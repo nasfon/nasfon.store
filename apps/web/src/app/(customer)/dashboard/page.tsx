@@ -1,41 +1,99 @@
-import { Package, Clock, CheckCircle2, XCircle } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+"use client";
 
-export default function CustomerDashboardPage() {
+import Link from "next/link";
+import { Package, Clock, CheckCircle, XCircle } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { useOrders } from "@/hooks/use-orders";
+
+const statusLabels: Record<string, { label: string; variant: "info" | "success" | "warning" | "error" }> = {
+  pending: { label: "Pending", variant: "warning" },
+  payment_confirmed: { label: "Payment Confirmed", variant: "info" },
+  processing: { label: "Processing", variant: "info" },
+  ready_for_delivery: { label: "Ready for Delivery", variant: "info" },
+  out_for_delivery: { label: "Out for Delivery", variant: "info" },
+  delivered: { label: "Delivered", variant: "success" },
+  cancelled: { label: "Cancelled", variant: "error" },
+};
+
+export default function CustomerDashboard() {
+  const { data: orders, isLoading } = useOrders();
+  const recentOrders = orders?.slice(0, 5) || [];
+
+  const stats = {
+    total: orders?.length || 0,
+    pending: orders?.filter((o) => o.order_status === "pending" || o.order_status === "payment_confirmed").length || 0,
+    delivered: orders?.filter((o) => o.order_status === "delivered").length || 0,
+    cancelled: orders?.filter((o) => o.order_status === "cancelled").length || 0,
+  };
+
+  if (isLoading) {
+    return (
+      <div>
+        <Skeleton className="h-8 w-48" />
+        <div className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-24 rounded-lg" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-      <p className="mt-1 text-sm text-gray-500">Welcome back! Here&apos;s your account overview.</p>
 
-      <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
         {[
-          { label: "Total Orders", value: "0", icon: Package, color: "text-primary" },
-          { label: "Pending", value: "0", icon: Clock, color: "text-warning" },
-          { label: "Delivered", value: "0", icon: CheckCircle2, color: "text-success" },
-          { label: "Cancelled", value: "0", icon: XCircle, color: "text-error" },
+          { icon: Package, label: "Total Orders", value: stats.total, color: "text-blue-600 bg-blue-100" },
+          { icon: Clock, label: "Pending", value: stats.pending, color: "text-yellow-600 bg-yellow-100" },
+          { icon: CheckCircle, label: "Delivered", value: stats.delivered, color: "text-green-600 bg-green-100" },
+          { icon: XCircle, label: "Cancelled", value: stats.cancelled, color: "text-red-600 bg-red-100" },
         ].map((item) => {
           const Icon = item.icon;
           return (
-            <Card key={item.label}>
-              <CardContent className="flex items-center gap-3 p-4">
-                <div className={`rounded-full p-2 ${item.color} bg-gray-100`}>
-                  <Icon size={22} />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-gray-900">{item.value}</p>
-                  <p className="text-xs text-gray-500">{item.label}</p>
-                </div>
-              </CardContent>
-            </Card>
+            <div key={item.label} className="rounded-lg border border-gray-200 bg-white p-4">
+              <div className={`inline-flex rounded-lg p-2 ${item.color}`}>
+                <Icon size={20} />
+              </div>
+              <p className="mt-3 text-2xl font-bold text-gray-900">{item.value}</p>
+              <p className="text-sm text-gray-500">{item.label}</p>
+            </div>
           );
         })}
       </div>
 
       <div className="mt-8">
-        <h2 className="text-lg font-semibold text-gray-900">Recent Orders</h2>
-        <div className="mt-3 rounded-lg border border-gray-200 bg-white p-8 text-center text-sm text-gray-400">
-          No orders yet. Start shopping to see your orders here.
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-900">Recent Orders</h2>
+          <Link href="/dashboard/orders" className="text-sm text-primary hover:text-primary-hover">
+            View All
+          </Link>
         </div>
+
+        {recentOrders.length > 0 ? (
+          <div className="mt-4 space-y-3">
+            {recentOrders.map((order) => (
+              <Link key={order.id} href={`/dashboard/orders/${order.id}`}>
+                <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4 hover:border-gray-300">
+                  <div>
+                    <p className="font-medium text-gray-900">{order.order_number}</p>
+                    <p className="text-sm text-gray-500">{new Date(order.created_at).toLocaleDateString()}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Badge variant={statusLabels[order.order_status]?.variant || "info"}>
+                      {statusLabels[order.order_status]?.label || order.order_status}
+                    </Badge>
+                    <span className="font-medium">₦{order.total_amount.toLocaleString()}</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <p className="mt-4 text-sm text-gray-400">No orders yet.</p>
+        )}
       </div>
     </div>
   );

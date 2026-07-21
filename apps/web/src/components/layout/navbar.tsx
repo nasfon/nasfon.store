@@ -1,7 +1,30 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
-import { Search, ShoppingCart, User } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Search, ShoppingCart, User, LogOut, LayoutDashboard } from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { createClient } from "@/utils/supabase/client";
 
 export function Navbar() {
+  const { user, profile } = useAuth();
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/");
+  };
+
   return (
     <header className="sticky top-0 z-40 border-b border-gray-200 bg-white">
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4">
@@ -10,25 +33,27 @@ export function Navbar() {
         </Link>
 
         <div className="hidden flex-1 md:block">
-          <div className="relative mx-auto max-w-md">
+          <form onSubmit={handleSearch} className="relative mx-auto max-w-md">
             <Search
               size={18}
               className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
             />
             <input
               type="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search products..."
               className="h-9 w-full rounded-full border border-gray-200 bg-gray-50 pl-10 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
-          </div>
+          </form>
         </div>
 
         <nav className="hidden items-center gap-4 md:flex">
           <Link
-            href="/categories"
+            href="/products"
             className="text-sm font-medium text-gray-600 hover:text-gray-900"
           >
-            Categories
+            Products
           </Link>
           <Link
             href="/cart"
@@ -36,12 +61,40 @@ export function Navbar() {
           >
             <ShoppingCart size={20} />
           </Link>
-          <Link
-            href="/login"
-            className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
-          >
-            <User size={20} />
-          </Link>
+          {user ? (
+            <div className="flex items-center gap-2">
+              {profile?.role === "admin" && (
+                <Link
+                  href="/admin"
+                  className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
+                  title="Admin Dashboard"
+                >
+                  <LayoutDashboard size={20} />
+                </Link>
+              )}
+              <Link
+                href="/dashboard"
+                className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
+                title="Dashboard"
+              >
+                <User size={20} />
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
+                title="Logout"
+              >
+                <LogOut size={20} />
+              </button>
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
+            >
+              <User size={20} />
+            </Link>
+          )}
         </nav>
       </div>
     </header>

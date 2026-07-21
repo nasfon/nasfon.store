@@ -1,12 +1,20 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight, Smartphone, ShieldCheck, Truck, Headphones } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TrustBadge } from "@/components/shared/trust-badge";
+import { ProductCard } from "@/components/shared/product-card";
+import { useFeaturedProducts, useProducts } from "@/hooks/use-products";
+import { useCategories } from "@/hooks/use-categories";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Home() {
+  const { data: featured, isLoading: featuredLoading } = useFeaturedProducts();
+  const { data: categoriesData, isLoading: categoriesLoading } = useCategories();
+
   return (
     <div>
-      {/* Hero */}
       <section className="bg-gradient-to-b from-primary/5 to-white py-16 md:py-24">
         <div className="mx-auto max-w-7xl px-4 text-center">
           <h1 className="text-4xl font-bold tracking-tight text-gray-900 md:text-5xl">
@@ -34,14 +42,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Trust Signals */}
       <section className="mx-auto max-w-7xl px-4 py-12">
         <TrustBadge />
       </section>
 
-      {/* Featured Products */}
       <section className="mx-auto max-w-7xl px-4 py-12">
-        <div className="flex items-center justify-between mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900">Featured Products</h2>
           <Link
             href="/products"
@@ -51,30 +57,72 @@ export default function Home() {
           </Link>
         </div>
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-          <div className="col-span-full py-12 text-center text-gray-400">
-            Products loading...
-          </div>
+          {featuredLoading ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="space-y-3">
+                <Skeleton className="aspect-square w-full rounded-lg" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
+            ))
+          ) : featured?.length ? (
+            featured.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))
+          ) : (
+            <div className="col-span-full py-12 text-center text-gray-400">
+              No featured products yet.
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Categories */}
       <section className="bg-gray-50 py-12">
         <div className="mx-auto max-w-7xl px-4">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            Shop by Category
-          </h2>
+          <h2 className="mb-6 text-2xl font-bold text-gray-900">Shop by Category</h2>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {/* Category cards will be rendered here */}
-            <div className="col-span-full py-12 text-center text-gray-400">
-              Categories loading...
-            </div>
+            {categoriesLoading ? (
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="space-y-3 rounded-lg bg-white p-6">
+                  <Skeleton className="mx-auto h-16 w-16 rounded-full" />
+                  <Skeleton className="mx-auto h-4 w-3/4" />
+                </div>
+              ))
+            ) : categoriesData?.length ? (
+              categoriesData.map((cat) => (
+                <Link
+                  key={cat.id}
+                  href={`/categories/${cat.slug}`}
+                  className="flex flex-col items-center rounded-lg border border-gray-200 bg-white p-6 text-center shadow-card transition hover:border-primary/50"
+                >
+                  {cat.image_url ? (
+                    <img
+                      src={cat.image_url}
+                      alt={cat.name}
+                      className="h-16 w-16 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-lg font-bold text-primary">
+                      {cat.name.charAt(0)}
+                    </div>
+                  )}
+                  <h3 className="mt-4 font-semibold text-gray-900">{cat.name}</h3>
+                  {cat.description && (
+                    <p className="mt-1 text-xs text-gray-500 line-clamp-2">{cat.description}</p>
+                  )}
+                </Link>
+              ))
+            ) : (
+              <div className="col-span-full py-12 text-center text-gray-400">
+                No categories yet.
+              </div>
+            )}
           </div>
         </div>
       </section>
 
-      {/* Why NasFon */}
       <section className="mx-auto max-w-7xl px-4 py-16">
-        <h2 className="text-2xl font-bold text-gray-900 text-center mb-10">
+        <h2 className="mb-10 text-center text-2xl font-bold text-gray-900">
           Why Shop at NasFon Store?
         </h2>
         <div className="grid gap-8 md:grid-cols-3">
@@ -104,7 +152,7 @@ export default function Home() {
             return (
               <div
                 key={item.title}
-                className="flex flex-col items-center text-center rounded-lg border border-gray-200 bg-white p-6 shadow-card"
+                className="flex flex-col items-center rounded-lg border border-gray-200 bg-white p-6 text-center shadow-card"
               >
                 <div className="rounded-full bg-primary/10 p-3">
                   <Icon size={28} className="text-primary" />
