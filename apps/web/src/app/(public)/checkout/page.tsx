@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCart } from "@/hooks/use-cart";
+import { useCart, useClearCart } from "@/hooks/use-cart";
 import { useDeliveryLocations } from "@/hooks/use-delivery";
 import { useCheckout, useBuyNow } from "@/hooks/use-orders";
 import { toast } from "sonner";
@@ -20,6 +20,7 @@ function CheckoutContent() {
   const { data: locations } = useDeliveryLocations();
   const checkout = useCheckout();
   const buyNow = useBuyNow();
+  const clearCart = useClearCart();
 
   const isBuyNow = searchParams.has("buy_now");
   const buyNowProductId = searchParams.get("buy_now") || "";
@@ -65,6 +66,7 @@ function CheckoutContent() {
 
     try {
       const result = await mutation;
+      if (!isBuyNow) clearCart.mutate();
       router.push(`/order/confirmation/${result.order.id}`);
       toast.success("Order placed successfully!");
     } catch (err) {

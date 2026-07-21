@@ -2,10 +2,13 @@
 
 import { use } from "react";
 import Link from "next/link";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Copy, Clock, Building2, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useOrder } from "@/hooks/use-orders";
+import { usePaymentStatus } from "@/hooks/use-payments";
+import { toast } from "sonner";
 
 export default function OrderConfirmationPage({
   params,
@@ -14,6 +17,15 @@ export default function OrderConfirmationPage({
 }) {
   const { id } = use(params);
   const { data: order, isLoading } = useOrder(id);
+  const { data: paymentStatus } = usePaymentStatus(id);
+
+  const isPaid = paymentStatus?.payment_status === "paid" || order?.payment_status === "paid";
+  const payment = paymentStatus?.payment || order?.payment;
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success("Copied to clipboard");
+  };
 
   if (isLoading) {
     return (
@@ -53,30 +65,88 @@ export default function OrderConfirmationPage({
             <span className="font-bold text-primary">₦{order.total_amount.toLocaleString()}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-sm text-gray-500">Status</span>
-            <span className="capitalize">{order.order_status.replace(/_/g, " ")}</span>
+            <span className="text-sm text-gray-500">Payment Status</span>
+            <Badge variant={isPaid ? "success" : "warning"}>
+              {isPaid ? "Paid" : "Awaiting Payment"}
+            </Badge>
           </div>
         </div>
       </div>
 
-      <div className="mt-8 rounded-lg border border-gray-200 bg-primary/5 p-6 text-left">
-        <h2 className="font-semibold text-gray-900">Payment Instructions</h2>
-        <p className="mt-2 text-sm text-gray-600">
-          Make a bank transfer to the dynamic account generated for your order.
-          Your order will be processed once payment is confirmed.
-        </p>
-        <div className="mt-4 space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="text-gray-500">Amount</span>
-            <span className="font-semibold">₦{order.total_amount.toLocaleString()}</span>
+      {payment?.virtual_account_number ? (
+        <div className="mt-6 rounded-lg border border-primary/20 bg-primary/5 p-6 text-left">
+          <h2 className="flex items-center gap-2 font-semibold text-gray-900">
+            <Building2 size={18} className="text-primary" />
+            Bank Transfer Details
+          </h2>
+          <p className="mt-2 text-sm text-gray-600">
+            Transfer the exact amount to the account below. Your order will be processed once payment is confirmed.
+          </p>
+
+          <div className="mt-4 space-y-3">
+            <div className="rounded-lg border border-gray-200 bg-white p-3">
+              <p className="text-xs text-gray-500">Bank</p>
+              <p className="font-semibold text-gray-900">{payment.bank_name}</p>
+            </div>
+            <div className="rounded-lg border border-gray-200 bg-white p-3">
+              <p className="text-xs text-gray-500">Account Number</p>
+              <div className="flex items-center justify-between">
+                <p className="font-mono text-lg font-bold text-gray-900">{payment.virtual_account_number}</p>
+                <button
+                  onClick={() => copyToClipboard(payment.virtual_account_number || "")}
+                  className="rounded p-1 text-gray-400 hover:text-primary"
+                >
+                  <Copy size={16} />
+                </button>
+              </div>
+            </div>
+            <div className="rounded-lg border border-gray-200 bg-white p-3">
+              <p className="text-xs text-gray-500">Account Name</p>
+              <p className="font-semibold text-gray-900">{payment.account_name}</p>
+            </div>
+            <div className="rounded-lg border border-gray-200 bg-white p-3">
+              <p className="text-xs text-gray-500">Amount</p>
+              <p className="font-bold text-primary">₦{order.total_amount.toLocaleString()}</p>
+            </div>
+            <div className="rounded-lg border border-gray-200 bg-white p-3">
+              <p className="text-xs text-gray-500">Reference</p>
+              <p className="font-mono text-sm text-gray-600">{payment.flutterwave_reference}</p>
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="mt-6 rounded-lg border border-gray-200 bg-gray-50 p-6 text-left">
+          <h2 className="flex items-center gap-2 font-semibold text-gray-900">
+            <CreditCard size={18} />
+            Payment Instructions
+          </h2>
+          <p className="mt-2 text-sm text-gray-600">
+            Make a bank transfer of <strong>₦{order.total_amount.toLocaleString()}</strong> to the store&apos;s account.
+            Your order will be processed once payment is confirmed.
+          </p>
+          <p className="mt-3 text-sm text-gray-500">
+            Order reference: <span className="font-mono">{order.order_number}</span>
+          </p>
+        </div>
+      )}
+
+      {!isPaid && (
+        <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-500">
+          <Clock size={16} className="animate-pulse" />
+          Waiting for payment confirmation...
+        </div>
+      )}
 
       <div className="mt-8 flex flex-col gap-3">
-        <Link href={`/track?order_number=${order.order_number}&phone=${order.customer_phone}`}>
-          <Button size="lg" className="w-full">Track Order</Button>
-        </Link>
+        {isPaid ? (
+          <Link href={`/dashboard/orders/${order.id}`}>
+            <Button size="lg" className="w-full">View Order Details</Button>
+          </Link>
+        ) : (
+          <Link href={`/track?order_number=${order.order_number}&phone=${order.customer_phone}`}>
+            <Button size="lg" className="w-full" variant="outline">Track Order</Button>
+          </Link>
+        )}
         <Link href="/products">
           <Button variant="outline" size="lg" className="w-full">Continue Shopping</Button>
         </Link>

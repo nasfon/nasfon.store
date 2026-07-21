@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { getCart } from "./cart.service";
+import { generatePayment } from "./payment.service";
 
 export async function createCheckout(data: {
   customer_name: string;
@@ -138,5 +139,7 @@ async function processOrder(
       .eq("id", item.product_id);
   }
 
-  return { order };
+  const payment = await generatePayment(order.id, totalAmount, data.customer_email, data.customer_name);
+
+  return { order, payment };
 }

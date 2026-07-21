@@ -4,6 +4,22 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/fetch";
 import type { Order } from "@/types";
 
+interface PaymentInfo {
+  id: string;
+  flutterwave_reference: string;
+  virtual_account_number: string | null;
+  bank_name: string | null;
+  account_name: string | null;
+  amount: number;
+  payment_status: string;
+  reference: string;
+}
+
+interface CheckoutResponse {
+  order: Order;
+  payment: PaymentInfo;
+}
+
 export function useOrders() {
   return useQuery({
     queryKey: ["orders"],
@@ -34,7 +50,7 @@ export function useCheckout() {
       customer_phone: string;
       delivery_location_id: string;
       notes?: string;
-    }) => api.post<{ order: Order }>("/checkout", data),
+    }) => api.post<CheckoutResponse>("/checkout", data),
   });
 }
 
@@ -48,6 +64,6 @@ export function useBuyNow() {
       customer_phone: string;
       delivery_location_id: string;
       notes?: string;
-    }) => api.post<{ order: Order }>("/checkout/buy-now", data),
+    }) => api.post<CheckoutResponse>("/checkout/buy-now", data),
   });
 }
