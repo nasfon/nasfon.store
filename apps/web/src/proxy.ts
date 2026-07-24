@@ -1,23 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/middleware";
 
-const publicRoutes = [
-  "/",
-  "/products",
-  "/categories",
-  "/cart",
-  "/checkout",
-  "/track",
-  "/order/confirmation",
-  "/login",
-  "/register",
-  "/forgot-password",
-  "/reset-password",
-  "/api",
-];
-
 const customerRoutes = ["/dashboard"];
-
 const adminRoutes = ["/admin"];
 
 function isRouteMatch(pathname: string, routes: string[]): boolean {
@@ -26,39 +10,27 @@ function isRouteMatch(pathname: string, routes: string[]): boolean {
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
   const { supabase, supabaseResponse } = createClient(request);
+
+  const isAuthRoute = isRouteMatch(pathname, ["/login", "/register"]);
+  const isProtectedRoute =
+    isRouteMatch(pathname, adminRoutes) || isRouteMatch(pathname, customerRoutes);
+
+  if (!isAuthRoute && !isProtectedRoute) {
+    return supabaseResponse;
+  }
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (isRouteMatch(pathname, adminRoutes)) {
-    if (!user) {
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-
-    const { data: profile } = await supabase
-      .from("users")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-
-    if (profile?.role !== "admin") {
-      return NextResponse.redirect(new URL("/", request.url));
-    }
+  if (isProtectedRoute && !user) {
+    const loginUrl = new URL("/login", request.url);
+    loginUrl.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
-  if (isRouteMatch(pathname, customerRoutes)) {
-    if (!user) {
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("redirect", pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-  }
-
-  if (isRouteMatch(pathname, ["/login", "/register"]) && user) {
+  if (isAuthRoute && user) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 

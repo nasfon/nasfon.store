@@ -37,7 +37,7 @@ src/
 | `apps/web/src/app/layout.tsx` | Root layout with Geist font and metadata |
 | `apps/web/src/app/page.tsx` | Home page placeholder |
 | `apps/web/src/lib/supabase.ts` | Supabase client initialization |
-| `apps/web/src/types/index.ts` | TypeScript types for all entities |
+| `apps/web/src/types/index.ts` | TypeScript types for all entities including RBAC roles (customer, admin) |
 | `apps/web/.env.example` | Environment variable template |
 
 ### Cleanup

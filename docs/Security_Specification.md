@@ -90,9 +90,9 @@ Never trust client-side payment confirmations.
 
 ---
 
-# Authorization
+# Authorization (RBAC Enforcement)
 
-Every protected request must verify:
+Every protected request must verify via RBAC:
 
 * User is authenticated
 * User account is active
@@ -101,19 +101,21 @@ Every protected request must verify:
 
 ---
 
-# User Roles
+# Role-Based Access Control (RBAC)
 
-Guest
+Access is governed by **Role-Based Access Control (RBAC)** — each role carries a fixed set of permissions.
+
+## Guest Role
 
 * Public access only
 
-Customer
+## Customer Role
 
 * Own resources only
 
-Admin
+## Admin Role
 
-* Administrative resources
+* Full administrative resources
 
 ---
 

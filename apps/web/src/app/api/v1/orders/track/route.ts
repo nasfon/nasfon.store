@@ -1,9 +1,12 @@
 import { NextRequest } from "next/server";
-import { successResponse, errorResponse } from "@/lib/api";
+import { successResponse, errorResponse, withRateLimit } from "@/lib/api";
 import { orderTrackSchema } from "@/lib/validation";
 import * as orderService from "@/services/order.service";
 
 export async function GET(request: NextRequest) {
+  const rateLimitResponse = await withRateLimit(request, "track");
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const { searchParams } = new URL(request.url);
     const params = {

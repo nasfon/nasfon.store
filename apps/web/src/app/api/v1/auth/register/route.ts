@@ -1,9 +1,12 @@
 import { NextRequest } from "next/server";
-import { successResponse, errorResponse } from "@/lib/api";
+import { successResponse, errorResponse, withRateLimit } from "@/lib/api";
 import { registerSchema } from "@/lib/validation";
 import * as authService from "@/services/auth.service";
 
 export async function POST(request: NextRequest) {
+  const rateLimitResponse = await withRateLimit(request, "auth");
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const body = await request.json();
     const parsed = registerSchema.safeParse(body);

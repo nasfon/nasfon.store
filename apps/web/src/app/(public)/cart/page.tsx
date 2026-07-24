@@ -5,13 +5,13 @@ import { ShoppingCart as CartIcon, Trash2, ArrowLeft, Minus, Plus } from "lucide
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCart, useUpdateCartItem, useRemoveCartItem } from "@/hooks/use-cart";
+import { useCart, useCartQuantity, useRemoveCartItem } from "@/hooks/use-cart";
 import { toast } from "sonner";
 
 export default function CartPage() {
   const { data: cart, isLoading } = useCart();
-  const updateItem = useUpdateCartItem();
   const removeItem = useRemoveCartItem();
+  const { setQuantity, syncToServer, cancelPending } = useCartQuantity();
 
   if (isLoading) {
     return (
@@ -45,16 +45,15 @@ export default function CartPage() {
 
   const handleQuantityChange = (productId: string, newQty: number) => {
     if (newQty < 1) {
+      cancelPending(productId);
       removeItem.mutate(productId, {
         onSuccess: () => toast.success("Item removed"),
         onError: (err) => toast.error(err.message),
       });
       return;
     }
-    updateItem.mutate(
-      { product_id: productId, quantity: newQty },
-      { onError: (err) => toast.error(err.message) }
-    );
+    setQuantity(productId, newQty);
+    syncToServer(productId, newQty);
   };
 
   return (

@@ -1,11 +1,9 @@
-import { cookies } from "next/headers";
-import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 import type { adminCategorySchema, adminCategoryUpdateSchema } from "@/lib/validation";
 import type { z } from "zod";
 
 export async function getAdminCategories() {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from("categories")
@@ -17,8 +15,7 @@ export async function getAdminCategories() {
 }
 
 export async function createCategory(data: z.infer<typeof adminCategorySchema>) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createAdminClient();
 
   const { data: category, error } = await supabase
     .from("categories")
@@ -31,8 +28,7 @@ export async function createCategory(data: z.infer<typeof adminCategorySchema>) 
 }
 
 export async function updateCategory(id: string, data: z.infer<typeof adminCategoryUpdateSchema>) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createAdminClient();
 
   const { data: category, error } = await supabase
     .from("categories")
@@ -46,8 +42,7 @@ export async function updateCategory(id: string, data: z.infer<typeof adminCateg
 }
 
 export async function deleteCategory(id: string) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createAdminClient();
 
   const { error } = await supabase
     .from("categories")

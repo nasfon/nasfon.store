@@ -19,8 +19,21 @@ export function ProductCard({ product }: ProductCardProps) {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!inStock) {
+      toast.error("Insufficient stock");
+      return;
+    }
     addToCart.mutate(
-      { product_id: product.id, quantity: 1 },
+      {
+        product_id: product.id,
+        quantity: 1,
+        name: product.name,
+        slug: product.slug,
+        selling_price: product.selling_price,
+        compare_price: product.compare_price,
+        featured_image: product.featured_image,
+        stock_quantity: product.stock_quantity,
+      },
       {
         onSuccess: () => toast.success("Added to cart"),
         onError: (err) => toast.error(err.message),
@@ -81,7 +94,7 @@ export function ProductCard({ product }: ProductCardProps) {
           variant="secondary"
           size="sm"
           className="mt-3 w-full"
-          disabled={!inStock || addToCart.isPending}
+          disabled={addToCart.isPending}
           onClick={handleAddToCart}
         >
           <ShoppingCart size={16} />

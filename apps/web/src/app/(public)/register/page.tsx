@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createClient } from "@/utils/supabase/client";
 import { toast } from "sonner";
 
 export default function RegisterPage() {
@@ -21,33 +20,23 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
 
-    const supabase = createClient();
-    const { data: authData, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
-    if (signUpError) {
-      toast.error(signUpError.message);
-      setLoading(false);
-      return;
-    }
-
-    if (authData.user) {
-      const { error: profileError } = await supabase.from("users").insert({
-        id: authData.user.id,
+    const res = await fetch("/api/v1/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
         full_name: fullName,
         email,
-        phone_number: phone || null,
-        role: "customer",
-        is_active: true,
-      });
+        password,
+        phone_number: phone || undefined,
+      }),
+    });
 
-      if (profileError) {
-        toast.error("Account created but profile setup failed. Contact support.");
-        setLoading(false);
-        return;
-      }
+    const data = await res.json();
+
+    if (!data.success) {
+      toast.error(data.message || "Registration failed");
+      setLoading(false);
+      return;
     }
 
     toast.success("Account created successfully!");

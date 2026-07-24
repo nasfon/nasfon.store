@@ -2,7 +2,7 @@
 
 import { use } from "react";
 import Link from "next/link";
-import { ArrowLeft, ShoppingCart, Star, Minus, Plus } from "lucide-react";
+import { ArrowLeft, ShoppingCart, Star, Minus, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -20,13 +20,27 @@ export default function ProductDetailPage({
   const { slug } = use(params);
   const [quantity, setQuantity] = useState(1);
   const { data: product, isLoading } = useProduct(slug);
-  const { data: reviews } = useProductReviews(product?.id || "");
+  const { data: reviews } = useProductReviews(slug);
   const addToCart = useAddCartItem();
+  const [selectedIdx, setSelectedIdx] = useState(0);
 
   const handleAddToCart = () => {
     if (!product) return;
+    if (!inStock) {
+      toast.error("Insufficient stock");
+      return;
+    }
     addToCart.mutate(
-      { product_id: product.id, quantity },
+      {
+        product_id: product.id,
+        quantity,
+        name: product.name,
+        slug: product.slug,
+        selling_price: product.selling_price,
+        compare_price: product.compare_price,
+        featured_image: product.featured_image,
+        stock_quantity: product.stock_quantity,
+      },
       {
         onSuccess: () => {
           toast.success("Added to cart");
@@ -35,6 +49,15 @@ export default function ProductDetailPage({
         onError: (err) => toast.error(err.message),
       }
     );
+  };
+
+  const handleBuyNow = () => {
+    if (!product) return;
+    if (!inStock) {
+      toast.error("Insufficient stock");
+      return;
+    }
+    window.location.href = `/checkout?buy_now=${product.id}&qty=${quantity}&price=${product.selling_price}`;
   };
 
   if (isLoading) {
@@ -63,6 +86,12 @@ export default function ProductDetailPage({
   }
 
   const inStock = product.stock_quantity > 0;
+  const allImages = [
+    ...(product.featured_image ? [{ id: "featured", image_url: product.featured_image }] : []),
+    ...(product.images?.map((img) => ({ id: img.id, image_url: img.image_url })) ?? []),
+  ];
+  const safeIdx = Math.min(selectedIdx, Math.max(0, allImages.length - 1));
+  const selectedImage = allImages[safeIdx];
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
@@ -76,28 +105,61 @@ export default function ProductDetailPage({
 
       <div className="grid gap-8 lg:grid-cols-2">
         <div className="space-y-4">
-          <div className="aspect-square overflow-hidden rounded-lg bg-gray-100">
-            {product.featured_image ? (
-              <img
-                src={product.featured_image}
-                alt={product.name}
-                className="h-full w-full object-cover"
-              />
+          <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100">
+            {selectedImage ? (
+              <>
+                <img
+                  key={selectedImage.id}
+                  src={selectedImage.image_url}
+                  alt={product.name}
+                  className="h-full w-full object-cover transition-opacity duration-300"
+                />
+                {allImages.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => setSelectedIdx((i) => (i - 1 + allImages.length) % allImages.length)}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-1.5 text-gray-700 shadow hover:bg-white"
+                    >
+                      <ChevronLeft size={20} />
+                    </button>
+                    <button
+                      onClick={() => setSelectedIdx((i) => (i + 1) % allImages.length)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-1.5 text-gray-700 shadow hover:bg-white"
+                    >
+                      <ChevronRight size={20} />
+                    </button>
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                      {allImages.map((_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setSelectedIdx(i)}
+                          className={`h-2 w-2 rounded-full transition-colors ${i === selectedIdx ? "bg-white" : "bg-white/50"}`}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </>
             ) : (
               <div className="flex h-full items-center justify-center text-gray-300">
                 No image
               </div>
             )}
           </div>
-          {product.images && product.images.length > 0 && (
+          {allImages.length > 1 && (
             <div className="flex gap-2 overflow-x-auto">
-              {product.images.map((img) => (
-                <img
+              {allImages.map((img, i) => (
+                <button
                   key={img.id}
-                  src={img.image_url}
-                  alt=""
-                  className="h-20 w-20 shrink-0 rounded-md object-cover"
-                />
+                  onClick={() => setSelectedIdx(i)}
+                  className={`h-20 w-20 shrink-0 overflow-hidden rounded-md border-2 object-cover ${i === selectedIdx ? "border-primary" : "border-transparent"}`}
+                >
+                  <img
+                    src={img.image_url}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                </button>
               ))}
             </div>
           )}
@@ -164,19 +226,22 @@ export default function ProductDetailPage({
 
             <div className="flex gap-3">
               <Button
+                variant="outline"
                 size="lg"
                 className="flex-1"
-                disabled={!inStock || addToCart.isPending}
+                disabled={addToCart.isPending}
                 onClick={handleAddToCart}
               >
                 <ShoppingCart size={18} />
                 {addToCart.isPending ? "Adding..." : "Add to Cart"}
               </Button>
-              <Link href={`/checkout?buy_now=${product.id}&qty=${quantity}`} className="flex-1">
-                <Button variant="outline" size="lg" className="w-full" disabled={!inStock}>
-                  Buy Now
-                </Button>
-              </Link>
+              <Button
+                size="lg"
+                className="flex-1"
+                onClick={handleBuyNow}
+              >
+                Buy Now
+              </Button>
             </div>
           </div>
         </div>

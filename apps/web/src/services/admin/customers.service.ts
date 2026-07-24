@@ -1,11 +1,9 @@
-import { cookies } from "next/headers";
-import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 import type { adminCustomerUpdateSchema } from "@/lib/validation";
 import type { z } from "zod";
 
 export async function getAdminCustomers() {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from("users")
@@ -17,8 +15,7 @@ export async function getAdminCustomers() {
 }
 
 export async function getAdminCustomerById(id: string) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from("users")
@@ -31,8 +28,7 @@ export async function getAdminCustomerById(id: string) {
 }
 
 export async function updateCustomer(id: string, data: z.infer<typeof adminCustomerUpdateSchema>) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createAdminClient();
 
   const { data: customer, error } = await supabase
     .from("users")

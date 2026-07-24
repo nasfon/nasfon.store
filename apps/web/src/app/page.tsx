@@ -83,33 +83,27 @@ export default function Home() {
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
             {categoriesLoading ? (
               Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="space-y-3 rounded-lg bg-white p-6">
-                  <Skeleton className="mx-auto h-16 w-16 rounded-full" />
-                  <Skeleton className="mx-auto h-4 w-3/4" />
-                </div>
+                <div key={i} className="aspect-[3/2] rounded-xl bg-gray-200" />
               ))
             ) : categoriesData?.length ? (
               categoriesData.map((cat) => (
                 <Link
                   key={cat.id}
                   href={`/categories/${cat.slug}`}
-                  className="flex flex-col items-center rounded-lg border border-gray-200 bg-white p-6 text-center shadow-card transition hover:border-primary/50"
+                  className={`group relative flex items-start justify-center overflow-hidden rounded-xl shadow-md transition hover:shadow-lg ${cat.image_url ? "" : "bg-gradient-to-br from-primary/40 to-primary/20"}`}
+                  style={cat.image_url ? { backgroundImage: `url(${cat.image_url})`, backgroundSize: "cover", backgroundPosition: "center" } : undefined}
                 >
-                  {cat.image_url ? (
-                    <img
-                      src={cat.image_url}
-                      alt={cat.name}
-                      className="h-16 w-16 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-lg font-bold text-primary">
-                      {cat.name.charAt(0)}
-                    </div>
-                  )}
-                  <h3 className="mt-4 font-semibold text-gray-900">{cat.name}</h3>
-                  {cat.description && (
-                    <p className="mt-1 text-xs text-gray-500 line-clamp-2">{cat.description}</p>
-                  )}
+                  <div className="absolute inset-0 bg-black/40" />
+                  <div className="relative flex aspect-[3/2] w-full items-center justify-center">
+                    {!cat.image_url && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-4xl font-bold text-white/80">{cat.name.charAt(0)}</span>
+                      </div>
+                    )}
+                    <h3 className="px-3 text-center text-sm font-semibold text-white drop-shadow-sm">
+                      {cat.name}
+                    </h3>
+                  </div>
                 </Link>
               ))
             ) : (

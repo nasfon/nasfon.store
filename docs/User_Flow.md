@@ -232,9 +232,11 @@ Visitor
 
 ---
 
-# MVP User Roles
+# MVP User Roles (RBAC)
 
-### Guest
+The application uses **Role-Based Access Control (RBAC)** with three distinct roles.
+
+### Guest Role
 
 * Browse products
 * Add to cart
@@ -243,14 +245,14 @@ Visitor
 * Pay via bank transfer using a dynamic account number generated from Flutterwave
 * Track order using order number
 
-### Customer
+### Customer Role
 
 * Everything a Guest can do
 * View order history
 * Save profile
 * Submit reviews
 
-### Admin
+### Admin Role
 
 * Manage products
 * Manage categories

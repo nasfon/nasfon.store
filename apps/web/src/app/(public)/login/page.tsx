@@ -5,15 +5,16 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createClient } from "@/utils/supabase/client";
 import { toast } from "sonner";
 
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/dashboard";
+  const errorParam = searchParams.get("error");
 
   const [email, setEmail] = useState("");
+  const [suspendedAlert, setSuspendedAlert] = useState(errorParam === "suspended");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -21,17 +22,30 @@ function LoginContent() {
     e.preventDefault();
     setLoading(true);
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const res = await fetch("/api/v1/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
 
-    if (error) {
-      toast.error(error.message);
+    const data = await res.json();
+
+    if (!data.success) {
+      if (data.message?.toLowerCase().includes("suspended")) {
+        setSuspendedAlert(true);
+      }
+      toast.error(data.message || "Login failed");
       setLoading(false);
       return;
     }
 
+    const role = data.data?.profile?.role || "customer";
     toast.success("Welcome back!");
-    router.push(redirect);
+    if (role === "admin") {
+      router.push("/admin");
+    } else {
+      router.push(redirect);
+    }
   };
 
   return (
@@ -39,7 +53,13 @@ function LoginContent() {
       <h1 className="text-center text-2xl font-bold text-gray-900">Login</h1>
       <p className="mt-2 text-center text-sm text-gray-500">Welcome back! Sign in to your account.</p>
 
-      <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+      {suspendedAlert && (
+        <div className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          Your account has been suspended. Please contact support.
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <Input
           id="email"
           label="Email"

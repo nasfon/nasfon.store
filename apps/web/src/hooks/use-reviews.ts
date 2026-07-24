@@ -4,11 +4,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/fetch";
 import type { Review } from "@/types";
 
-export function useProductReviews(productId: string) {
+export function useProductReviews(productSlug: string) {
   return useQuery({
-    queryKey: ["reviews", productId],
-    queryFn: () => api.get<Review[]>(`/products/${productId}/reviews`),
-    enabled: !!productId,
+    queryKey: ["reviews", productSlug],
+    queryFn: () => api.get<Review[]>(`/products/${productSlug}/reviews`),
+    enabled: !!productSlug,
   });
 }
 
@@ -22,8 +22,8 @@ export function useCreateReview() {
       rating: number;
       review?: string;
     }) => api.post<Review>("/reviews", data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["reviews", variables.product_id] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["reviews"] });
     },
   });
 }

@@ -1,11 +1,9 @@
-import { cookies } from "next/headers";
-import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 import type { adminDeliveryLocationSchema, adminDeliveryLocationUpdateSchema } from "@/lib/validation";
 import type { z } from "zod";
 
 export async function getAdminDeliveryLocations() {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from("delivery_locations")
@@ -17,8 +15,7 @@ export async function getAdminDeliveryLocations() {
 }
 
 export async function createDeliveryLocation(data: z.infer<typeof adminDeliveryLocationSchema>) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createAdminClient();
 
   const { data: location, error } = await supabase
     .from("delivery_locations")
@@ -31,8 +28,7 @@ export async function createDeliveryLocation(data: z.infer<typeof adminDeliveryL
 }
 
 export async function updateDeliveryLocation(id: string, data: z.infer<typeof adminDeliveryLocationUpdateSchema>) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createAdminClient();
 
   const { data: location, error } = await supabase
     .from("delivery_locations")
@@ -46,8 +42,7 @@ export async function updateDeliveryLocation(id: string, data: z.infer<typeof ad
 }
 
 export async function deleteDeliveryLocation(id: string) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createAdminClient();
 
   const { error } = await supabase
     .from("delivery_locations")

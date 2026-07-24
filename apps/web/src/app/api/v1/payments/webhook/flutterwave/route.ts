@@ -1,9 +1,99 @@
 import { NextRequest } from "next/server";
-import { cookies } from "next/headers";
-import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
+import { rateLimitMiddleware, getRateLimitHeaders } from "@/lib/rate-limit";
+import { createOrderFromPayment } from "@/services/payment.service";
+
+async function processPayment(txRef: string, actualAmount?: number) {
+  const supabase = createAdminClient();
+
+  const { data: payment } = await supabase
+    .from("payments")
+    .select("id, payment_status, amount, webhook_payload")
+    .eq("flutterwave_reference", txRef)
+    .single();
+
+  if (!payment) return false;
+
+  if (payment.payment_status === "paid") return true;
+
+  if (payment.payment_status === "expired") return false;
+
+  const expiresAt = (payment.webhook_payload as Record<string, unknown>)?.expires_at as string | undefined;
+  if (expiresAt && new Date(expiresAt) < new Date()) {
+    await supabase
+      .from("payments")
+      .update({ payment_status: "expired" })
+      .eq("id", payment.id);
+    return false;
+  }
+
+  const expectedAmount = payment.amount;
+  if (actualAmount !== undefined && actualAmount !== expectedAmount) {
+    const payload = payment.webhook_payload as Record<string, unknown>;
+    await supabase
+      .from("payments")
+      .update({
+        payment_status: "paid",
+        paid_at: new Date().toISOString(),
+        webhook_payload: {
+          ...payload,
+          amount_mismatch: true,
+          expected_amount: expectedAmount,
+          actual_amount: actualAmount,
+        },
+      })
+      .eq("id", payment.id);
+    return true;
+  }
+
+  await createOrderFromPayment(txRef);
+  await supabase
+    .from("payments")
+    .update({
+      payment_status: "paid",
+      paid_at: new Date().toISOString(),
+    })
+    .eq("id", payment.id);
+  return true;
+}
+
+function getEventType(body: Record<string, unknown>): string | null {
+  if (typeof body.event === "string") return body.event;
+  if (typeof body.type === "string") return body.type;
+  return null;
+}
+
+function getTxRef(data: Record<string, unknown>): string | null {
+  if (typeof data.tx_ref === "string") return data.tx_ref;
+  if (typeof data.reference === "string") return data.reference;
+  return null;
+}
+
+function getAmount(data: Record<string, unknown>): number | undefined {
+  if (typeof data.amount === "number") return data.amount;
+  if (typeof data.amount === "string") return parseFloat(data.amount);
+  if (typeof data.charged_amount === "number") return data.charged_amount;
+  if (typeof data.charged_amount === "string") return parseFloat(data.charged_amount);
+  return undefined;
+}
+
+function isSuccessful(data: Record<string, unknown>): boolean {
+  if (data.status === "successful") return true;
+  if (data.status === "succeeded") return true;
+  return false;
+}
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "127.0.0.1";
+    const rateResult = rateLimitMiddleware(ip, "webhook");
+    if (!rateResult.allowed) {
+      return new Response("Too many requests", {
+        status: 429,
+        headers: getRateLimitHeaders(rateResult),
+      });
+    }
+
     const secretHash = process.env.FLUTTERWAVE_WEBHOOK_SECRET;
     if (!secretHash) {
       return new Response("Webhook not configured", { status: 503 });
@@ -15,45 +105,17 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+    const eventType = getEventType(body);
+    const data = (body.data || {}) as Record<string, unknown>;
 
-    if (body.event === "charge.completed" && body.data.status === "successful") {
-      const cookieStore = await cookies();
-      const supabase = createClient(cookieStore);
-
-      const { data: existingPayment } = await supabase
-        .from("payments")
-        .select("id")
-        .eq("flutterwave_reference", body.data.tx_ref)
-        .single();
-
-      if (existingPayment) {
-        return new Response("Already processed", { status: 200 });
-      }
-
-      const { data: payment } = await supabase
-        .from("payments")
-        .insert({
-          flutterwave_reference: body.data.tx_ref,
-          virtual_account_number: body.data.account_number || "",
-          bank_name: body.data.bank_name || "",
-          account_name: body.data.account_name || "",
-          amount: body.data.amount,
-          payment_status: "paid",
-          paid_at: body.data.paid_at || new Date().toISOString(),
-          webhook_payload: body,
-        })
-        .select()
-        .single();
-
-      if (payment) {
-        await supabase
-          .from("orders")
-          .update({
-            payment_id: payment.id,
-            payment_status: "paid",
-            order_status: "payment_confirmed",
-          })
-          .eq("order_number", body.data.tx_ref);
+    if (
+      (eventType === "charge.completed" || eventType === "virtual_account.credited") &&
+      isSuccessful(data)
+    ) {
+      const txRef = getTxRef(data);
+      const actualAmount = getAmount(data);
+      if (txRef) {
+        await processPayment(txRef, actualAmount);
       }
     }
 

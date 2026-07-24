@@ -2,7 +2,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/fetch";
-import type { Product, Category, Order, DeliveryLocation, User, StoreSettings } from "@/types";
+import type { Product, Category, Order, DeliveryLocation, User, StoreSettings, ProductImage } from "@/types";
 
 interface DashboardData {
   stats: {
@@ -55,10 +55,11 @@ export function useDeleteProduct() {
   });
 }
 
-export function useAdminCategories() {
+export function useAdminCategories(enabled = true) {
   return useQuery({
     queryKey: ["admin", "categories"],
     queryFn: () => api.get<Category[]>("/admin/categories"),
+    enabled,
   });
 }
 
@@ -168,6 +169,49 @@ export function useUpdateCustomer() {
     mutationFn: ({ id, ...data }: Partial<User> & { id: string }) =>
       api.patch<User>(`/admin/customers/${id}`, data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "customers"] }),
+  });
+}
+
+export function useProductImages(productId: string | null) {
+  return useQuery({
+    queryKey: ["admin", "products", productId, "images"],
+    queryFn: () => api.get<ProductImage[]>(`/admin/products/${productId}/images`),
+    enabled: !!productId,
+  });
+}
+
+export function useAddProductImage() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ productId, ...data }: { productId: string; image_url: string; display_order: number }) =>
+      api.post<ProductImage>(`/admin/products/${productId}/images`, data),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ["admin", "products", variables.productId, "images"] });
+      qc.invalidateQueries({ queryKey: ["admin", "products"] });
+    },
+  });
+}
+
+export function useUpdateProductImage() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ productId, imageId, ...data }: { productId: string; imageId: string; display_order?: number }) =>
+      api.patch<ProductImage>(`/admin/products/${productId}/images/${imageId}`, data),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ["admin", "products", variables.productId, "images"] });
+    },
+  });
+}
+
+export function useDeleteProductImage() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ productId, imageId }: { productId: string; imageId: string }) =>
+      api.delete(`/admin/products/${productId}/images/${imageId}`),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: ["admin", "products", variables.productId, "images"] });
+      qc.invalidateQueries({ queryKey: ["admin", "products"] });
+    },
   });
 }
 

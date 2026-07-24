@@ -6,27 +6,27 @@
 
 ## Phase 1: Foundation & Repository Setup
 
-- [ ] **Create GitHub repository** (`nasfon-store`)
-- [ ] **Configure branching strategy**
+- [x] **Create GitHub repository** (`nasfon-store`)
+- [x] **Configure branching strategy**
   - `main` — production-ready code
   - `develop` — integration branch
   - `feature/*` — feature branches
-- [ ] **Set up local development environment**
+- [x] **Set up local development environment**
   - Node.js (LTS)
   - Git
   - VS Code (or preferred IDE)
-- [ ] **Add `.gitignore`** (Next.js defaults + `.env` files)
+- [x] **Add `.gitignore`** (Next.js defaults + `.env` files)
 - [ ] **Create `develop` branch** as default working branch
 
 ---
 
 ## Phase 2: Project Initialization
 
-- [ ] **Scaffold Next.js project** (App Router, TypeScript)
+- [x] **Scaffold Next.js project** (App Router, TypeScript)
   ```bash
   npx create-next-app@latest apps/web --typescript --tailwind --app --src-dir
   ```
-- [ ] **Install core dependencies**
+- [x] **Install core dependencies**
   - `@supabase/supabase-js`
   - `@supabase/ssr`
   - `@tanstack/react-query`
@@ -35,14 +35,14 @@
   - `lucide-react`
   - `cloudinary` + `next-cloudinary`
   - `sonner` (toast notifications)
-- [ ] **Configure Tailwind CSS** (custom design tokens)
+- [x] **Configure Tailwind CSS** (custom design tokens)
   - Primary (Blue), Secondary (White), Neutral & Status colors
   - Font family: Geist (fallback: Inter, system-ui, sans-serif)
   - Font sizes: 48px → 12px scale
   - Spacing scale: 4, 8, 12, 16, 24, 32, 40, 48, 64
   - Border radius: 6px, 10px, 16px, 9999px
   - Shadows: small (cards), medium (dropdowns), large (modals)
-- [ ] **Set up folder structure**
+- [x] **Set up folder structure**
   ```
   src/
   ├── app/
@@ -78,29 +78,29 @@
 
 ## Phase 3: Supabase & Database Setup
 
-- [ ] **Create Supabase project** (dev environment)
-- [ ] **Enable Supabase Authentication** (Email + Password)
-- [ ] **Create database migration** for all tables
-  - [ ] `users` (extends Supabase auth.users)
-  - [ ] `categories`
-  - [ ] `products`
-  - [ ] `product_images`
-  - [ ] `delivery_locations`
-  - [ ] `orders`
-  - [ ] `order_items`
-  - [ ] `payments`
-  - [ ] `reviews`
-  - [ ] `settings`
-- [ ] **Add database indexes**
+- [x] **Create Supabase project** (dev environment)
+- [x] **Enable Supabase Authentication** (Email + Password)
+- [x] **Create database migration** for all tables
+  - [x] `users` (extends Supabase auth.users)
+  - [x] `categories`
+  - [x] `products`
+  - [x] `product_images`
+  - [x] `delivery_locations`
+  - [x] `orders`
+  - [x] `order_items`
+  - [x] `payments`
+  - [x] `reviews`
+  - [x] `settings`
+- [x] **Add database indexes**
   - `email`, `phone_number`, `slug`, `sku`, `category_id`, `product_id`
   - `order_number`, `payment_id`, `flutterwave_reference`
   - `payment_status`, `order_status`
-- [ ] **Configure Row Level Security (RLS)** on every table
-  - [ ] Guests: read active products/categories only
-  - [ ] Customers: own orders, own profile, reviews for delivered purchases
-  - [ ] Admins: full access
-- [ ] **Create database triggers** for `created_at` / `updated_at` timestamps
-- [ ] **Seed development data** (categories, sample products, delivery locations)
+- [x] **Configure Row Level Security (RLS)** on every table
+  - [x] Guests: read active products/categories only
+  - [x] Customers: own orders, own profile, reviews for delivered purchases
+  - [x] Admins: full access
+- [x] **Create database triggers** for `created_at` / `updated_at` timestamps
+- [x] **Seed development data** (categories, sample products, delivery locations)
 - [ ] **Create Supabase Edge Functions** (if needed for webhooks/payments)
 - [ ] **Set up staging Supabase project** (mirror dev schema)
 
@@ -108,23 +108,23 @@
 
 ## Phase 4: Supabase Client & Auth Setup
 
-- [ ] **Initialize Supabase client** (`src/lib/supabase/client.ts`)
+- [x] **Initialize Supabase client** (`src/lib/supabase/client.ts`)
   - Browser client (public anon key)
   - Server client (service role for admin ops)
-- [ ] **Set up Supabase SSR helpers** for Next.js App Router
-- [ ] **Build auth pages**
-  - [ ] `/login` — email + password
-  - [ ] `/register` — full name, email, password
-  - [ ] `/forgot-password`
+- [x] **Set up Supabase SSR helpers** for Next.js App Router
+- [x] **Build auth pages**
+  - [x] `/login` — email + password
+  - [x] `/register` — full name, email, password
+  - [x] `/forgot-password`
   - [ ] `/reset-password`
-- [ ] **Implement authentication hooks**
+- [x] **Implement authentication hooks**
   - `useAuth` / `useUser` — session + user state
   - `useLogin` / `useRegister` / `useLogout`
-- [ ] **Create auth middleware** (`src/middleware.ts`)
+- [x] **Create auth middleware** (`src/middleware.ts`)
   - Redirect unauthenticated users from protected pages
   - Redirect non-admin users away from admin pages
   - Preserve intended destination after login
-- [ ] **Implement route protection patterns**
+- [x] **Implement route protection patterns**
   - Public routes: home, products, cart, checkout, order tracking
   - Customer routes: dashboard, orders, profile, reviews
   - Admin routes: admin dashboard, products, categories, orders, customers, delivery locations, analytics, settings
@@ -136,45 +136,45 @@
 
 ### Core UI Components
 
-- [ ] **Button** — Primary, Secondary, Outline, Text variants
-- [ ] **Input** — text, email, password, search
-- [ ] **Textarea**
-- [ ] **Select**
+- [x] **Button** — Primary, Secondary, Outline, Text variants
+- [x] **Input** — text, email, password, search
+- [x] **Textarea**
+- [x] **Select**
 - [ ] **Checkbox**
 - [ ] **Radio Button**
 - [ ] **Switch**
-- [ ] **Badge** — Genuine Product Badge, Secure Payment Badge
-- [ ] **Card** — reusable card wrapper
-- [ ] **Modal**
+- [x] **Badge** — Genuine Product Badge, Secure Payment Badge
+- [x] **Card** — reusable card wrapper
+- [x] **Modal**
 - [ ] **Drawer**
-- [ ] **Skeleton Loader**
-- [ ] **Loading Spinner**
-- [ ] **Empty State**
+- [x] **Skeleton Loader**
+- [x] **Loading Spinner**
+- [x] **Empty State**
 
 ### Feedback Components
 
-- [ ] **Toast** (success, warning, error) — positioned top of screen
-- [ ] **Alert** — success, warning, error, info variants
+- [x] **Toast** (success, warning, error) — positioned top of screen
+- [x] **Alert** — success, warning, error, info variants
 
 ### Layout Components
 
-- [ ] **Navbar** (top navigation for desktop/tablet)
+- [x] **Navbar** (top navigation for desktop/tablet)
   - Logo, Search, Categories, Cart, Login/Profile
-- [ ] **Bottom Navigation** (mobile)
+- [x] **Bottom Navigation** (mobile)
   - Home, Categories, Search, Cart, Profile
-- [ ] **Footer**
+- [x] **Footer**
   - About, Contact, FAQ, Privacy Policy, Return Policy, Terms & Conditions
 
 ### Trust Components
 
-- [ ] **Genuine Product Badge**
+- [x] **Genuine Product Badge**
 - [ ] **Secure Payment Notice**
 - [ ] **Delivery Information**
 - [ ] **Customer Support Contact**
 - [ ] **Return Policy Summary**
 - [ ] **FAQ Section**
-- [ ] **Customer Reviews**
-- [ ] **Order Tracking Timeline**
+- [x] **Customer Reviews**
+- [x] **Order Tracking Timeline**
 
 ---
 
@@ -182,29 +182,29 @@
 
 ### Home Page (`/`)
 
-- [ ] **Hero section** — tagline, trust elements, CTA to browse
-- [ ] **Featured products** section
-- [ ] **Categories** overview
-- [ ] **Trust signals** — secure payment, genuine products, delivery info
-- [ ] **Footer**
+- [x] **Hero section** — tagline, trust elements, CTA to browse
+- [x] **Featured products** section
+- [x] **Categories** overview
+- [x] **Trust signals** — secure payment, genuine products, delivery info
+- [x] **Footer**
 
 ### Products (`/products`)
 
-- [ ] **Product grid** with pagination
-- [ ] **Search** functionality
-- [ ] **Category filter**
-- [ ] **Sorting** (price, newest, name)
-- [ ] **Featured filter**
+- [x] **Product grid** with pagination
+- [x] **Search** functionality
+- [x] **Category filter**
+- [x] **Sorting** (price, newest, name)
+- [x] **Featured filter**
 
 ### Product Detail (`/products/[slug]`)
 
-- [ ] **Image gallery** (main image + thumbnails)
-- [ ] **Product info** — name, price, description, brand, stock status
-- [ ] **Compare price** display (original vs selling)
-- [ ] **Add to Cart** button
-- [ ] **Buy Now** button
-- [ ] **Stock status** indicator
-- [ ] **Reviews section**
+- [x] **Image gallery** (main image + thumbnails)
+- [x] **Product info** — name, price, description, brand, stock status
+- [x] **Compare price** display (original vs selling)
+- [x] **Add to Cart** button
+- [x] **Buy Now** button
+- [x] **Stock status** indicator
+- [x] **Reviews section**
 
 ### Categories (`/categories/[slug]`)
 
@@ -213,41 +213,41 @@
 
 ### Cart (`/cart`)
 
-- [ ] **Cart items list** — image, name, price, quantity selector
-- [ ] **Remove item**
-- [ ] **Clear cart**
-- [ ] **Subtotal, delivery fee, total**
-- [ ] **Proceed to Checkout** button
+- [x] **Cart items list** — image, name, price, quantity selector
+- [x] **Remove item**
+- [x] **Clear cart**
+- [x] **Subtotal, delivery fee, total**
+- [x] **Proceed to Checkout** button
 
 ### Checkout (`/checkout`)
 
-- [ ] **Customer information form** — name, phone, email
-- [ ] **Delivery location selection** (admin-managed locations)
-- [ ] **Order summary**
-- [ ] **Payment method** — Bank Transfer via Dynamic Account
-- [ ] **Place Order** button
+- [x] **Customer information form** — name, phone, email
+- [x] **Delivery location selection** (admin-managed locations)
+- [x] **Order summary**
+- [x] **Payment method** — Bank Transfer via Dynamic Account
+- [x] **Place Order** button
 
 ### Order Confirmation (`/order/confirmation/[id]`)
 
-- [ ] **Order number** display
-- [ ] **Payment instructions** — bank name, account number, amount, expiry
-- [ ] **Next steps** info
+- [x] **Order number** display
+- [x] **Payment instructions** — bank name, account number, amount, expiry
+- [x] **Next steps** info
 
 ### Order Tracking (`/track`)
 
-- [ ] **Guest tracking** — order number + phone number
-- [ ] **Status timeline** — Pending → Payment Confirmed → Processing → Ready for Delivery → Out for Delivery → Delivered
-- [ ] **Order details** — items, total, delivery info
+- [x] **Guest tracking** — order number + phone number
+- [x] **Status timeline** — Pending → Payment Confirmed → Processing → Ready for Delivery → Out for Delivery → Delivered
+- [x] **Order details** — items, total, delivery info
 
 ---
 
 ## Phase 7: Customer Dashboard
 
-- [ ] **Dashboard overview** — recent orders, profile summary
-- [ ] **My Orders** — list with status, total, date, track button
-- [ ] **Order Detail** — items, timeline, delivery info
-- [ ] **Profile Management** — view/update name, email, phone, avatar
-- [ ] **My Reviews** — products purchased, write/update reviews
+- [x] **Dashboard overview** — recent orders, profile summary
+- [x] **My Orders** — list with status, total, date, track button
+- [x] **Order Detail** — items, timeline, delivery info
+- [x] **Profile Management** — view/update name, email, phone, avatar
+- [x] **My Reviews** — products purchased, write/update reviews
 
 ---
 
@@ -255,43 +255,43 @@
 
 ### Auth Endpoints (`/api/v1/auth/...`)
 
-- [ ] `POST /auth/register` — create account + Supabase user
-- [ ] `POST /auth/login` — authenticate
-- [ ] `POST /auth/logout` — invalidate session
-- [ ] `GET /auth/me` — current user info
-- [ ] `POST /auth/forgot-password`
-- [ ] `POST /auth/reset-password`
+- [x] `POST /auth/register` — create account + Supabase user
+- [x] `POST /auth/login` — authenticate
+- [x] `POST /auth/logout` — invalidate session
+- [x] `GET /auth/me` — current user info
+- [x] `POST /auth/forgot-password`
+- [x] `POST /auth/reset-password`
 
 ### Product Endpoints (`/api/v1/products/...`)
 
-- [ ] `GET /products` — paginated, search, category filter, featured, sort
-- [ ] `GET /products/[slug]` — single product with images
-- [ ] `GET /products/featured` — featured products
-- [ ] `GET /products/search` — search results
+- [x] `GET /products` — paginated, search, category filter, featured, sort
+- [x] `GET /products/[slug]` — single product with images
+- [x] `GET /products/featured` — featured products
+- [x] `GET /products/search` — search results
 
 ### Category Endpoints (`/api/v1/categories/...`)
 
-- [ ] `GET /categories` — all active categories
-- [ ] `GET /categories/[slug]` — single category with products
+- [x] `GET /categories` — all active categories
+- [x] `GET /categories/[slug]` — single category with products
 
 ### Cart Endpoints (`/api/v1/cart/...`)
 
-- [ ] `GET /cart` — get current cart
-- [ ] `POST /cart/items` — add item
-- [ ] `PATCH /cart/items/[itemId]` — update quantity
-- [ ] `DELETE /cart/items/[itemId]` — remove item
-- [ ] `DELETE /cart` — clear cart
+- [x] `GET /cart` — get current cart
+- [x] `POST /cart/items` — add item
+- [x] `PATCH /cart/items/[itemId]` — update quantity
+- [x] `DELETE /cart/items/[itemId]` — remove item
+- [x] `DELETE /cart` — clear cart
 
 ### Checkout Endpoints (`/api/v1/checkout/...`)
 
-- [ ] `POST /checkout` — full checkout (validate products, stock, calculate totals + delivery fee, create payment, create order)
-- [ ] `POST /checkout/buy-now` — single product direct purchase (skip cart)
+- [x] `POST /checkout` — full checkout (validate products, stock, calculate totals + delivery fee, create payment, create order)
+- [x] `POST /checkout/buy-now` — single product direct purchase (skip cart)
 
 ### Payment Endpoints (`/api/v1/payments/...`)
 
-- [ ] `POST /payments/dynamic-account` — generate Flutterwave virtual account
-- [ ] `GET /payments/[reference]` — verify payment
-- [ ] `POST /payments/webhook/flutterwave` — Flutterwave webhook handler
+- [x] `POST /payments/dynamic-account` — generate Flutterwave virtual account
+- [x] `GET /payments/[reference]` — verify payment
+- [x] `POST /payments/webhook/flutterwave` — Flutterwave webhook handler
   - Verify webhook signature
   - Confirm payment
   - Update payment record
@@ -300,69 +300,69 @@
 
 ### Order Endpoints (`/api/v1/orders/...`)
 
-- [ ] `GET /orders/track` — guest tracking (order_number + phone_number)
-- [ ] `GET /orders` — customer's orders (auth required)
-- [ ] `GET /orders/[id]` — single order detail
+- [x] `GET /orders/track` — guest tracking (order_number + phone_number)
+- [x] `GET /orders` — customer's orders (auth required)
+- [x] `GET /orders/[id]` — single order detail
 
 ### Review Endpoints (`/api/v1/reviews/...`)
 
-- [ ] `POST /reviews` — create review (auth required, verified delivered order)
-- [ ] `GET /products/[id]/reviews` — product reviews (public)
+- [x] `POST /reviews` — create review (auth required, verified delivered order)
+- [x] `GET /products/[id]/reviews` — product reviews (public)
 
 ### Customer Profile (`/api/v1/profile/...`)
 
-- [ ] `GET /profile` — get profile
-- [ ] `PATCH /profile` — update profile
+- [x] `GET /profile` — get profile
+- [x] `PATCH /profile` — update profile
 
 ### Admin Endpoints (`/api/v1/admin/...`)
 
-- [ ] `GET/POST /admin/products`
-- [ ] `PATCH/DELETE /admin/products/[id]`
-- [ ] `GET/POST /admin/categories`
-- [ ] `PATCH/DELETE /admin/categories/[id]`
-- [ ] `GET /admin/orders`
-- [ ] `GET /admin/orders/[id]`
-- [ ] `PATCH /admin/orders/[id]` — update order/payment/delivery status
-- [ ] `GET/POST /admin/delivery-locations`
-- [ ] `PATCH/DELETE /admin/delivery-locations/[id]`
-- [ ] `GET /admin/customers`
-- [ ] `GET /admin/customers/[id]`
-- [ ] `PATCH /admin/customers/[id]`
-- [ ] `GET /admin/settings`
-- [ ] `PATCH /admin/settings`
-- [ ] `GET /admin/dashboard` — revenue, orders, pending, products, customers, low stock, recent orders
+- [x] `GET/POST /admin/products`
+- [x] `PATCH/DELETE /admin/products/[id]`
+- [x] `GET/POST /admin/categories`
+- [x] `PATCH/DELETE /admin/categories/[id]`
+- [x] `GET /admin/orders`
+- [x] `GET /admin/orders/[id]`
+- [x] `PATCH /admin/orders/[id]` — update order/payment/delivery status
+- [x] `GET/POST /admin/delivery-locations`
+- [x] `PATCH/DELETE /admin/delivery-locations/[id]`
+- [x] `GET /admin/customers`
+- [x] `GET /admin/customers/[id]`
+- [x] `PATCH /admin/customers/[id]`
+- [x] `GET /admin/settings`
+- [x] `PATCH /admin/settings`
+- [x] `GET /admin/dashboard` — revenue, orders, pending, products, customers, low stock, recent orders
 
 ---
 
 ## Phase 9: Admin Dashboard
 
-- [ ] **Dashboard overview** — stats cards, charts, recent orders
-- [ ] **Product management** — CRUD, image upload, inventory
-- [ ] **Category management** — CRUD
-- [ ] **Order management** — view, update status, verify payment
-- [ ] **Customer management** — view, disable/enable accounts
-- [ ] **Delivery location management** — CRUD, set fees, enable/disable
-- [ ] **Store settings** — support phone/email, store address, return/privacy/terms
-- [ ] **Analytics** — sales data, popular products, order trends
+- [x] **Dashboard overview** — stats cards, charts, recent orders
+- [x] **Product management** — CRUD, image upload, inventory
+- [x] **Category management** — CRUD
+- [x] **Order management** — view, update status, verify payment
+- [x] **Customer management** — view, disable/enable accounts
+- [x] **Delivery location management** — CRUD, set fees, enable/disable
+- [x] **Store settings** — support phone/email, store address, return/privacy/terms
+- [x] **Analytics** — sales data, popular products, order trends
 
 ---
 
 ## Phase 10: Payment Integration (Flutterwave)
 
-- [ ] **Create Flutterwave account** (sandbox + live)
-- [ ] **Generate API keys** (secret key, webhook secret)
-- [ ] **Implement dynamic virtual bank account generation**
+- [x] **Create Flutterwave account** (sandbox + live)
+- [x] **Generate API keys** (secret key, webhook secret)
+- [x] **Implement dynamic virtual bank account generation**
   - `POST /api/v1/payments/dynamic-account`
   - Return bank name, account number, account name, amount, expiry
-- [ ] **Implement payment verification**
+- [x] **Implement payment verification**
   - `GET /api/v1/payments/[reference]`
-- [ ] **Implement Flutterwave webhook handler**
+- [x] **Implement Flutterwave webhook handler**
   - Verify webhook signature
   - Idempotent processing (prevent duplicates)
   - Update payment status
   - Update linked orders
   - Trigger notifications
-- [ ] **Build payment UI components**
+- [x] **Build payment UI components**
   - Payment instructions display
   - Payment status polling
   - Payment confirmation page
@@ -375,12 +375,12 @@
 
 ## Phase 11: Image Management (Cloudinary)
 
-- [ ] **Create Cloudinary account**
+- [ ] **Create Cloudinary account** (and upload preset `nasfon_store` with unsigned upload)
 - [ ] **Set up folders per environment** (`development/`, `staging/`, `production/`)
-- [ ] **Integrate Cloudinary upload widget** or API
-- [ ] **Build admin product image upload** (multiple images, reorder)
-- [ ] **Configure image transformations** (optimize, resize)
-- [ ] **Display images** on product cards, detail pages
+- [x] **Integrate Cloudinary upload widget** or API
+- [x] **Build admin product image upload** (multiple images, reorder)
+- [x] **Configure image transformations** (optimize, resize)
+- [x] **Display images** on product cards, detail pages
 
 ---
 
@@ -396,22 +396,22 @@
 
 ## Phase 13: Security Hardening
 
-- [ ] **Enable HTTPS** (Vercel provides by default)
-- [ ] **Configure HTTP security headers**
+- [x] **Enable HTTPS** (Vercel provides by default)
+- [x] **Configure HTTP security headers**
   - Content-Security-Policy (CSP)
   - X-Content-Type-Options
   - X-Frame-Options
   - Referrer-Policy
   - Permissions-Policy
   - Strict-Transport-Security (HSTS)
-- [ ] **Implement rate limiting** on sensitive endpoints
+- [x] **Implement rate limiting** on sensitive endpoints
   - Login, registration, password reset, checkout, order tracking, payments, webhooks
-- [ ] **Add input validation** (Zod schemas) on all API routes
+- [x] **Add input validation** (Zod schemas) on all API routes
 - [ ] **Implement CSRF protection** for state-changing requests
 - [ ] **Configure CORS** — allow only approved origins
-- [ ] **Webhook signature verification** (Flutterwave)
-- [ ] **Sanitize user-generated content** (reviews, names, search terms)
-- [ ] **File upload restrictions** — images only, size limits, MIME validation
+- [x] **Webhook signature verification** (Flutterwave)
+- [x] **Sanitize user-generated content** (reviews, names, search terms)
+- [x] **File upload restrictions** — images only, size limits, MIME validation
 - [ ] **Verify RLS policies** on every database table before deployment
 
 ---

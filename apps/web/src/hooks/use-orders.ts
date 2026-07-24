@@ -16,7 +16,6 @@ interface PaymentInfo {
 }
 
 interface CheckoutResponse {
-  order: Order;
   payment: PaymentInfo;
 }
 

@@ -5,12 +5,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Search, ShoppingCart, User, LogOut, LayoutDashboard } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { useCart } from "@/hooks/use-cart";
 import { createClient } from "@/utils/supabase/client";
 
 export function Navbar() {
   const { user, profile } = useAuth();
+  const { data: cart } = useCart();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+
+  const itemCount = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,6 +64,11 @@ export function Navbar() {
             className="relative rounded-full p-2 text-gray-600 hover:bg-gray-100"
           >
             <ShoppingCart size={20} />
+            {itemCount > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-white">
+                {itemCount > 99 ? "99+" : itemCount}
+              </span>
+            )}
           </Link>
           {user ? (
             <div className="flex items-center gap-2">

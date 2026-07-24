@@ -1,16 +1,17 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCart, useClearCart } from "@/hooks/use-cart";
+import { useCart } from "@/hooks/use-cart";
 import { useDeliveryLocations } from "@/hooks/use-delivery";
 import { useCheckout, useBuyNow } from "@/hooks/use-orders";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
+
+const CHECKOUT_DRAFT_KEY = "checkout_draft";
 
 function CheckoutContent() {
   const router = useRouter();
@@ -20,28 +21,55 @@ function CheckoutContent() {
   const { data: locations } = useDeliveryLocations();
   const checkout = useCheckout();
   const buyNow = useBuyNow();
-  const clearCart = useClearCart();
 
   const isBuyNow = searchParams.has("buy_now");
   const buyNowProductId = searchParams.get("buy_now") || "";
   const buyNowQty = parseInt(searchParams.get("qty") || "1");
+  const buyNowPrice = parseFloat(searchParams.get("price") || "0");
 
   const [name, setName] = useState(profile?.full_name || "");
   const [email, setEmail] = useState(profile?.email || "");
   const [phone, setPhone] = useState(profile?.phone_number || "");
   const [locationId, setLocationId] = useState("");
   const [notes, setNotes] = useState("");
+  const [hasDraft, setHasDraft] = useState(false);
+  const redirecting = useRef(false);
+
+  const restoreDraft = useCallback(() => {
+    try {
+      const raw = sessionStorage.getItem(CHECKOUT_DRAFT_KEY);
+      if (!raw) return false;
+      const draft = JSON.parse(raw);
+      setName(draft.name || "");
+      setEmail(draft.email || "");
+      setPhone(draft.phone || "");
+      setLocationId(draft.location_id || "");
+      setNotes(draft.notes || "");
+      sessionStorage.removeItem(CHECKOUT_DRAFT_KEY);
+      setHasDraft(true);
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
 
   useEffect(() => {
-    if (profile) {
+    if (profile && !restoreDraft()) {
       setName(profile.full_name || "");
       setEmail(profile.email || "");
       setPhone(profile.phone_number || "");
     }
-  }, [profile]);
+  }, [profile, restoreDraft]);
+
+  useEffect(() => {
+    if (!isBuyNow && !cartLoading && !cart?.items.length && !hasDraft && !redirecting.current) {
+      redirecting.current = true;
+      router.push("/cart");
+    }
+  }, [isBuyNow, cartLoading, cart, hasDraft, router]);
 
   const selectedLocation = locations?.find((l) => l.id === locationId);
-  const cartTotal = cart?.total || 0;
+  const cartTotal = isBuyNow ? buyNowPrice * buyNowQty : (cart?.total || 0);
   const deliveryFee = selectedLocation?.delivery_fee || 0;
   const total = cartTotal + deliveryFee;
 
@@ -65,10 +93,21 @@ function CheckoutContent() {
       : checkout.mutateAsync(commonData);
 
     try {
+      sessionStorage.setItem(CHECKOUT_DRAFT_KEY, JSON.stringify({
+        name, email, phone, location_id: locationId, notes,
+        ...(isBuyNow ? { buy_now: buyNowProductId, qty: buyNowQty, price: buyNowPrice } : {}),
+      }));
       const result = await mutation;
-      if (!isBuyNow) clearCart.mutate();
-      router.push(`/order/confirmation/${result.order.id}`);
-      toast.success("Order placed successfully!");
+      const from = isBuyNow ? "product" : "cart";
+      redirecting.current = true;
+      const paymentParams = new URLSearchParams({ from });
+      if (isBuyNow) {
+        paymentParams.set("buy_now", buyNowProductId);
+        paymentParams.set("qty", String(buyNowQty));
+        paymentParams.set("price", String(buyNowPrice));
+      }
+      router.push(`/payment/${result.payment.reference}?${paymentParams}`);
+      toast.success("Proceed to payment!");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Checkout failed");
     }
@@ -86,8 +125,7 @@ function CheckoutContent() {
     );
   }
 
-  if (!isBuyNow && !cart?.items.length) {
-    router.push("/cart");
+  if (!isBuyNow && !hasDraft && !cart?.items.length && redirecting.current) {
     return null;
   }
 
@@ -166,16 +204,24 @@ function CheckoutContent() {
         <div className="lg:col-span-2">
           <div className="rounded-lg border border-gray-200 bg-white p-4">
             <h2 className="text-lg font-semibold text-gray-900">Order Summary</h2>
-            <div className="mt-4 space-y-2 text-sm">
-              {!isBuyNow && cart?.items.map((item) => (
-                <div key={item.product_id} className="flex justify-between text-gray-500">
-                  <span className="truncate">{item.product.name} x{item.quantity}</span>
-                  <span>₦{item.subtotal.toLocaleString()}</span>
-                </div>
-              ))}
-              {isBuyNow && (
-                <div className="flex justify-between text-gray-500">
-                  <span>Buy Now (x{buyNowQty})</span>
+            <div className="mt-4 space-y-3 text-sm">
+              {!isBuyNow ? (
+                cart?.items.map((item) => (
+                  <div key={item.product_id} className="flex items-start justify-between gap-4 text-gray-500">
+                    <span className="leading-5">{item.product.name}</span>
+                    <span className="shrink-0 text-right">
+                      <span className="block">₦{item.subtotal.toLocaleString()}</span>
+                      <span className="block text-xs text-gray-400">qty: {item.quantity}</span>
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <div className="flex items-start justify-between gap-4 text-gray-500">
+                  <span className="leading-5">Product</span>
+                  <span className="shrink-0 text-right">
+                    <span className="block">₦{cartTotal.toLocaleString()}</span>
+                    <span className="block text-xs text-gray-400">qty: {buyNowQty}</span>
+                  </span>
                 </div>
               )}
               <hr className="my-2" />

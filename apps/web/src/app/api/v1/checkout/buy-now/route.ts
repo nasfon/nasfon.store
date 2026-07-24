@@ -1,10 +1,12 @@
 import { NextRequest } from "next/server";
-import { successResponse, errorResponse } from "@/lib/api";
+import { successResponse, errorResponse, getAuthUser, withRateLimit } from "@/lib/api";
 import { buyNowSchema } from "@/lib/validation";
 import * as checkoutService from "@/services/checkout.service";
-import { getAuthUser } from "@/lib/api";
 
 export async function POST(request: NextRequest) {
+  const rateLimitResponse = await withRateLimit(request, "checkout");
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
     const body = await request.json();
     const parsed = buyNowSchema.safeParse(body);
@@ -19,7 +21,7 @@ export async function POST(request: NextRequest) {
       user_id: user?.id || null,
     });
 
-    return successResponse(result, "Order placed successfully", 201);
+    return successResponse(result, "Payment initiated", 201);
   } catch (err) {
     return errorResponse(err instanceof Error ? err.message : "Checkout failed", [], 400);
   }

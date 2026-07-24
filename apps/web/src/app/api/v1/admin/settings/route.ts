@@ -17,7 +17,7 @@ export async function GET() {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const { error } = await requireAdmin();
+    const { error } = await requireAdmin(request);
     if (error) return error;
 
     const body = await request.json();
