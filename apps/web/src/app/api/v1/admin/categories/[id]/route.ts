@@ -8,7 +8,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { error } = await requireAdmin();
+    const { error } = await requireAdmin(request);
     if (error) return error;
 
     const { id } = await params;

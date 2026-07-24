@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
-import { getCart } from "./cart.service";
+import { getCart, clearCart } from "./cart.service";
+import { generatePayment } from "./payment.service";
 
 export async function createCheckout(data: {
   customer_name: string;
@@ -16,7 +17,11 @@ export async function createCheckout(data: {
   const { items } = await getCart();
   if (items.length === 0) throw new Error("Cart is empty");
 
-  return processOrder(supabase, items, data);
+  const result = await processPayment(supabase, items, data);
+
+  await clearCart();
+
+  return result;
 }
 
 export async function buyNow(data: {
@@ -34,7 +39,7 @@ export async function buyNow(data: {
 
   const items = [{ product_id: data.product_id, quantity: data.quantity, added_at: new Date().toISOString() }];
 
-  return processOrder(supabase, items, {
+  return processPayment(supabase, items, {
     customer_name: data.customer_name,
     customer_email: data.customer_email,
     customer_phone: data.customer_phone,
@@ -44,7 +49,7 @@ export async function buyNow(data: {
   });
 }
 
-async function processOrder(
+async function processPayment(
   supabase: ReturnType<typeof createClient>,
   cartItems: { product_id: string; quantity: number }[],
   data: {
@@ -93,50 +98,18 @@ async function processOrder(
   const deliveryFee = location.delivery_fee;
   const totalAmount = subtotal + deliveryFee;
 
-  const orderNumber = `NF-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
-
-  const { data: order, error: orderError } = await supabase
-    .from("orders")
-    .insert({
-      order_number: orderNumber,
-      user_id: data.user_id || null,
-      customer_name: data.customer_name,
-      customer_email: data.customer_email,
-      customer_phone: data.customer_phone,
-      delivery_location_id: data.delivery_location_id,
-      subtotal,
-      delivery_fee: deliveryFee,
-      total_amount: totalAmount,
-      payment_status: "pending",
-      order_status: "pending",
-      notes: data.notes || null,
-    })
-    .select()
-    .single();
-
-  if (orderError) throw new Error("Failed to create order");
-
-  const orderItems = cartItems.map((item) => {
-    const product = productMap.get(item.product_id)!;
-    return {
-      order_id: order.id,
-      product_id: item.product_id,
-      quantity: item.quantity,
-      unit_price: product.selling_price,
-      subtotal: product.selling_price * item.quantity,
-    };
+  const payment = await generatePayment({
+    items: cartItems.map((i) => ({ product_id: i.product_id, quantity: i.quantity })),
+    customer_name: data.customer_name,
+    customer_email: data.customer_email,
+    customer_phone: data.customer_phone,
+    delivery_location_id: data.delivery_location_id,
+    delivery_fee: deliveryFee,
+    subtotal,
+    total_amount: totalAmount,
+    notes: data.notes,
+    user_id: data.user_id,
   });
 
-  const { error: itemsError } = await supabase.from("order_items").insert(orderItems);
-  if (itemsError) throw new Error("Failed to create order items");
-
-  for (const item of cartItems) {
-    const product = productMap.get(item.product_id)!;
-    await supabase
-      .from("products")
-      .update({ stock_quantity: product.stock_quantity - item.quantity })
-      .eq("id", item.product_id);
-  }
-
-  return { order };
+  return { payment };
 }

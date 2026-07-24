@@ -1,5 +1,9 @@
 import Link from "next/link";
-import { Package, User, Star, LayoutDashboard, ChevronRight } from "lucide-react";
+import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
+import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
+import { Package, User, Star, LayoutDashboard } from "lucide-react";
 
 const sidebarLinks = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -8,7 +12,37 @@ const sidebarLinks = [
   { href: "/dashboard/reviews", label: "My Reviews", icon: Star },
 ];
 
-export default function CustomerLayout({ children }: { children: React.ReactNode }) {
+export default async function CustomerLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+  const adminClient = createAdminClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login?redirect=/dashboard");
+  }
+
+  const { data: profile } = await adminClient
+    .from("users")
+    .select("is_active")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (!profile) {
+    await adminClient.from("users").upsert({
+      id: user.id,
+      full_name: user.email?.split("@")[0] || "User",
+      email: user.email || "",
+      role: "customer",
+      is_active: true,
+    }, { onConflict: "id" });
+  }
+
+  if (profile && !profile.is_active) {
+    await supabase.auth.signOut();
+    redirect("/login?error=suspended");
+  }
   return (
     <div className="mx-auto flex max-w-7xl px-4 py-8 gap-8">
       <aside className="hidden w-56 shrink-0 md:block">

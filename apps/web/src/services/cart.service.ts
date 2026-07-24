@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 
 interface CartItem {
   product_id: string;
@@ -59,11 +60,25 @@ export async function clearCart() {
 }
 
 export async function addCartItem(productId: string, quantity: number) {
+  const supabase = createAdminClient();
+  const { data: product } = await supabase
+    .from("products")
+    .select("stock_quantity")
+    .eq("id", productId)
+    .single();
+
+  if (!product) throw new Error("Product not found");
+
   const { items } = await getCart();
   const existing = items.find((i) => i.product_id === productId);
+  const totalQty = (existing?.quantity ?? 0) + quantity;
+
+  if (product.stock_quantity < totalQty) {
+    throw new Error("Insufficient stock");
+  }
 
   if (existing) {
-    existing.quantity += quantity;
+    existing.quantity = totalQty;
   } else {
     items.push({ product_id: productId, quantity, added_at: new Date().toISOString() });
   }
@@ -73,6 +88,19 @@ export async function addCartItem(productId: string, quantity: number) {
 }
 
 export async function updateCartItem(productId: string, quantity: number) {
+  const supabase = createAdminClient();
+  const { data: product } = await supabase
+    .from("products")
+    .select("stock_quantity")
+    .eq("id", productId)
+    .single();
+
+  if (!product) throw new Error("Product not found");
+
+  if (product.stock_quantity < quantity) {
+    throw new Error("Insufficient stock");
+  }
+
   const { items } = await getCart();
   const existing = items.find((i) => i.product_id === productId);
 

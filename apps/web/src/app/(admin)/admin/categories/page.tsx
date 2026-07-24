@@ -1,33 +1,116 @@
-import { Plus } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Modal } from "@/components/ui/modal";
+import { Input } from "@/components/ui/input";
+import { useAdminCategories, useCreateCategory, useUpdateCategory, useDeleteCategory } from "@/hooks/use-admin";
+import { toast } from "sonner";
 
 export default function AdminCategoriesPage() {
+  const { data: categories, isLoading } = useAdminCategories();
+  const createCategory = useCreateCategory();
+  const updateCategory = useUpdateCategory();
+  const deleteCategory = useDeleteCategory();
+
+  const [showModal, setShowModal] = useState(false);
+  const [editing, setEditing] = useState<any>(null);
+  const [form, setForm] = useState({ name: "", slug: "", description: "", image_url: "", is_active: true });
+
+  const openCreate = () => {
+    setEditing(null);
+    setForm({ name: "", slug: "", description: "", image_url: "", is_active: true });
+    setShowModal(true);
+  };
+
+  const openEdit = (cat: any) => {
+    setEditing(cat);
+    setForm({ name: cat.name, slug: cat.slug, description: cat.description || "", image_url: cat.image_url || "", is_active: cat.is_active });
+    setShowModal(true);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const payload = { ...form, description: form.description || null, image_url: form.image_url || null };
+
+    if (editing) {
+      updateCategory.mutate({ id: editing.id, ...payload }, {
+        onSuccess: () => { toast.success("Category updated"); setShowModal(false); },
+        onError: (err) => toast.error(err.message),
+      });
+    } else {
+      createCategory.mutate(payload as any, {
+        onSuccess: () => { toast.success("Category created"); setShowModal(false); },
+        onError: (err) => toast.error(err.message),
+      });
+    }
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Categories</h1>
-        <Button><Plus size={18} /> Add Category</Button>
+        <Button onClick={openCreate}><Plus size={18} />Add Category</Button>
       </div>
-      <div className="mt-6 rounded-lg border border-gray-200 bg-white">
+
+      <div className="mt-6 overflow-x-auto rounded-lg border border-gray-200 bg-white">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-gray-50 text-left text-gray-500">
               <th className="px-4 py-3 font-medium">Name</th>
               <th className="px-4 py-3 font-medium">Slug</th>
-              <th className="px-4 py-3 font-medium">Products</th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium">Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td colSpan={5} className="px-4 py-12 text-center text-gray-400">
-                No categories yet.
-              </td>
-            </tr>
+            {isLoading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <tr key={i}><td colSpan={4} className="px-4 py-3"><Skeleton className="h-6 w-full" /></td></tr>
+              ))
+            ) : categories?.length ? (
+              categories.map((cat) => (
+                <tr key={cat.id} className="border-b last:border-b-0">
+                  <td className="px-4 py-3 font-medium text-gray-900">{cat.name}</td>
+                  <td className="px-4 py-3 text-gray-500">{cat.slug}</td>
+                  <td className="px-4 py-3"><Badge variant={cat.is_active ? "success" : "error"}>{cat.is_active ? "Active" : "Inactive"}</Badge></td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-2">
+                      <button onClick={() => openEdit(cat)} className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"><Pencil size={16} /></button>
+                      <button onClick={() => { if (confirm("Delete?")) deleteCategory.mutate(cat.id, { onSuccess: () => toast.success("Deleted") }); }} className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-error"><Trash2 size={16} /></button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr><td colSpan={4} className="px-4 py-12 text-center text-gray-400">No categories yet.</td></tr>
+            )}
           </tbody>
         </table>
       </div>
+
+      <Modal open={showModal} onClose={() => setShowModal(false)} title={editing ? "Edit Category" : "Add Category"}>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Input id="name" label="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
+          <Input id="slug" label="Slug" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} required />
+          <div>
+            <label className="text-sm font-medium text-gray-700">Description</label>
+            <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="mt-1.5 h-20 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm" />
+          </div>
+          <Input id="image_url" label="Image URL" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} />
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} />
+            Active
+          </label>
+          <div className="flex justify-end gap-3">
+            <Button type="button" variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
+            <Button type="submit">Save</Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

@@ -255,6 +255,10 @@ create policy "Admins can update all users"
   on users for update
   using (exists (select 1 from users where id = auth.uid() and role = 'admin'));
 
+create policy "Users can insert own profile"
+  on users for insert
+  with check (auth.uid() = id);
+
 -- 6.2 categories
 create policy "Anyone can read active categories"
   on categories for select

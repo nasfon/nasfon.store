@@ -55,9 +55,11 @@ Authentication using:
 
 ---
 
-# User Roles
+# Role-Based Access Control (RBAC)
 
-## Guest
+The application enforces **Role-Based Access Control (RBAC)** — access to resources is determined by the user's assigned role (`customer` or `admin`). Guests are assigned an implicit role with the least privilege.
+
+## Guest Role
 
 Permissions
 
@@ -67,7 +69,7 @@ Permissions
 
 ---
 
-## Customer
+## Customer Role
 
 Permissions
 
@@ -80,7 +82,7 @@ Everything available to Guests, plus:
 
 ---
 
-## Admin
+## Admin Role
 
 Permissions
 
@@ -251,9 +253,9 @@ Authentication and Admin role required.
 
 ---
 
-# Authorization
+# Authorization (RBAC Enforcement)
 
-Authorization is based on the user's role stored in the database.
+Authorization is enforced via **RBAC** using the user's role stored in the database.
 
 Available roles:
 
@@ -265,7 +267,7 @@ Every protected request must verify:
 1. Valid session
 2. User exists
 3. User is active
-4. User has the required role
+4. User has the required role (RBAC check)
 
 ---
 

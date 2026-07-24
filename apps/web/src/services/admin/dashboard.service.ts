@@ -1,9 +1,7 @@
-import { cookies } from "next/headers";
-import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 
 export async function getDashboard() {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createAdminClient();
 
   const [
     { count: totalOrders },

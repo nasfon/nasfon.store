@@ -1,4 +1,8 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
+import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 import {
   LayoutDashboard, Package, Grid3X3, ShoppingCart, Users,
   MapPin, BarChart3, Settings,
@@ -15,7 +19,30 @@ const sidebarLinks = [
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+  const adminClient = createAdminClient();
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login?redirect=/admin");
+  }
+
+  const { data: profile } = await adminClient
+    .from("users")
+    .select("role, is_active")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (!profile || profile.role !== "admin") {
+    redirect("/");
+  }
+
+  if (!profile.is_active) {
+    redirect("/login?error=suspended");
+  }
   return (
     <div className="mx-auto flex max-w-7xl px-4 py-8 gap-8">
       <aside className="hidden w-56 shrink-0 md:block">

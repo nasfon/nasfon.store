@@ -264,6 +264,7 @@ Customer Receives Product
 * HTTPS Everywhere
 * Supabase Authentication
 * Row Level Security (RLS)
+* **Role-Based Access Control (RBAC)** — customer and admin roles enforced server-side
 * Protected Admin Routes
 * Server-side Authorization
 * Secure Environment Variables

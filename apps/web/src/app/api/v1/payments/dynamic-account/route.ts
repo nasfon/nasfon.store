@@ -1,15 +1,21 @@
 import { NextRequest } from "next/server";
-import { successResponse, errorResponse } from "@/lib/api";
+import { successResponse, errorResponse, withRateLimit } from "@/lib/api";
+import { findOrCreateCustomer, createVirtualAccount } from "@/services/flutterwave";
 
 export async function POST(request: NextRequest) {
+  const rateLimitResponse = await withRateLimit(request, "payment");
+  if (rateLimitResponse) return rateLimitResponse;
+
   try {
-    const flutterwaveSecretKey = process.env.FLUTTERWAVE_SECRET_KEY;
-    if (!flutterwaveSecretKey) {
+    const hasV4Credentials =
+      process.env.FLUTTERWAVE_CLIENT_ID && process.env.FLUTTERWAVE_CLIENT_SECRET;
+
+    if (!hasV4Credentials) {
       return errorResponse("Payment not configured", [], 503);
     }
 
     const body = await request.json();
-    const { amount, email, fullname, order_id } = body;
+    const { amount, email, fullname, phonenumber } = body;
 
     if (!amount || !email) {
       return errorResponse("Amount and email are required");
@@ -17,38 +23,31 @@ export async function POST(request: NextRequest) {
 
     const txRef = `NF-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
 
-    const response = await fetch(
-      "https://api.flutterwave.com/v3/virtual-account-numbers",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${flutterwaveSecretKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          amount,
-          tx_ref: txRef,
-          fullname: fullname || email,
-          is_permanent: false,
-          meta: order_id ? { order_id } : undefined,
-        }),
-      }
-    );
+    const nameParts = (fullname || "").split(" ");
+    const firstname = nameParts[0] || email;
+    const lastname = nameParts.slice(1).join(" ") || firstname;
 
-    const data = await response.json();
+    const customer = await findOrCreateCustomer({
+      email,
+      firstName: firstname,
+      lastName: lastname,
+      phone: phonenumber,
+    });
 
-    if (!response.ok || data.status !== "success") {
-      return errorResponse(data.message || "Failed to generate account", [], 400);
-    }
-
-    return successResponse({
-      bank_name: data.data.bank_name,
-      account_number: data.data.account_number,
-      account_name: data.data.account_name,
+    const va = await createVirtualAccount({
+      customerId: customer.id,
       amount,
       reference: txRef,
-      expires_at: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+      narration: fullname || email,
+    });
+
+    return successResponse({
+      bank_name: va.account_bank_name,
+      account_number: va.account_number,
+      account_name: va.account_name,
+      amount,
+      reference: txRef,
+      expires_at: va.account_expiration_datetime,
     });
   } catch (err) {
     return errorResponse(err instanceof Error ? err.message : "Payment initiation failed", [], 500);

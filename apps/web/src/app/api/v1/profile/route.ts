@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
-import { successResponse, errorResponse } from "@/lib/api";
-import { requireUser } from "@/lib/api";
+import { successResponse, errorResponse, requireUser } from "@/lib/api";
 import { profileSchema } from "@/lib/validation";
 import * as profileService from "@/services/profile.service";
+import { sanitizeName, sanitizePhone } from "@/lib/sanitize";
 
 export async function GET() {
   try {
@@ -18,10 +18,13 @@ export async function GET() {
 
 export async function PATCH(request: NextRequest) {
   try {
-    const { user, error } = await requireUser();
+    const { user, error } = await requireUser(request);
     if (error) return error;
 
     const body = await request.json();
+    if (body.full_name) body.full_name = sanitizeName(body.full_name);
+    if (body.phone_number) body.phone_number = sanitizePhone(body.phone_number);
+
     const parsed = profileSchema.safeParse(body);
     if (!parsed.success) {
       return errorResponse("Validation failed", parsed.error.flatten().fieldErrors as unknown as string[]);

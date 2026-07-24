@@ -410,7 +410,7 @@ PATCH
 
 # Admin APIs
 
-All endpoints require an Admin role.
+All endpoints require an Admin role (RBAC enforcement).
 
 ---
 

@@ -1,5 +1,7 @@
 import { NextRequest } from "next/server";
 import { successResponse, errorResponse } from "@/lib/api";
+import { getCharge } from "@/services/flutterwave";
+import { expirePayment } from "@/services/payment.service";
 
 export async function GET(
   _request: NextRequest,
@@ -7,34 +9,35 @@ export async function GET(
 ) {
   try {
     const { reference } = await params;
-    const flutterwaveSecretKey = process.env.FLUTTERWAVE_SECRET_KEY;
 
-    if (!flutterwaveSecretKey) {
+    if (!process.env.FLUTTERWAVE_CLIENT_ID || !process.env.FLUTTERWAVE_CLIENT_SECRET) {
       return errorResponse("Payment not configured", [], 503);
     }
 
-    const response = await fetch(
-      `https://api.flutterwave.com/v3/transactions/by_reference/${reference}`,
-      {
-        headers: {
-          Authorization: `Bearer ${flutterwaveSecretKey}`,
-        },
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok || data.status !== "success") {
+    const charge = await getCharge(reference);
+    if (!charge) {
       return errorResponse("Payment not found", [], 404);
     }
 
     return successResponse({
-      status: data.data.status,
-      amount: data.data.amount,
-      currency: data.data.currency,
-      paid_at: data.data.paid_at,
+      status: charge.status,
+      amount: charge.amount,
+      paid_at: charge.paid_at || null,
     });
   } catch (err) {
     return errorResponse(err instanceof Error ? err.message : "Verification failed", [], 500);
+  }
+}
+
+export async function PATCH(
+  _request: NextRequest,
+  { params }: { params: Promise<{ reference: string }> }
+) {
+  try {
+    const { reference } = await params;
+    const result = await expirePayment(reference);
+    return successResponse(result);
+  } catch (err) {
+    return errorResponse(err instanceof Error ? err.message : "Failed to expire payment", [], 400);
   }
 }

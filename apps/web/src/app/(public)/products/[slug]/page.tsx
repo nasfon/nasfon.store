@@ -1,74 +1,282 @@
-import { notFound } from "next/navigation";
-import { ShoppingCart, Zap, ShieldCheck, Package } from "lucide-react";
+"use client";
+
+import { use } from "react";
+import Link from "next/link";
+import { ArrowLeft, ShoppingCart, Star, Minus, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useProduct } from "@/hooks/use-products";
+import { useProductReviews } from "@/hooks/use-reviews";
+import { useAddCartItem } from "@/hooks/use-cart";
+import { toast } from "sonner";
+import { useState } from "react";
 
-interface Props {
+export default function ProductDetailPage({
+  params,
+}: {
   params: Promise<{ slug: string }>;
-}
+}) {
+  const { slug } = use(params);
+  const [quantity, setQuantity] = useState(1);
+  const { data: product, isLoading } = useProduct(slug);
+  const { data: reviews } = useProductReviews(slug);
+  const addToCart = useAddCartItem();
+  const [selectedIdx, setSelectedIdx] = useState(0);
 
-export default async function ProductDetailPage({ params }: Props) {
-  const { slug } = await params;
-  if (!slug) notFound();
+  const handleAddToCart = () => {
+    if (!product) return;
+    if (!inStock) {
+      toast.error("Insufficient stock");
+      return;
+    }
+    addToCart.mutate(
+      {
+        product_id: product.id,
+        quantity,
+        name: product.name,
+        slug: product.slug,
+        selling_price: product.selling_price,
+        compare_price: product.compare_price,
+        featured_image: product.featured_image,
+        stock_quantity: product.stock_quantity,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Added to cart");
+          setQuantity(1);
+        },
+        onError: (err) => toast.error(err.message),
+      }
+    );
+  };
 
-  return (
-    <div className="mx-auto max-w-7xl px-4 py-8">
-      <div className="grid gap-8 md:grid-cols-2">
-        <div>
-          <div className="aspect-square overflow-hidden rounded-lg bg-gray-100">
-            <div className="flex h-full items-center justify-center text-gray-300">
-              Product Image
-            </div>
-          </div>
-          <div className="mt-3 flex gap-2">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-16 w-16 overflow-hidden rounded-md bg-gray-100">
-                <div className="flex h-full items-center justify-center text-xs text-gray-300">{i}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div>
-          <Badge variant="info">Phone Accessories</Badge>
-          <h1 className="mt-2 text-2xl font-bold text-gray-900">Product Name</h1>
-          <p className="mt-1 text-sm text-gray-400">Brand Name</p>
-          <div className="mt-4 flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-gray-900">₦0</span>
-            <span className="text-lg text-gray-400 line-through">₦0</span>
-          </div>
-          <div className="mt-4 flex items-center gap-2">
-            <Badge variant="success">In Stock</Badge>
-            <span className="text-sm text-gray-500">10+ units available</span>
-          </div>
-          <p className="mt-4 text-sm leading-relaxed text-gray-600">
-            Product description will appear here.
-          </p>
-          <div className="mt-6 space-y-2 rounded-lg border border-gray-200 bg-gray-50 p-4">
-            {[
-              { icon: ShieldCheck, text: "100% genuine product" },
-              { icon: Package, text: "Secure packaging & fast delivery" },
-            ].map((item) => {
-              const Icon = item.icon;
-              return (
-                <div key={item.text} className="flex items-center gap-2 text-sm text-gray-600">
-                  <Icon size={16} className="text-success" />
-                  {item.text}
-                </div>
-              );
-            })}
-          </div>
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <Button size="lg" className="flex-1">
-              <ShoppingCart size={18} />
-              Add to Cart
-            </Button>
-            <Button size="lg" className="flex-1">
-              <Zap size={18} />
-              Buy Now
-            </Button>
+  const handleBuyNow = () => {
+    if (!product) return;
+    if (!inStock) {
+      toast.error("Insufficient stock");
+      return;
+    }
+    window.location.href = `/checkout?buy_now=${product.id}&qty=${quantity}&price=${product.selling_price}`;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-8">
+        <Skeleton className="h-6 w-32" />
+        <div className="mt-6 grid gap-8 lg:grid-cols-2">
+          <Skeleton className="aspect-square w-full rounded-lg" />
+          <div className="space-y-4">
+            <Skeleton className="h-8 w-3/4" />
+            <Skeleton className="h-6 w-1/4" />
+            <Skeleton className="h-24 w-full" />
           </div>
         </div>
       </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-16 text-center">
+        <p className="text-gray-500">Product not found.</p>
+        <Link href="/products"><Button className="mt-4">Browse Products</Button></Link>
+      </div>
+    );
+  }
+
+  const inStock = product.stock_quantity > 0;
+  const allImages = [
+    ...(product.featured_image ? [{ id: "featured", image_url: product.featured_image }] : []),
+    ...(product.images?.map((img) => ({ id: img.id, image_url: img.image_url })) ?? []),
+  ];
+  const safeIdx = Math.min(selectedIdx, Math.max(0, allImages.length - 1));
+  const selectedImage = allImages[safeIdx];
+
+  return (
+    <div className="mx-auto max-w-7xl px-4 py-8">
+      <Link
+        href="/products"
+        className="mb-6 flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900"
+      >
+        <ArrowLeft size={16} />
+        Back to Products
+      </Link>
+
+      <div className="grid gap-8 lg:grid-cols-2">
+        <div className="space-y-4">
+          <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100">
+            {selectedImage ? (
+              <>
+                <img
+                  key={selectedImage.id}
+                  src={selectedImage.image_url}
+                  alt={product.name}
+                  className="h-full w-full object-cover transition-opacity duration-300"
+                />
+                {allImages.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => setSelectedIdx((i) => (i - 1 + allImages.length) % allImages.length)}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-1.5 text-gray-700 shadow hover:bg-white"
+                    >
+                      <ChevronLeft size={20} />
+                    </button>
+                    <button
+                      onClick={() => setSelectedIdx((i) => (i + 1) % allImages.length)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-1.5 text-gray-700 shadow hover:bg-white"
+                    >
+                      <ChevronRight size={20} />
+                    </button>
+                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                      {allImages.map((_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => setSelectedIdx(i)}
+                          className={`h-2 w-2 rounded-full transition-colors ${i === selectedIdx ? "bg-white" : "bg-white/50"}`}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+              </>
+            ) : (
+              <div className="flex h-full items-center justify-center text-gray-300">
+                No image
+              </div>
+            )}
+          </div>
+          {allImages.length > 1 && (
+            <div className="flex gap-2 overflow-x-auto">
+              {allImages.map((img, i) => (
+                <button
+                  key={img.id}
+                  onClick={() => setSelectedIdx(i)}
+                  className={`h-20 w-20 shrink-0 overflow-hidden rounded-md border-2 object-cover ${i === selectedIdx ? "border-primary" : "border-transparent"}`}
+                >
+                  <img
+                    src={img.image_url}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div>
+          {product.category && (
+            <Link
+              href={`/categories/${product.category.slug}`}
+              className="text-sm text-primary hover:text-primary-hover"
+            >
+              {product.category.name}
+            </Link>
+          )}
+          <h1 className="mt-1 text-2xl font-bold text-gray-900">{product.name}</h1>
+          {product.brand && (
+            <p className="mt-1 text-sm text-gray-500">{product.brand}</p>
+          )}
+
+          <div className="mt-4 flex items-baseline gap-2">
+            <span className="text-3xl font-bold text-gray-900">
+              ₦{product.selling_price.toLocaleString()}
+            </span>
+            {product.compare_price && product.compare_price > product.selling_price && (
+              <span className="text-lg text-gray-400 line-through">
+                ₦{product.compare_price.toLocaleString()}
+              </span>
+            )}
+          </div>
+
+          <div className="mt-4">
+            <Badge variant={inStock ? "success" : "error"}>
+              {inStock ? `In Stock (${product.stock_quantity} available)` : "Out of Stock"}
+            </Badge>
+          </div>
+
+          {product.description && (
+            <p className="mt-6 text-gray-600 leading-relaxed whitespace-pre-line">
+              {product.description}
+            </p>
+          )}
+
+          <div className="mt-6 space-y-3">
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-gray-700">Quantity:</span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  className="flex h-8 w-8 items-center justify-center rounded border text-gray-500 hover:bg-gray-50"
+                  disabled={quantity <= 1}
+                >
+                  <Minus size={16} />
+                </button>
+                <span className="w-8 text-center text-sm font-medium">{quantity}</span>
+                <button
+                  onClick={() => setQuantity((q) => Math.min(product.stock_quantity, q + 1))}
+                  className="flex h-8 w-8 items-center justify-center rounded border text-gray-500 hover:bg-gray-50"
+                  disabled={quantity >= product.stock_quantity}
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                size="lg"
+                className="flex-1"
+                disabled={addToCart.isPending}
+                onClick={handleAddToCart}
+              >
+                <ShoppingCart size={18} />
+                {addToCart.isPending ? "Adding..." : "Add to Cart"}
+              </Button>
+              <Button
+                size="lg"
+                className="flex-1"
+                onClick={handleBuyNow}
+              >
+                Buy Now
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section className="mt-12">
+        <h2 className="text-xl font-bold text-gray-900">Customer Reviews</h2>
+        {reviews && reviews.length > 0 ? (
+          <div className="mt-4 space-y-4">
+            {reviews.map((review) => (
+              <div key={review.id} className="rounded-lg border border-gray-200 bg-white p-4">
+                <div className="flex items-center gap-2">
+                  <div className="flex">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star
+                        key={i}
+                        size={14}
+                        className={i < review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm font-medium text-gray-700">
+                    {review.user?.full_name || "Anonymous"}
+                  </span>
+                </div>
+                {review.review && (
+                  <p className="mt-2 text-sm text-gray-600">{review.review}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="mt-4 text-sm text-gray-400">No reviews yet.</p>
+        )}
+      </section>
     </div>
   );
 }

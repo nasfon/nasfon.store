@@ -1,11 +1,9 @@
-import { cookies } from "next/headers";
-import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 import type { adminSettingsSchema } from "@/lib/validation";
 import type { z } from "zod";
 
 export async function getAdminSettings() {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from("settings")
@@ -17,8 +15,14 @@ export async function getAdminSettings() {
 }
 
 export async function updateSettings(data: z.infer<typeof adminSettingsSchema>) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createAdminClient();
+
+  const { data: existing } = await supabase
+    .from("settings")
+    .select("id")
+    .single();
+
+  if (!existing) throw new Error("Settings record not found");
 
   const updateData: Record<string, unknown> = {};
   if (data.support_phone !== undefined) updateData.support_phone = data.support_phone;
@@ -31,7 +35,7 @@ export async function updateSettings(data: z.infer<typeof adminSettingsSchema>) 
   const { data: settings, error } = await supabase
     .from("settings")
     .update(updateData)
-    .eq("id", 1)
+    .eq("id", existing.id)
     .select()
     .single();
 

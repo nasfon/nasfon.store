@@ -1,7 +1,11 @@
+"use client";
+
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useAddCartItem } from "@/hooks/use-cart";
+import { toast } from "sonner";
 import type { Product } from "@/types";
 
 interface ProductCardProps {
@@ -9,7 +13,33 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const addToCart = useAddCartItem();
   const inStock = product.stock_quantity > 0;
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!inStock) {
+      toast.error("Insufficient stock");
+      return;
+    }
+    addToCart.mutate(
+      {
+        product_id: product.id,
+        quantity: 1,
+        name: product.name,
+        slug: product.slug,
+        selling_price: product.selling_price,
+        compare_price: product.compare_price,
+        featured_image: product.featured_image,
+        stock_quantity: product.stock_quantity,
+      },
+      {
+        onSuccess: () => toast.success("Added to cart"),
+        onError: (err) => toast.error(err.message),
+      }
+    );
+  };
 
   return (
     <div className="group rounded-lg border border-gray-200 bg-white shadow-card transition-shadow hover:shadow-dropdown">
@@ -64,10 +94,11 @@ export function ProductCard({ product }: ProductCardProps) {
           variant="secondary"
           size="sm"
           className="mt-3 w-full"
-          disabled={!inStock}
+          disabled={addToCart.isPending}
+          onClick={handleAddToCart}
         >
           <ShoppingCart size={16} />
-          Add to Cart
+          {addToCart.isPending ? "Adding..." : "Add to Cart"}
         </Button>
       </div>
     </div>

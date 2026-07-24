@@ -1,11 +1,9 @@
-import { cookies } from "next/headers";
-import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 import type { adminOrderUpdateSchema } from "@/lib/validation";
 import type { z } from "zod";
 
 export async function getAdminOrders() {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from("orders")
@@ -17,8 +15,7 @@ export async function getAdminOrders() {
 }
 
 export async function getAdminOrderById(id: string) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from("orders")
@@ -31,8 +28,7 @@ export async function getAdminOrderById(id: string) {
 }
 
 export async function updateOrder(id: string, data: z.infer<typeof adminOrderUpdateSchema>) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createAdminClient();
 
   const updateData: Record<string, unknown> = {};
   if (data.order_status !== undefined) updateData.order_status = data.order_status;
