@@ -37,7 +37,7 @@ export default function RootLayout({
         <Providers>
           <Navbar />
           <main className="flex-1 pb-16 md:pb-0">{children}</main>
-          <Footer />
+          <div className="hidden md:block"><Footer /></div>
           <BottomNav />
           <Toaster position="top-center" richColors />
         </Providers>

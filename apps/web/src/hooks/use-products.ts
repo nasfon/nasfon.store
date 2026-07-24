@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { api } from "@/lib/fetch";
 import type { Product, ApiResponse } from "@/types";
 
@@ -43,10 +43,34 @@ export function useFeaturedProducts() {
   });
 }
 
-export function useSearchProducts(query: string) {
-  return useQuery({
-    queryKey: ["products", "search", query],
-    queryFn: () => api.get<Product[]>("/products/search", { q: query }),
+export function useInfiniteProducts(params?: {
+  limit?: number;
+  search?: string;
+  category_id?: string;
+  sort?: string;
+}) {
+  return useInfiniteQuery({
+    queryKey: ["products", "infinite", params],
+    queryFn: ({ pageParam = 1 }) =>
+      api.get<ProductsResponse>("/products", { ...params, page: pageParam }),
+    getNextPageParam: (lastPage) => {
+      const { page, total_pages } = lastPage.pagination;
+      return page < total_pages ? page + 1 : undefined;
+    },
+    initialPageParam: 1,
+  });
+}
+
+export function useInfiniteSearchProducts(query: string, limit = 20) {
+  return useInfiniteQuery({
+    queryKey: ["products", "search", "infinite", query],
+    queryFn: ({ pageParam = 1 }) =>
+      api.get<ProductsResponse>("/products/search", { q: query, page: pageParam, limit }),
+    getNextPageParam: (lastPage) => {
+      const { page, total_pages } = lastPage.pagination;
+      return page < total_pages ? page + 1 : undefined;
+    },
+    initialPageParam: 1,
     enabled: query.length > 0,
   });
 }

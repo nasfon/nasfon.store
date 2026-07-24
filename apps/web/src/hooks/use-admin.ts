@@ -163,6 +163,14 @@ export function useAdminCustomer(id: string) {
   });
 }
 
+export function useDeleteCustomer() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/admin/customers/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "customers"] }),
+  });
+}
+
 export function useUpdateCustomer() {
   const qc = useQueryClient();
   return useMutation({

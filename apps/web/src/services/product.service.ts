@@ -1,14 +1,17 @@
 import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
+import { cache } from "react";
 
-export async function getProducts(params: {
+const listingColumns = "id, name, slug, featured_image, selling_price, compare_price, stock_quantity, brand, is_featured, category_id, created_at";
+
+export const getProducts = cache(async (params: {
   page?: number;
   limit?: number;
   search?: string;
   category_id?: string;
   featured?: boolean;
   sort?: string;
-}) {
+}) => {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
@@ -18,7 +21,7 @@ export async function getProducts(params: {
 
   let query = supabase
     .from("products")
-    .select("*, category:categories(*), images:product_images(*)", { count: "exact" })
+    .select(listingColumns, { count: "exact" })
     .eq("is_active", true);
 
   if (params.search) {
@@ -56,7 +59,7 @@ export async function getProducts(params: {
       total_pages: Math.ceil((count || 0) / limit),
     },
   };
-}
+});
 
 export async function getProductBySlug(slug: string) {
   const cookieStore = await cookies();
@@ -79,7 +82,7 @@ export async function getFeaturedProducts() {
 
   const { data, error } = await supabase
     .from("products")
-    .select("*, category:categories(*), images:product_images(*)")
+    .select(listingColumns)
     .eq("is_featured", true)
     .eq("is_active", true)
     .order("created_at", { ascending: false });
@@ -88,18 +91,34 @@ export async function getFeaturedProducts() {
   return data || [];
 }
 
-export async function searchProducts(searchQuery: string) {
+export async function searchProducts(searchQuery: string, page = 1, limit = 20) {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
-  const { data, error } = await supabase
+  const offset = (page - 1) * limit;
+
+  const query = supabase
     .from("products")
-    .select("*, category:categories(*), images:product_images(*)")
+    .select(listingColumns, { count: "exact" })
     .eq("is_active", true)
-    .ilike("name", `%${searchQuery}%`)
+    .textSearch("search_vector", searchQuery, {
+      type: "websearch",
+      config: "english",
+    })
     .order("created_at", { ascending: false })
-    .limit(20);
+    .range(offset, offset + limit - 1);
+
+  const { data, error, count } = await query;
 
   if (error) throw new Error(error.message);
-  return data || [];
+
+  return {
+    products: data || [],
+    pagination: {
+      page,
+      limit,
+      total: count || 0,
+      total_pages: Math.ceil((count || 0) / limit),
+    },
+  };
 }

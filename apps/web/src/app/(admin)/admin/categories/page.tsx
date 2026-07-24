@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
+import { ImageUpload } from "@/components/shared/image-upload";
 import { useAdminCategories, useCreateCategory, useUpdateCategory, useDeleteCategory } from "@/hooks/use-admin";
 import { toast } from "sonner";
 
@@ -60,6 +61,7 @@ export default function AdminCategoriesPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-gray-50 text-left text-gray-500">
+              <th className="px-4 py-3 font-medium">Image</th>
               <th className="px-4 py-3 font-medium">Name</th>
               <th className="px-4 py-3 font-medium">Slug</th>
               <th className="px-4 py-3 font-medium">Status</th>
@@ -69,11 +71,18 @@ export default function AdminCategoriesPage() {
           <tbody>
             {isLoading ? (
               Array.from({ length: 3 }).map((_, i) => (
-                <tr key={i}><td colSpan={4} className="px-4 py-3"><Skeleton className="h-6 w-full" /></td></tr>
+                <tr key={i}><td colSpan={5} className="px-4 py-3"><Skeleton className="h-6 w-full" /></td></tr>
               ))
             ) : categories?.length ? (
               categories.map((cat) => (
                 <tr key={cat.id} className="border-b last:border-b-0">
+                  <td className="px-4 py-3">
+                    {cat.image_url ? (
+                      <img src={cat.image_url} alt="" className="h-10 w-10 rounded-lg object-cover" />
+                    ) : (
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-100 text-gray-300"><ImagePlus size={16} /></div>
+                    )}
+                  </td>
                   <td className="px-4 py-3 font-medium text-gray-900">{cat.name}</td>
                   <td className="px-4 py-3 text-gray-500">{cat.slug}</td>
                   <td className="px-4 py-3"><Badge variant={cat.is_active ? "success" : "error"}>{cat.is_active ? "Active" : "Inactive"}</Badge></td>
@@ -86,7 +95,7 @@ export default function AdminCategoriesPage() {
                 </tr>
               ))
             ) : (
-              <tr><td colSpan={4} className="px-4 py-12 text-center text-gray-400">No categories yet.</td></tr>
+              <tr><td colSpan={5} className="px-4 py-12 text-center text-gray-400">No categories yet.</td></tr>
             )}
           </tbody>
         </table>
@@ -100,7 +109,16 @@ export default function AdminCategoriesPage() {
             <label className="text-sm font-medium text-gray-700">Description</label>
             <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="mt-1.5 h-20 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm" />
           </div>
-          <Input id="image_url" label="Image URL" value={form.image_url} onChange={(e) => setForm({ ...form, image_url: e.target.value })} />
+          <div>
+            <label className="text-sm font-medium text-gray-700">Image</label>
+            <div className="mt-1.5">
+              <ImageUpload
+                images={form.image_url ? [{ image_url: form.image_url, display_order: 0 }] : []}
+                onChange={(images) => setForm({ ...form, image_url: images[0]?.image_url || "" })}
+                maxImages={1}
+              />
+            </div>
+          </div>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} />
             Active

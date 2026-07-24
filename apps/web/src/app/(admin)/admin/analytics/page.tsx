@@ -1,23 +1,8 @@
-"use client";
-
 import { BarChart3 } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useAdminDashboard } from "@/hooks/use-admin";
+import { getDashboard } from "@/services/admin/dashboard.service";
 
-export default function AdminAnalyticsPage() {
-  const { data, isLoading } = useAdminDashboard();
-
-  if (isLoading) {
-    return (
-      <div>
-        <Skeleton className="h-8 w-48" />
-        <div className="mt-6 grid gap-6 lg:grid-cols-2">
-          <Skeleton className="h-64 rounded-lg" />
-          <Skeleton className="h-64 rounded-lg" />
-        </div>
-      </div>
-    );
-  }
+export default async function AdminAnalyticsPage() {
+  const data = await getDashboard();
 
   return (
     <div>
@@ -29,20 +14,20 @@ export default function AdminAnalyticsPage() {
           <div className="mt-4 space-y-4">
             <div className="flex items-center justify-between border-b pb-2">
               <span className="text-sm text-gray-500">Total Revenue</span>
-              <span className="text-lg font-bold">₦{(data?.stats.total_revenue || 0).toLocaleString()}</span>
+              <span className="text-lg font-bold">₦{(data.stats.total_revenue || 0).toLocaleString()}</span>
             </div>
             <div className="flex items-center justify-between border-b pb-2">
               <span className="text-sm text-gray-500">Total Orders</span>
-              <span className="text-lg font-bold">{data?.stats.total_orders || 0}</span>
+              <span className="text-lg font-bold">{data.stats.total_orders || 0}</span>
             </div>
             <div className="flex items-center justify-between border-b pb-2">
               <span className="text-sm text-gray-500">Pending Orders</span>
-              <span className="text-lg font-bold text-yellow-600">{data?.stats.pending_orders || 0}</span>
+              <span className="text-lg font-bold text-yellow-600">{data.stats.pending_orders || 0}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-500">Average Order Value</span>
               <span className="text-lg font-bold">
-                ₦{data?.stats.total_orders ? Math.round((data.stats.total_revenue || 0) / data.stats.total_orders).toLocaleString() : 0}
+                ₦{data.stats.total_orders ? Math.round((data.stats.total_revenue || 0) / data.stats.total_orders).toLocaleString() : 0}
               </span>
             </div>
           </div>
@@ -53,15 +38,15 @@ export default function AdminAnalyticsPage() {
           <div className="mt-4 space-y-4">
             <div className="flex items-center justify-between border-b pb-2">
               <span className="text-sm text-gray-500">Total Products</span>
-              <span className="text-lg font-bold">{data?.stats.total_products || 0}</span>
+              <span className="text-lg font-bold">{data.stats.total_products || 0}</span>
             </div>
             <div className="flex items-center justify-between border-b pb-2">
               <span className="text-sm text-gray-500">Total Customers</span>
-              <span className="text-lg font-bold">{data?.stats.total_customers || 0}</span>
+              <span className="text-lg font-bold">{data.stats.total_customers || 0}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-500">Low Stock Items</span>
-              <span className="text-lg font-bold text-red-600">{data?.low_stock_products?.length || 0}</span>
+              <span className="text-lg font-bold text-red-600">{data.low_stock_products?.length || 0}</span>
             </div>
           </div>
         </div>

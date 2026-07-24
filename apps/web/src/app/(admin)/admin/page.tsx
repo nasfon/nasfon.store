@@ -1,33 +1,17 @@
-"use client";
-
 import { Package, Users, ShoppingBag, AlertTriangle, DollarSign, Clock } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useAdminDashboard } from "@/hooks/use-admin";
+import { getDashboard } from "@/services/admin/dashboard.service";
 import Link from "next/link";
 
-export default function AdminDashboard() {
-  const { data, isLoading } = useAdminDashboard();
-
-  if (isLoading) {
-    return (
-      <div>
-        <Skeleton className="h-8 w-64" />
-        <div className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-28 rounded-lg" />
-          ))}
-        </div>
-      </div>
-    );
-  }
+export default async function AdminDashboard() {
+  const data = await getDashboard();
 
   const stats = [
-    { icon: DollarSign, label: "Total Revenue", value: `₦${(data?.stats.total_revenue || 0).toLocaleString()}`, color: "text-green-600 bg-green-100" },
-    { icon: ShoppingBag, label: "Total Orders", value: data?.stats.total_orders || 0, color: "text-blue-600 bg-blue-100" },
-    { icon: Clock, label: "Pending Orders", value: data?.stats.pending_orders || 0, color: "text-yellow-600 bg-yellow-100" },
-    { icon: Package, label: "Products", value: data?.stats.total_products || 0, color: "text-purple-600 bg-purple-100" },
-    { icon: Users, label: "Customers", value: data?.stats.total_customers || 0, color: "text-indigo-600 bg-indigo-100" },
-    { icon: AlertTriangle, label: "Low Stock Items", value: data?.low_stock_products?.length || 0, color: "text-red-600 bg-red-100" },
+    { icon: DollarSign, label: "Total Revenue", value: `₦${(data.stats.total_revenue || 0).toLocaleString()}`, color: "text-green-600 bg-green-100" },
+    { icon: ShoppingBag, label: "Total Orders", value: data.stats.total_orders || 0, color: "text-blue-600 bg-blue-100" },
+    { icon: Clock, label: "Pending Orders", value: data.stats.pending_orders || 0, color: "text-yellow-600 bg-yellow-100" },
+    { icon: Package, label: "Products", value: data.stats.total_products || 0, color: "text-purple-600 bg-purple-100" },
+    { icon: Users, label: "Customers", value: data.stats.total_customers || 0, color: "text-indigo-600 bg-indigo-100" },
+    { icon: AlertTriangle, label: "Low Stock Items", value: data.low_stock_products?.length || 0, color: "text-red-600 bg-red-100" },
   ];
 
   return (
@@ -49,7 +33,7 @@ export default function AdminDashboard() {
         })}
       </div>
 
-      {data?.low_stock_products && data.low_stock_products.length > 0 && (
+      {data.low_stock_products && data.low_stock_products.length > 0 && (
         <div className="mt-8 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
           <h2 className="flex items-center gap-2 font-semibold text-yellow-800">
             <AlertTriangle size={18} />
@@ -68,7 +52,7 @@ export default function AdminDashboard() {
 
       <div className="mt-8">
         <h2 className="text-lg font-semibold text-gray-900">Recent Orders</h2>
-        {data?.recent_orders && data.recent_orders.length > 0 ? (
+        {data.recent_orders && data.recent_orders.length > 0 ? (
           <div className="mt-4 space-y-2">
             {data.recent_orders.map((order: any) => (
               <Link
