@@ -21,7 +21,10 @@ export async function GET(request: NextRequest) {
     }
 
     const result = await productService.getProducts(parsed.data);
-    return successResponse(result);
+
+    return successResponse(result, undefined, undefined, {
+      "Cache-Control": "public, max-age=60, stale-while-revalidate=300",
+    });
   } catch (err) {
     return errorResponse(err instanceof Error ? err.message : "Failed to fetch products", [], 500);
   }

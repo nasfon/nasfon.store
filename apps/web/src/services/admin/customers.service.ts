@@ -27,6 +27,17 @@ export async function getAdminCustomerById(id: string) {
   return data;
 }
 
+export async function deleteCustomer(id: string) {
+  const supabase = createAdminClient();
+
+  const { error } = await supabase
+    .from("users")
+    .delete()
+    .eq("id", id);
+
+  if (error) throw new Error("Failed to delete customer");
+}
+
 export async function updateCustomer(id: string, data: z.infer<typeof adminCustomerUpdateSchema>) {
   const supabase = createAdminClient();
 

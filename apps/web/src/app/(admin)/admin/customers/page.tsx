@@ -2,16 +2,26 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useAdminCustomers, useUpdateCustomer } from "@/hooks/use-admin";
+import { useAdminCustomers, useUpdateCustomer, useDeleteCustomer } from "@/hooks/use-admin";
 import { toast } from "sonner";
+import { Trash2 } from "lucide-react";
 
 export default function AdminCustomersPage() {
   const { data: customers, isLoading } = useAdminCustomers();
   const updateCustomer = useUpdateCustomer();
+  const deleteCustomer = useDeleteCustomer();
 
   const toggleActive = (id: string, current: boolean) => {
     updateCustomer.mutate({ id, is_active: !current }, {
       onSuccess: () => toast.success("Customer updated"),
+      onError: (err) => toast.error(err.message),
+    });
+  };
+
+  const handleDelete = (id: string, name: string) => {
+    if (!window.confirm(`Delete customer "${name}"? This action cannot be undone.`)) return;
+    deleteCustomer.mutate(id, {
+      onSuccess: () => toast.success("Customer deleted"),
       onError: (err) => toast.error(err.message),
     });
   };
@@ -30,12 +40,13 @@ export default function AdminCustomersPage() {
               <th className="px-4 py-3 font-medium">Role</th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium">Joined</th>
+              <th className="px-4 py-3 font-medium">Actions</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
-                <tr key={i}><td colSpan={6} className="px-4 py-3"><Skeleton className="h-6 w-full" /></td></tr>
+                <tr key={i}><td colSpan={7} className="px-4 py-3"><Skeleton className="h-6 w-full" /></td></tr>
               ))
             ) : customers?.length ? (
               customers.map((customer) => (
@@ -45,15 +56,39 @@ export default function AdminCustomersPage() {
                   <td className="px-4 py-3 text-gray-500">{customer.phone_number || "—"}</td>
                   <td className="px-4 py-3"><Badge variant={customer.role === "admin" ? "primary" : "info"}>{customer.role}</Badge></td>
                   <td className="px-4 py-3">
-                    <button onClick={() => toggleActive(customer.id, customer.is_active)}>
-                      <Badge variant={customer.is_active ? "success" : "error"}>{customer.is_active ? "Active" : "Suspended"}</Badge>
-                    </button>
+                    <Badge variant={customer.is_active ? "success" : "error"}>{customer.is_active ? "Active" : "Suspended"}</Badge>
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-500">{new Date(customer.created_at).toLocaleDateString()}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      {customer.is_active ? (
+                        <button
+                          onClick={() => toggleActive(customer.id, customer.is_active)}
+                          className="rounded bg-yellow-50 px-2.5 py-1 text-xs font-medium text-yellow-700 hover:bg-yellow-100"
+                        >
+                          Suspend
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => toggleActive(customer.id, customer.is_active)}
+                          className="rounded bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700 hover:bg-green-100"
+                        >
+                          Activate
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleDelete(customer.id, customer.full_name)}
+                        className="rounded bg-red-50 p-1.5 text-red-600 hover:bg-red-100"
+                        title="Delete customer"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))
             ) : (
-              <tr><td colSpan={6} className="px-4 py-12 text-center text-gray-400">No customers yet.</td></tr>
+              <tr><td colSpan={7} className="px-4 py-12 text-center text-gray-400">No customers yet.</td></tr>
             )}
           </tbody>
         </table>

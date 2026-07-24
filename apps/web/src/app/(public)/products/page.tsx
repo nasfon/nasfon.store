@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { useCallback, useRef, useEffect, useState } from "react";
+import { Search, Loader2 } from "lucide-react";
 import { ProductCard } from "@/components/shared/product-card";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useProducts } from "@/hooks/use-products";
+import { useInfiniteProducts } from "@/hooks/use-products";
 import { useCategories } from "@/hooks/use-categories";
 
 export default function ProductsPage() {
@@ -13,10 +12,8 @@ export default function ProductsPage() {
   const [searchInput, setSearchInput] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [sort, setSort] = useState("newest");
-  const [page, setPage] = useState(1);
 
-  const { data, isLoading } = useProducts({
-    page,
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteProducts({
     limit: 12,
     search: search || undefined,
     category_id: categoryId || undefined,
@@ -28,8 +25,28 @@ export default function ProductsPage() {
   const handleSearch = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     setSearch(searchInput);
-    setPage(1);
   }, [searchInput]);
+
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { rootMargin: "400px" },
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const products = data?.pages.flatMap((p) => p.products) ?? [];
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
@@ -49,7 +66,7 @@ export default function ProductsPage() {
         <div className="flex gap-2">
           <select
             value={categoryId}
-            onChange={(e) => { setCategoryId(e.target.value); setPage(1); }}
+            onChange={(e) => setCategoryId(e.target.value)}
             className="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:border-primary focus:outline-none"
           >
             <option value="">All Categories</option>
@@ -59,7 +76,7 @@ export default function ProductsPage() {
           </select>
           <select
             value={sort}
-            onChange={(e) => { setSort(e.target.value); setPage(1); }}
+            onChange={(e) => setSort(e.target.value)}
             className="h-10 rounded-lg border border-gray-200 bg-white px-3 text-sm focus:border-primary focus:outline-none"
           >
             <option value="newest">Newest</option>
@@ -79,8 +96,8 @@ export default function ProductsPage() {
               <Skeleton className="h-4 w-1/2" />
             </div>
           ))
-        ) : data?.products.length ? (
-          data.products.map((product) => (
+        ) : products.length ? (
+          products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))
         ) : (
@@ -90,29 +107,14 @@ export default function ProductsPage() {
         )}
       </div>
 
-      {data?.pagination && data.pagination.total_pages > 1 && (
-        <div className="mt-8 flex items-center justify-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page <= 1}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-          >
-            Previous
-          </Button>
-          <span className="text-sm text-gray-500">
-            Page {page} of {data.pagination.total_pages}
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={page >= data.pagination.total_pages}
-            onClick={() => setPage((p) => p + 1)}
-          >
-            Next
-          </Button>
-        </div>
-      )}
+      <div ref={sentinelRef} className="flex justify-center py-8">
+        {isFetchingNextPage && (
+          <div className="flex items-center gap-2 text-sm text-gray-400">
+            <Loader2 size={16} className="animate-spin" />
+            Loading more products...
+          </div>
+        )}
+      </div>
     </div>
   );
 }

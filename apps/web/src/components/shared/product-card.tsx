@@ -42,13 +42,14 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
   return (
-    <div className="group rounded-lg border border-gray-200 bg-white shadow-card transition-shadow hover:shadow-dropdown">
+    <div className="group rounded-lg border border-gray-200 bg-white shadow-card transition-shadow hover:shadow-dropdown" style={{ contentVisibility: "auto" }}>
       <Link href={`/products/${product.slug}`} className="block">
         <div className="aspect-square overflow-hidden rounded-t-lg bg-gray-100">
           {product.featured_image ? (
             <img
               src={product.featured_image}
               alt={product.name}
+              loading="lazy"
               className="h-full w-full object-cover transition-transform group-hover:scale-105"
             />
           ) : (

@@ -19,6 +19,22 @@ export async function GET(
   }
 }
 
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { error } = await requireAdmin(_request);
+    if (error) return error;
+
+    const { id } = await params;
+    await customersService.deleteCustomer(id);
+    return successResponse(null, "Customer deleted");
+  } catch (err) {
+    return errorResponse(err instanceof Error ? err.message : "Failed to delete customer", [], 400);
+  }
+}
+
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
