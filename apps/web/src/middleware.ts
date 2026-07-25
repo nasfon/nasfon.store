@@ -46,7 +46,7 @@ function csrfCheck(request: NextRequest): NextResponse | null {
   return null;
 }
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Handle preflight OPTIONS request
