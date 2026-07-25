@@ -32,6 +32,7 @@ export async function apiFetch<T = unknown>(path: string, options: FetchOptions 
   const response = await fetch(url, {
     headers: {
       "Content-Type": "application/json",
+      "X-Requested-With": "XMLHttpRequest",
       ...fetchOptions.headers,
     },
     ...fetchOptions,

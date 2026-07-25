@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/utils/supabase/admin";
 import type { adminOrderUpdateSchema } from "@/lib/validation";
 import type { z } from "zod";
+import { sendOrderStatusUpdate } from "@/services/email.service";
 
 export async function getAdminOrders() {
   const supabase = createAdminClient();
@@ -43,5 +44,16 @@ export async function updateOrder(id: string, data: z.infer<typeof adminOrderUpd
     .single();
 
   if (error) throw new Error("Failed to update order");
+
+  if (data.order_status) {
+    sendOrderStatusUpdate({
+      email: order.customer_email,
+      name: order.customer_name,
+      orderNumber: order.order_number,
+      newStatus: data.order_status,
+      notes: data.notes,
+    });
+  }
+
   return order;
 }

@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { successResponse, errorResponse, withRateLimit } from "@/lib/api";
-import { findOrCreateCustomer, createVirtualAccount } from "@/services/flutterwave";
+import { createVirtualAccount, findOrCreateCustomer } from "@/services/flutterwave";
 
 export async function POST(request: NextRequest) {
   const rateLimitResponse = await withRateLimit(request, "payment");
@@ -21,21 +21,21 @@ export async function POST(request: NextRequest) {
       return errorResponse("Amount and email are required");
     }
 
-    const txRef = `NF-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
-
-    const nameParts = (fullname || "").split(" ");
+    const nameParts = (fullname || email).split(" ");
     const firstname = nameParts[0] || email;
     const lastname = nameParts.slice(1).join(" ") || firstname;
 
-    const customer = await findOrCreateCustomer({
+    const customerId = await findOrCreateCustomer({
       email,
       firstName: firstname,
       lastName: lastname,
       phone: phonenumber,
     });
 
+    const txRef = `NF-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
+
     const va = await createVirtualAccount({
-      customerId: customer.id,
+      customer_id: customerId,
       amount,
       reference: txRef,
       narration: fullname || email,
