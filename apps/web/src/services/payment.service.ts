@@ -58,7 +58,7 @@ export async function generatePayment(checkoutData: CheckoutData) {
           flutterwave_reference: txRef,
           virtual_account_number: va.account_number,
           bank_name: va.account_bank_name,
-          account_name: va.account_name,
+          account_name: checkoutData.customer_name,
           amount: checkoutData.total_amount,
           payment_status: "pending",
           webhook_payload: {
@@ -76,7 +76,7 @@ export async function generatePayment(checkoutData: CheckoutData) {
         flutterwave_reference: txRef,
         virtual_account_number: va.account_number,
         bank_name: va.account_bank_name,
-        account_name: va.account_name,
+        account_name: checkoutData.customer_name,
         amount: checkoutData.total_amount,
         payment_status: "pending",
         reference: txRef,

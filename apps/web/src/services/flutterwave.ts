@@ -173,11 +173,13 @@ export async function createVirtualAccount(params: {
   console.log("[Flutterwave v4] createVirtualAccount response:", JSON.stringify(result.data, null, 2));
 
   const d = (result.data || result) as Record<string, unknown>;
+  const customerObj = typeof d.customer === "object" && d.customer ? (d.customer as Record<string, unknown>) : {};
+  const customerName = String(customerObj.name || customerObj.first_name || customerObj.last_name || "");
   return {
     id: String(d.id || d.flw_ref || ""),
     account_number: String(d.account_number || ""),
     account_bank_name: String(d.bank_name || d.account_bank_name || ""),
-    account_name: String(d.account_name || d.beneficiary || ""),
+    account_name: String(d.account_name || d.beneficiary || d.beneficiary_name || customerName || params.narration || ""),
     account_expiration_datetime: String(d.expiry_date || d.account_expiration_datetime || ""),
     reference: String(d.reference || params.reference),
     customer_id: String(d.customer_id || params.customer_id),

@@ -3,7 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Search, ShoppingCart, User, LogOut, LayoutDashboard } from "lucide-react";
+import {
+  Search,
+  ShoppingCart,
+  User,
+  LogOut,
+  LayoutDashboard,
+} from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/hooks/use-cart";
 import { createClient } from "@/utils/supabase/client";
@@ -14,7 +20,8 @@ export function Navbar() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const itemCount = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
+  const itemCount =
+    cart?.items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +40,7 @@ export function Navbar() {
     <header className="sticky top-0 z-40 border-b border-gray-200 bg-white">
       <div className="mx-auto flex h-14 max-w-7xl items-center gap-4 px-4">
         <Link href="/" className="text-xl font-bold text-primary">
-          NasFon Store
+          NasFon
         </Link>
 
         <div className="hidden flex-1 md:block">
