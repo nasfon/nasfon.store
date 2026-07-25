@@ -1,5 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/utils/supabase/middleware";
+import { validateEnv } from "@/lib/env";
+
+const { ok, missing } = validateEnv();
+if (!ok) {
+  console.error(`[env] Missing variables at startup: ${missing.join(", ")}`);
+}
 
 const STATE_CHANGING_METHODS = ["POST", "PATCH", "PUT", "DELETE"];
 const customerRoutes = ["/dashboard"];

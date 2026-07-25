@@ -14,10 +14,15 @@ export function validateEnv(): { missing: string[]; ok: boolean } {
   return { missing: allMissing, ok: allMissing.length === 0 };
 }
 
+const isServer = typeof window === "undefined";
+
 export function requireEnv(name: string): string {
   const value = process.env[name];
   if (!value) {
-    throw new Error(`Missing required environment variable: ${name}`);
+    if (isServer) {
+      throw new Error(`Missing required environment variable: ${name}`);
+    }
+    return "";
   }
   return value;
 }
