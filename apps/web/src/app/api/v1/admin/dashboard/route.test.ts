@@ -24,12 +24,12 @@ describe('GET /api/v1/admin/dashboard', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockRequireAdmin.mockResolvedValue({ user: { id: 'admin-1', role: 'admin' }, error: null });
+    mockRequireAdmin.mockResolvedValue({ user: { id: 'admin-1', role: 'admin' } as any, error: null });
   });
 
   it('should return 200 with dashboard data', async () => {
     const mockDashboard = {
-      stats: { total_orders: 100, total_revenue: 500000 },
+      stats: { total_orders: 100, pending_orders: 10, total_products: 50, total_customers: 200, total_revenue: 500000 },
       low_stock_products: [],
       recent_orders: [],
     };

@@ -28,7 +28,7 @@ describe('GET /api/v1/admin/customers/[id]', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockRequireAdmin.mockResolvedValue({ user: { id: 'admin-1', role: 'admin' }, error: null });
+    mockRequireAdmin.mockResolvedValue({ user: { id: 'admin-1', role: 'admin' } as any, error: null });
   });
 
   it('should return 200 with customer', async () => {
@@ -58,7 +58,7 @@ describe('PATCH /api/v1/admin/customers/[id]', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (apiLib.requireAdmin as jest.Mock).mockResolvedValue({ user: { id: 'admin-1', role: 'admin' }, error: null });
+    (apiLib.requireAdmin as jest.Mock).mockResolvedValue({ user: { id: 'admin-1', role: 'admin' } as any, error: null });
   });
 
   it('should return 200 on successful update', async () => {
@@ -83,7 +83,7 @@ describe('DELETE /api/v1/admin/customers/[id]', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (apiLib.requireAdmin as jest.Mock).mockResolvedValue({ user: { id: 'admin-1', role: 'admin' }, error: null });
+    (apiLib.requireAdmin as jest.Mock).mockResolvedValue({ user: { id: 'admin-1', role: 'admin' } as any, error: null });
   });
 
   it('should return 200 on successful deletion', async () => {

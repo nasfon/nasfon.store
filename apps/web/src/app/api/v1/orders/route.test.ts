@@ -24,7 +24,7 @@ describe('GET /api/v1/orders', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockRequireUser.mockResolvedValue({ user: { id: 'user-1' }, error: null });
+    mockRequireUser.mockResolvedValue({ user: { id: 'user-1' } as any, error: null });
   });
 
   it('should return 401 if user is not authenticated', async () => {

@@ -49,7 +49,7 @@ describe('PATCH /api/v1/cart/items/[itemId]', () => {
   });
 
   it('should return 200 on successful update', async () => {
-    const mockResult = { items: [{ product_id: ITEM_ID, quantity: 3 }] };
+    const mockResult = { items: [{ product_id: ITEM_ID, quantity: 3, added_at: new Date().toISOString() }] };
     mockUpdateCartItem.mockResolvedValue(mockResult);
 
     const req = new NextRequest(`http://localhost:3000/api/v1/cart/items/${ITEM_ID}`, {

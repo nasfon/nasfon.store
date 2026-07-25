@@ -27,7 +27,7 @@ describe('PATCH /api/v1/admin/products/[id]', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockRequireAdmin.mockResolvedValue({ user: { id: 'admin-1', role: 'admin' }, error: null });
+    mockRequireAdmin.mockResolvedValue({ user: { id: 'admin-1', role: 'admin' } as any, error: null });
   });
 
   it('should return 400 if validation fails', async () => {
@@ -63,7 +63,7 @@ describe('DELETE /api/v1/admin/products/[id]', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockRequireAdmin.mockResolvedValue({ user: { id: 'admin-1', role: 'admin' }, error: null });
+    mockRequireAdmin.mockResolvedValue({ user: { id: 'admin-1', role: 'admin' } as any, error: null });
   });
 
   it('should return 200 on successful deletion', async () => {

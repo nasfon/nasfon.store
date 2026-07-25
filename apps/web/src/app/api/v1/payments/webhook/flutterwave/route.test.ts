@@ -105,7 +105,7 @@ describe('POST /api/v1/payments/webhook/flutterwave', () => {
       },
     };
 
-    mockCreateAdminClient.mockReturnValue(makeSupabaseMockWithPayment(mockPayment));
+    (mockCreateAdminClient as jest.Mock).mockReturnValue(makeSupabaseMockWithPayment(mockPayment));
     mockConfirmPaymentFromFlutterwave.mockResolvedValue(true);
 
     const req = new NextRequest('http://localhost:3000/api/v1/payments/webhook/flutterwave', {
@@ -121,7 +121,7 @@ describe('POST /api/v1/payments/webhook/flutterwave', () => {
   });
 
   it('should return 200 but not process for non-completed events', async () => {
-    mockCreateAdminClient.mockReturnValue(makeSupabaseMock());
+    (mockCreateAdminClient as jest.Mock).mockReturnValue(makeSupabaseMock());
 
     const req = new NextRequest('http://localhost:3000/api/v1/payments/webhook/flutterwave', {
       method: 'POST',
@@ -142,7 +142,7 @@ describe('POST /api/v1/payments/webhook/flutterwave', () => {
       webhook_payload: {},
     };
 
-    mockCreateAdminClient.mockReturnValue(makeSupabaseMockWithPayment(mockPayment));
+    (mockCreateAdminClient as jest.Mock).mockReturnValue(makeSupabaseMockWithPayment(mockPayment));
 
     const req = new NextRequest('http://localhost:3000/api/v1/payments/webhook/flutterwave', {
       method: 'POST',

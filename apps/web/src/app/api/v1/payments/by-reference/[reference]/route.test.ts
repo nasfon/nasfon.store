@@ -35,10 +35,11 @@ describe('GET /api/v1/payments/by-reference/[reference]', () => {
   it('should return 200 with payment details', async () => {
     const mockResult = {
       payment_status: 'paid',
-      order: { id: 'order-1', order_number: 'NF-001' },
+      order: { id: 'order-1', order_number: 'NF-001', order_status: 'payment_confirmed', payment_status: 'paid' },
       payment: { id: 'pay-1', amount: 5000 },
+      amount_mismatch: false,
     };
-    mockGetPaymentByReference.mockResolvedValue(mockResult);
+    mockGetPaymentByReference.mockResolvedValue(mockResult as any);
 
     const req = new NextRequest(`http://localhost:3000/api/v1/payments/by-reference/${REFERENCE}`, {
       method: 'GET',
