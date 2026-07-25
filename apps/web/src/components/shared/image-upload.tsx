@@ -24,6 +24,7 @@ async function uploadToCloudinary(file: File): Promise<string> {
 
   const response = await fetch("/api/v1/admin/upload", {
     method: "POST",
+    headers: { "X-Requested-With": "XMLHttpRequest" },
     body: formData,
   });
 

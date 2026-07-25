@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { getCart, clearCart } from "./cart.service";
 import { generatePayment } from "./payment.service";
+import { sendOrderConfirmation } from "./email.service";
 
 export async function createCheckout(data: {
   customer_name: string;
@@ -21,7 +22,22 @@ export async function createCheckout(data: {
 
   await clearCart();
 
-  return result;
+  sendOrderConfirmation({
+    email: data.customer_email,
+    name: data.customer_name,
+    orderNumber: "",
+    items: result.items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price })),
+    total: result.payment.amount,
+    payment: {
+      bank_name: result.payment.bank_name,
+      account_number: result.payment.virtual_account_number,
+      account_name: result.payment.account_name,
+      amount: result.payment.amount,
+      expires_at: result.payment.expires_at || null,
+    },
+  });
+
+  return { payment: result.payment };
 }
 
 export async function buyNow(data: {
@@ -39,7 +55,7 @@ export async function buyNow(data: {
 
   const items = [{ product_id: data.product_id, quantity: data.quantity, added_at: new Date().toISOString() }];
 
-  return processPayment(supabase, items, {
+  const result = await processPayment(supabase, items, {
     customer_name: data.customer_name,
     customer_email: data.customer_email,
     customer_phone: data.customer_phone,
@@ -47,6 +63,23 @@ export async function buyNow(data: {
     notes: data.notes,
     user_id: data.user_id,
   });
+
+  sendOrderConfirmation({
+    email: data.customer_email,
+    name: data.customer_name,
+    orderNumber: "",
+    items: result.items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price })),
+    total: result.payment.amount,
+    payment: {
+      bank_name: result.payment.bank_name,
+      account_number: result.payment.virtual_account_number,
+      account_name: result.payment.account_name,
+      amount: result.payment.amount,
+      expires_at: result.payment.expires_at || null,
+    },
+  });
+
+  return { payment: result.payment };
 }
 
 async function processPayment(
@@ -111,5 +144,10 @@ async function processPayment(
     user_id: data.user_id,
   });
 
-  return { payment };
+  const items = cartItems.map((item) => {
+    const product = productMap.get(item.product_id)!;
+    return { name: product.name, quantity: item.quantity, price: product.selling_price };
+  });
+
+  return { payment, items };
 }

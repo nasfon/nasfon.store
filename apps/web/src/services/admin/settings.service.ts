@@ -31,6 +31,7 @@ export async function updateSettings(data: z.infer<typeof adminSettingsSchema>) 
   if (data.return_policy !== undefined) updateData.return_policy = data.return_policy;
   if (data.privacy_policy !== undefined) updateData.privacy_policy = data.privacy_policy;
   if (data.terms_conditions !== undefined) updateData.terms_conditions = data.terms_conditions;
+  if (data.admin_email !== undefined) updateData.admin_email = data.admin_email;
 
   const { data: settings, error } = await supabase
     .from("settings")

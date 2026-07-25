@@ -50,7 +50,11 @@ export function validateFileUpload(
   }
 
   const ext = filename.split(".").pop()?.toLowerCase();
-  const allowedExts = allowedTypes.map((t) => t.split("/")[1]);
+  const allowedExts = allowedTypes.flatMap((t) => {
+    const type = t.split("/")[1];
+    if (type === "jpeg") return ["jpeg", "jpg"];
+    return [type];
+  });
 
   if (ext && !allowedExts.includes(ext)) {
     return { valid: false, error: "Invalid file type. Allowed: " + allowedTypes.join(", ") };

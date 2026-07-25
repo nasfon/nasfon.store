@@ -139,6 +139,7 @@ export interface StoreSettings {
   return_policy: string | null;
   privacy_policy: string | null;
   terms_conditions: string | null;
+  admin_email: string | null;
   created_at: string;
   updated_at: string;
 }

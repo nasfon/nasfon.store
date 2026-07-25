@@ -1,61 +1,6 @@
 import { NextRequest } from "next/server";
-import { createAdminClient } from "@/utils/supabase/admin";
 import { rateLimitMiddleware, getRateLimitHeaders } from "@/lib/rate-limit";
-import { createOrderFromPayment } from "@/services/payment.service";
-
-async function processPayment(txRef: string, actualAmount?: number) {
-  const supabase = createAdminClient();
-
-  const { data: payment } = await supabase
-    .from("payments")
-    .select("id, payment_status, amount, webhook_payload")
-    .eq("flutterwave_reference", txRef)
-    .single();
-
-  if (!payment) return false;
-
-  if (payment.payment_status === "paid") return true;
-
-  if (payment.payment_status === "expired") return false;
-
-  const expiresAt = (payment.webhook_payload as Record<string, unknown>)?.expires_at as string | undefined;
-  if (expiresAt && new Date(expiresAt) < new Date()) {
-    await supabase
-      .from("payments")
-      .update({ payment_status: "expired" })
-      .eq("id", payment.id);
-    return false;
-  }
-
-  const expectedAmount = payment.amount;
-  if (actualAmount !== undefined && actualAmount !== expectedAmount) {
-    const payload = payment.webhook_payload as Record<string, unknown>;
-    await supabase
-      .from("payments")
-      .update({
-        payment_status: "paid",
-        paid_at: new Date().toISOString(),
-        webhook_payload: {
-          ...payload,
-          amount_mismatch: true,
-          expected_amount: expectedAmount,
-          actual_amount: actualAmount,
-        },
-      })
-      .eq("id", payment.id);
-    return true;
-  }
-
-  await createOrderFromPayment(txRef);
-  await supabase
-    .from("payments")
-    .update({
-      payment_status: "paid",
-      paid_at: new Date().toISOString(),
-    })
-    .eq("id", payment.id);
-  return true;
-}
+import { confirmPaymentFromFlutterwave } from "@/services/payment.service";
 
 function getEventType(body: Record<string, unknown>): string | null {
   if (typeof body.event === "string") return body.event;
@@ -115,7 +60,7 @@ export async function POST(request: NextRequest) {
       const txRef = getTxRef(data);
       const actualAmount = getAmount(data);
       if (txRef) {
-        await processPayment(txRef, actualAmount);
+        await confirmPaymentFromFlutterwave(txRef, actualAmount);
       }
     }
 

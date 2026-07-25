@@ -22,7 +22,7 @@ function getConfig(): FlutterwaveConfig | null {
 function getBaseUrl(env: "sandbox" | "live"): string {
   return env === "sandbox"
     ? "https://developersandbox-api.flutterwave.com"
-    : "https://api.flutterwave.com";
+    : "https://f4bexperience.flutterwave.com";
 }
 
 export async function getAccessToken(): Promise<string> {
@@ -59,12 +59,12 @@ export async function getAccessToken(): Promise<string> {
   return data.access_token;
 }
 
-export async function createCustomer(data: {
+export async function createCustomer(params: {
   email: string;
   firstName: string;
   lastName: string;
   phone?: string;
-}) {
+}): Promise<string> {
   const token = await getAccessToken();
   const config = getConfig()!;
   const baseUrl = getBaseUrl(config.environment);
@@ -77,23 +77,30 @@ export async function createCustomer(data: {
       "X-Trace-Id": crypto.randomUUID(),
     },
     body: JSON.stringify({
-      email: data.email,
-      name: { first: data.firstName, last: data.lastName },
-      phonenumber: data.phone || undefined,
+      email: params.email,
+      name: { first: params.firstName, last: params.lastName },
+      phonenumber: params.phone || "",
     }),
   });
 
   const result = await response.json();
-  if (!response.ok) throw new Error(result.message || "Failed to create customer");
-  return result.data as { id: string; email: string; name: { first: string; last: string } };
+  if (!response.ok) {
+    console.error("[Flutterwave v4] createCustomer error:", JSON.stringify(result));
+    throw new Error(result.message || "Failed to create customer");
+  }
+
+  console.log("[Flutterwave v4] createCustomer response:", JSON.stringify(result.data, null, 2));
+  const d = result.data || result;
+  return String(d.id || d.customer_id || "");
 }
 
-export async function findCustomerByEmail(email: string) {
+export async function findCustomerByEmail(email: string): Promise<string | null> {
   const token = await getAccessToken();
   const config = getConfig()!;
   const baseUrl = getBaseUrl(config.environment);
 
   const response = await fetch(`${baseUrl}/customers?email=${encodeURIComponent(email)}`, {
+    method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
@@ -102,24 +109,32 @@ export async function findCustomerByEmail(email: string) {
   });
 
   const result = await response.json();
-  if (!response.ok) return null;
-  const customers = result.data as { id: string; email: string }[];
-  return customers?.length > 0 ? customers[0] : null;
+  if (!response.ok) {
+    console.warn("[Flutterwave v4] findCustomerByEmail error:", JSON.stringify(result));
+    return null;
+  }
+
+  const data = result.data || result;
+  const customers = Array.isArray(data) ? data : data.customers || [data];
+  if (customers.length > 0) {
+    return String(customers[0].id || customers[0].customer_id || "");
+  }
+  return null;
 }
 
-export async function findOrCreateCustomer(data: {
+export async function findOrCreateCustomer(params: {
   email: string;
   firstName: string;
   lastName: string;
   phone?: string;
-}) {
-  const existing = await findCustomerByEmail(data.email);
+}): Promise<string> {
+  const existing = await findCustomerByEmail(params.email);
   if (existing) return existing;
-  return createCustomer(data);
+  return createCustomer(params);
 }
 
 export async function createVirtualAccount(params: {
-  customerId: string;
+  customer_id: string;
   amount: number;
   reference: string;
   currency?: string;
@@ -139,32 +154,33 @@ export async function createVirtualAccount(params: {
       "X-Idempotency-Key": params.reference,
     },
     body: JSON.stringify({
+      account_type: "dynamic",
       reference: params.reference,
-      customer_id: params.customerId,
+      customer_id: params.customer_id,
       amount: params.amount,
       currency: params.currency || "NGN",
-      account_type: "dynamic",
-      expiry: params.expiry || 3600,
+      expiry: params.expiry || 60,
       narration: params.narration || undefined,
     }),
   });
 
   const result = await response.json();
   if (!response.ok) {
+    console.error("[Flutterwave v4] createVirtualAccount error:", JSON.stringify(result));
     throw new Error(result.message || "Failed to create virtual account");
   }
 
   console.log("[Flutterwave v4] createVirtualAccount response:", JSON.stringify(result.data, null, 2));
 
-  const d = result.data as Record<string, unknown>;
+  const d = (result.data || result) as Record<string, unknown>;
   return {
-    id: String(d.id || ""),
+    id: String(d.id || d.flw_ref || ""),
     account_number: String(d.account_number || ""),
-    account_bank_name: String(d.account_bank_name || d.bank_name || ""),
-    account_name: String(d.account_name || d.beneficiary_name || d.customer_name || ""),
-    account_expiration_datetime: String(d.account_expiration_datetime || d.expiry_date || ""),
-    reference: String(d.reference || ""),
-    customer_id: String(d.customer_id || ""),
+    account_bank_name: String(d.bank_name || d.account_bank_name || ""),
+    account_name: String(d.account_name || d.beneficiary || ""),
+    account_expiration_datetime: String(d.expiry_date || d.account_expiration_datetime || ""),
+    reference: String(d.reference || params.reference),
+    customer_id: String(d.customer_id || params.customer_id),
     amount: Number(d.amount) || 0,
     status: String(d.status || ""),
     note: String(d.note || ""),
@@ -186,6 +202,14 @@ export async function getCharge(reference: string) {
 
   const result = await response.json();
   if (!response.ok) return null;
-  const charges = result.data as { id: string; status: string; amount: number; paid_at?: string }[];
-  return charges?.length > 0 ? charges[0] : null;
+
+  const data = (result.data || result) as Record<string, unknown>;
+  const charges = Array.isArray(data) ? data : [data];
+  charges[0] = charges[0] || {};
+  return {
+    id: String(charges[0].id || ""),
+    status: String(charges[0].status || ""),
+    amount: Number(charges[0].amount) || 0,
+    paid_at: String(charges[0].paid_at || ""),
+  };
 }

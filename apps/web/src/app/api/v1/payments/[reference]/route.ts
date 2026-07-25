@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { successResponse, errorResponse } from "@/lib/api";
 import { getCharge } from "@/services/flutterwave";
-import { expirePayment } from "@/services/payment.service";
+import { confirmPaymentFromFlutterwave, expirePayment } from "@/services/payment.service";
 
 export async function GET(
   _request: NextRequest,
@@ -17,6 +17,10 @@ export async function GET(
     const charge = await getCharge(reference);
     if (!charge) {
       return errorResponse("Payment not found", [], 404);
+    }
+
+    if (charge.status === "successful") {
+      await confirmPaymentFromFlutterwave(reference, charge.amount);
     }
 
     return successResponse({

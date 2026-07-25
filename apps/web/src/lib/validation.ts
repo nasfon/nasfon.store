@@ -121,11 +121,16 @@ export const adminCustomerUpdateSchema = z.object({
   is_active: z.boolean().optional(),
 });
 
+function emptyToNull() {
+  return (v: unknown) => (v === "" || v === null || v === undefined ? null : v);
+}
+
 export const adminSettingsSchema = z.object({
-  support_phone: z.string().optional().nullable(),
-  support_email: z.string().email().optional().nullable(),
-  store_address: z.string().optional().nullable(),
-  return_policy: z.string().optional().nullable(),
-  privacy_policy: z.string().optional().nullable(),
-  terms_conditions: z.string().optional().nullable(),
+  support_phone: z.preprocess(emptyToNull(), z.string().nullable().optional()),
+  support_email: z.preprocess(emptyToNull(), z.string().email().nullable().optional()),
+  store_address: z.preprocess(emptyToNull(), z.string().nullable().optional()),
+  return_policy: z.preprocess(emptyToNull(), z.string().nullable().optional()),
+  privacy_policy: z.preprocess(emptyToNull(), z.string().nullable().optional()),
+  terms_conditions: z.preprocess(emptyToNull(), z.string().nullable().optional()),
+  admin_email: z.preprocess(emptyToNull(), z.string().email().nullable().optional()),
 });

@@ -2,10 +2,11 @@ import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import {
-  findOrCreateCustomer,
   createVirtualAccount,
+  findOrCreateCustomer,
   getCharge,
 } from "@/services/flutterwave";
+import { sendPaymentConfirmation, sendAdminNewOrderNotification } from "./email.service";
 
 interface CheckoutData {
   items: { product_id: string; quantity: number }[];
@@ -20,7 +21,7 @@ interface CheckoutData {
   user_id?: string | null;
 }
 
-const PAYMENT_EXPIRY_MS = parseInt(process.env.PAYMENT_EXPIRY_MINUTES || "1") * 60 * 1000;
+const PAYMENT_EXPIRY_MS = parseInt(process.env.PAYMENT_EXPIRY_MINUTES || "30") * 60 * 1000;
 
 export async function generatePayment(checkoutData: CheckoutData) {
   const adminClient = createAdminClient();
@@ -37,7 +38,7 @@ export async function generatePayment(checkoutData: CheckoutData) {
       const firstName = nameParts[0] || checkoutData.customer_email;
       const lastName = nameParts.slice(1).join(" ") || firstName;
 
-      const customer = await findOrCreateCustomer({
+      const customerId = await findOrCreateCustomer({
         email: checkoutData.customer_email,
         firstName,
         lastName,
@@ -45,7 +46,7 @@ export async function generatePayment(checkoutData: CheckoutData) {
       });
 
       const va = await createVirtualAccount({
-        customerId: customer.id,
+        customer_id: customerId,
         amount: checkoutData.total_amount,
         reference: txRef,
         narration: checkoutData.customer_name,
@@ -63,7 +64,6 @@ export async function generatePayment(checkoutData: CheckoutData) {
           webhook_payload: {
             checkout_data: checkoutData,
             va_id: va.id,
-            customer_id: customer.id,
             expiry_date: va.account_expiration_datetime,
             expires_at: expiresAt,
           },
@@ -82,8 +82,8 @@ export async function generatePayment(checkoutData: CheckoutData) {
         reference: txRef,
         expires_at: expiresAt,
       };
-    } catch {
-      // Fall through to manual payment below
+    } catch (err) {
+      console.error("[Flutterwave v4] Virtual account generation failed:", err);
     }
   }
 
@@ -229,7 +229,82 @@ export async function createOrderFromPayment(flutterwaveReference: string) {
       .eq("id", item.product_id);
   }
 
+  sendPaymentConfirmation({
+    email: checkoutData.customer_email,
+    name: checkoutData.customer_name,
+    orderNumber: order.order_number,
+    items: checkoutData.items.map((item) => {
+      const product = productMap.get(item.product_id)!;
+      return { name: product.name, quantity: item.quantity, price: product.selling_price };
+    }),
+    total: checkoutData.total_amount,
+  });
+
+  sendAdminNewOrderNotification({
+    orderNumber: order.order_number,
+    customerName: checkoutData.customer_name,
+    customerEmail: checkoutData.customer_email,
+    customerPhone: checkoutData.customer_phone,
+    total: checkoutData.total_amount,
+    items: checkoutData.items.map((item) => {
+      const product = productMap.get(item.product_id)!;
+      return { name: product.name, quantity: item.quantity, price: product.selling_price };
+    }),
+  });
+
   return order;
+}
+
+export async function confirmPaymentFromFlutterwave(txRef: string, actualAmount?: number) {
+  const supabase = createAdminClient();
+
+  const { data: payment } = await supabase
+    .from("payments")
+    .select("id, payment_status, amount, webhook_payload")
+    .eq("flutterwave_reference", txRef)
+    .single();
+
+  if (!payment) return false;
+  if (payment.payment_status === "paid") return true;
+  if (payment.payment_status === "expired") return false;
+
+  const expiresAt = (payment.webhook_payload as Record<string, unknown>)?.expires_at as string | undefined;
+  if (expiresAt && new Date(expiresAt) < new Date()) {
+    await supabase
+      .from("payments")
+      .update({ payment_status: "expired" })
+      .eq("id", payment.id);
+    return false;
+  }
+
+  const expectedAmount = payment.amount;
+  if (actualAmount !== undefined && actualAmount !== expectedAmount) {
+    const payload = payment.webhook_payload as Record<string, unknown>;
+    await supabase
+      .from("payments")
+      .update({
+        payment_status: "paid",
+        paid_at: new Date().toISOString(),
+        webhook_payload: {
+          ...payload,
+          amount_mismatch: true,
+          expected_amount: expectedAmount,
+          actual_amount: actualAmount,
+        },
+      })
+      .eq("id", payment.id);
+    return true;
+  }
+
+  await createOrderFromPayment(txRef);
+  await supabase
+    .from("payments")
+    .update({
+      payment_status: "paid",
+      paid_at: new Date().toISOString(),
+    })
+    .eq("id", payment.id);
+  return true;
 }
 
 export async function getPaymentByReference(reference: string) {
@@ -251,6 +326,16 @@ export async function getPaymentByReference(reference: string) {
         .update({ payment_status: "expired" })
         .eq("id", payment.id);
       payment.payment_status = "expired";
+    } else if (process.env.FLUTTERWAVE_CLIENT_ID && process.env.FLUTTERWAVE_CLIENT_SECRET) {
+      try {
+        const charge = await getCharge(reference);
+        if (charge && charge.status === "successful") {
+          await confirmPaymentFromFlutterwave(reference, charge.amount);
+          payment.payment_status = "paid";
+        }
+      } catch {
+        // ignore verification errors
+      }
     }
   }
 

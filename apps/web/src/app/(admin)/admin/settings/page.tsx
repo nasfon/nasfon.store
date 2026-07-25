@@ -14,6 +14,7 @@ export default function AdminSettingsPage() {
   const [form, setForm] = useState({
     support_phone: "", support_email: "", store_address: "",
     return_policy: "", privacy_policy: "", terms_conditions: "",
+    admin_email: "",
   });
 
   useEffect(() => {
@@ -25,6 +26,7 @@ export default function AdminSettingsPage() {
         return_policy: settings.return_policy || "",
         privacy_policy: settings.privacy_policy || "",
         terms_conditions: settings.terms_conditions || "",
+        admin_email: settings.admin_email || "",
       });
     }
   }, [settings]);
@@ -61,6 +63,9 @@ export default function AdminSettingsPage() {
           </div>
           <div className="mt-4">
             <Input id="store_address" label="Store Address" value={form.store_address} onChange={(e) => setForm({ ...form, store_address: e.target.value })} />
+          </div>
+          <div className="mt-4">
+            <Input id="admin_email" label="Admin Email (for order notifications)" type="email" value={form.admin_email} onChange={(e) => setForm({ ...form, admin_email: e.target.value })} />
           </div>
         </div>
 
