@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { successResponse, errorResponse, withRateLimit } from "@/lib/api";
 import { registerSchema } from "@/lib/validation";
+import { sanitizeName } from "@/lib/sanitize";
 import * as authService from "@/services/auth.service";
 
 export async function POST(request: NextRequest) {
@@ -14,7 +15,12 @@ export async function POST(request: NextRequest) {
       return errorResponse("Validation failed", parsed.error.flatten().fieldErrors as unknown as string[]);
     }
 
-    const result = await authService.register(parsed.data);
+    const sanitized = {
+      ...parsed.data,
+      full_name: sanitizeName(parsed.data.full_name),
+    };
+
+    const result = await authService.register(sanitized);
     return successResponse(result, "Account created successfully", 201);
   } catch (err) {
     return errorResponse(err instanceof Error ? err.message : "Registration failed", [], 400);

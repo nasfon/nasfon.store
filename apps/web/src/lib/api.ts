@@ -4,12 +4,10 @@ import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { cookies } from "next/headers";
 import { rateLimitMiddleware, getRateLimitHeaders } from "@/lib/rate-limit";
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+import { getSupabaseUrl, getSupabaseAnonKey } from "@/lib/env";
 
 function createRouteHandlerClient(request: NextRequest) {
-  return createServerClient(supabaseUrl!, supabaseKey!, {
+  return createServerClient(getSupabaseUrl(), getSupabaseAnonKey(), {
     cookies: {
       getAll() { return request.cookies.getAll() },
       setAll(cookiesToSet) {

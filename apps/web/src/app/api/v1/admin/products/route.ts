@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { successResponse, errorResponse, requireAdmin } from "@/lib/api";
 import { adminProductSchema } from "@/lib/validation";
+import { sanitizeName, sanitizePlainText } from "@/lib/sanitize";
 import * as productsService from "@/services/admin/products.service";
 
 export async function GET() {
@@ -26,7 +27,13 @@ export async function POST(request: NextRequest) {
       return errorResponse("Validation failed", parsed.error.flatten().fieldErrors as unknown as string[]);
     }
 
-    const product = await productsService.createProduct(parsed.data);
+    const sanitized = {
+      ...parsed.data,
+      name: sanitizeName(parsed.data.name),
+      description: parsed.data.description ? sanitizePlainText(parsed.data.description, 2000) : parsed.data.description,
+    };
+
+    const product = await productsService.createProduct(sanitized);
     return successResponse(product, "Product created", 201);
   } catch (err) {
     return errorResponse(err instanceof Error ? err.message : "Failed to create product", [], 400);

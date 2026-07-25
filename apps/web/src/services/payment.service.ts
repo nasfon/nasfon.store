@@ -280,19 +280,30 @@ export async function confirmPaymentFromFlutterwave(txRef: string, actualAmount?
   const expectedAmount = payment.amount;
   if (actualAmount !== undefined && actualAmount !== expectedAmount) {
     const payload = payment.webhook_payload as Record<string, unknown>;
+    const checkoutData = { ...(payload.checkout_data as CheckoutData | undefined) } as CheckoutData | undefined;
+    const mismatchNote = `[AMOUNT MISMATCH] Expected: ${expectedAmount}, Received: ${actualAmount}. Order requires admin review.`;
+    if (checkoutData) {
+      checkoutData.notes = [checkoutData.notes || "", mismatchNote].filter(Boolean).join("\n");
+    }
+    const updatedPayload = {
+      ...payload,
+      amount_mismatch: true,
+      expected_amount: expectedAmount,
+      actual_amount: actualAmount,
+      ...(checkoutData ? { checkout_data: checkoutData } : {}),
+    };
     await supabase
       .from("payments")
       .update({
         payment_status: "paid",
         paid_at: new Date().toISOString(),
-        webhook_payload: {
-          ...payload,
-          amount_mismatch: true,
-          expected_amount: expectedAmount,
-          actual_amount: actualAmount,
-        },
+        webhook_payload: updatedPayload,
       })
       .eq("id", payment.id);
+    if (checkoutData) {
+      const order = await createOrderFromPayment(txRef);
+      return !!order;
+    }
     return true;
   }
 

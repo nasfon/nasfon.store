@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { successResponse, errorResponse, getAuthUser, withRateLimit } from "@/lib/api";
 import { checkoutSchema } from "@/lib/validation";
+import { sanitizeName, sanitizePlainText } from "@/lib/sanitize";
 import * as checkoutService from "@/services/checkout.service";
 
 export async function POST(request: NextRequest) {
@@ -16,8 +17,14 @@ export async function POST(request: NextRequest) {
 
     const user = await getAuthUser();
 
-    const result = await checkoutService.createCheckout({
+    const sanitized = {
       ...parsed.data,
+      customer_name: sanitizeName(parsed.data.customer_name),
+      notes: parsed.data.notes ? sanitizePlainText(parsed.data.notes, 500) : undefined,
+    };
+
+    const result = await checkoutService.createCheckout({
+      ...sanitized,
       user_id: user?.id || null,
     });
 

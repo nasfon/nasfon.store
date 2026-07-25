@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { successResponse, errorResponse, requireAdmin } from "@/lib/api";
+import { uuidSchema, productImageSchema } from "@/lib/validation";
 import * as productsService from "@/services/admin/products.service";
 
 export async function GET(
@@ -11,6 +12,9 @@ export async function GET(
     if (error) return error;
 
     const { id } = await params;
+    const parsed = uuidSchema.safeParse(id);
+    if (!parsed.success) return errorResponse("Invalid product ID");
+
     const images = await productsService.getProductImages(id);
     return successResponse(images);
   } catch (err) {
@@ -27,15 +31,18 @@ export async function POST(
     if (error) return error;
 
     const { id } = await params;
-    const body = await request.json();
+    const parsedId = uuidSchema.safeParse(id);
+    if (!parsedId.success) return errorResponse("Invalid product ID");
 
-    if (!body.image_url || typeof body.image_url !== "string") {
-      return errorResponse("image_url is required");
+    const body = await request.json();
+    const parsed = productImageSchema.safeParse(body);
+    if (!parsed.success) {
+      return errorResponse("Validation failed", parsed.error.flatten().fieldErrors as unknown as string[]);
     }
 
     const image = await productsService.addProductImage(id, {
-      image_url: body.image_url,
-      display_order: body.display_order ?? 0,
+      image_url: parsed.data.image_url,
+      display_order: parsed.data.display_order ?? 0,
     });
 
     return successResponse(image, "Image added", 201);

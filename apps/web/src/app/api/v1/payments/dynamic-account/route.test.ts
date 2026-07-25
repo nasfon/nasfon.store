@@ -89,7 +89,7 @@ describe('POST /api/v1/payments/dynamic-account', () => {
     const data = await res.json();
 
     expect(res.status).toBe(400);
-    expect(data.message).toBe('Amount and email are required');
+    expect(data.message).toBe('Validation failed');
   });
 
   it('should return 200 on successful account generation', async () => {

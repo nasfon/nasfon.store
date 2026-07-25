@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { successResponse, errorResponse } from "@/lib/api";
+import { slugSchema } from "@/lib/validation";
 import * as reviewService from "@/services/review.service";
 import * as productService from "@/services/product.service";
 
@@ -9,6 +10,10 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
+    const parsed = slugSchema.safeParse(slug);
+    if (!parsed.success) {
+      return errorResponse("Invalid product slug");
+    }
     const product = await productService.getProductBySlug(slug);
     const reviews = await reviewService.getProductReviews(product.id);
     return successResponse(reviews);
