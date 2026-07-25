@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     return successResponse({
       bank_name: va.account_bank_name,
       account_number: va.account_number,
-      account_name: va.account_name,
+      account_name: fullname || email,
       amount,
       reference: txRef,
       expires_at: va.account_expiration_datetime,
