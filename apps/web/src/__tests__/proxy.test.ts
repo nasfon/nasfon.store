@@ -10,7 +10,7 @@ jest.mock('@/utils/supabase/middleware', () => ({
   })),
 }));
 
-import { proxy } from '@/proxy';
+import { middleware } from '@/middleware';
 
 const ORIGINAL_APP_URL = process.env.APP_URL;
 
@@ -30,7 +30,7 @@ describe('proxy middleware', () => {
         headers: { origin: 'http://localhost:3000' },
       });
 
-      const res = await proxy(req);
+      const res = await middleware(req);
 
       expect(res.status).toBe(204);
       expect(res.headers.get('Access-Control-Allow-Origin')).toBe('http://localhost:3000');
@@ -44,7 +44,7 @@ describe('proxy middleware', () => {
         headers: { origin: 'https://evil.com' },
       });
 
-      const res = await proxy(req);
+      const res = await middleware(req);
 
       expect(res.status).toBe(204);
       expect(res.headers.get('Access-Control-Allow-Origin')).toBeNull();
@@ -58,7 +58,7 @@ describe('proxy middleware', () => {
         body: JSON.stringify({}),
       });
 
-      const res = await proxy(req);
+      const res = await middleware(req);
       const data = await res.json();
 
       expect(res.status).toBe(403);
@@ -75,7 +75,7 @@ describe('proxy middleware', () => {
         body: JSON.stringify({}),
       });
 
-      const res = await proxy(req);
+      const res = await middleware(req);
       const data = await res.json();
 
       expect(res.status).toBe(403);
@@ -87,7 +87,7 @@ describe('proxy middleware', () => {
         method: 'GET',
       });
 
-      const res = await proxy(req);
+      const res = await middleware(req);
       expect(res.status).not.toBe(403);
     });
 
@@ -97,7 +97,7 @@ describe('proxy middleware', () => {
         body: JSON.stringify({}),
       });
 
-      const res = await proxy(req);
+      const res = await middleware(req);
       expect(res.status).not.toBe(403);
     });
   });
