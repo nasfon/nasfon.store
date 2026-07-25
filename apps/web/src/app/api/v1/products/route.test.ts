@@ -50,7 +50,7 @@ describe('GET /api/v1/products', () => {
       data: [{ id: 'p1', name: 'Product 1' }],
       metadata: { total: 1, page: 1, limit: 20 },
     };
-    mockGetProducts.mockResolvedValue(mockResult);
+    mockGetProducts.mockResolvedValue(mockResult as any);
 
     const req = new NextRequest('http://localhost:3000/api/v1/products?page=1&limit=20', {
       method: 'GET',

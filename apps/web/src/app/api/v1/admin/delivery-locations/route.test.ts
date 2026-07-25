@@ -31,7 +31,7 @@ describe('GET /api/v1/admin/delivery-locations', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockRequireAdmin.mockResolvedValue({ user: { id: 'admin-1', role: 'admin' }, error: null });
+    mockRequireAdmin.mockResolvedValue({ user: { id: 'admin-1', role: 'admin' } as any, error: null });
   });
 
   it('should return 200 with locations', async () => {

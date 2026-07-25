@@ -88,7 +88,7 @@ describe('POST /api/v1/auth/login', () => {
       status: 429,
       headers: { 'Content-Type': 'application/json' },
     });
-    mockWithRateLimit.mockResolvedValue(rateLimitResponse);
+    mockWithRateLimit.mockResolvedValue(rateLimitResponse as any);
 
     const req = new NextRequest('http://localhost:3000/api/v1/auth/login', {
       method: 'POST',

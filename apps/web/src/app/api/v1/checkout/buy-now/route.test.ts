@@ -76,7 +76,11 @@ describe('POST /api/v1/checkout/buy-now', () => {
         flutterwave_reference: 'NF-ABC123',
         bank_name: 'GTBank',
         virtual_account_number: '1234567890',
+        account_name: 'John Doe',
         amount: 5500,
+        payment_status: 'pending',
+        reference: 'NF-ABC123',
+        expires_at: new Date(Date.now() + 3600000).toISOString(),
       },
     };
     mockBuyNow.mockResolvedValue(mockResult);
@@ -97,7 +101,7 @@ describe('POST /api/v1/checkout/buy-now', () => {
 
   it('should pass user_id as null if not authenticated', async () => {
     mockGetAuthUser.mockResolvedValue(null);
-    mockBuyNow.mockResolvedValue({ payment: {} });
+    mockBuyNow.mockResolvedValue({ payment: {} as any });
 
     const req = new NextRequest('http://localhost:3000/api/v1/checkout/buy-now', {
       method: 'POST',
