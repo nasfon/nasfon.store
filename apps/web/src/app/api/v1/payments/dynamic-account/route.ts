@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { successResponse, errorResponse, withRateLimit } from "@/lib/api";
+import { dynamicAccountSchema } from "@/lib/validation";
 import { createVirtualAccount, findOrCreateCustomer } from "@/services/flutterwave";
 
 export async function POST(request: NextRequest) {
@@ -15,11 +16,12 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { amount, email, fullname, phonenumber } = body;
-
-    if (!amount || !email) {
-      return errorResponse("Amount and email are required");
+    const parsed = dynamicAccountSchema.safeParse(body);
+    if (!parsed.success) {
+      return errorResponse("Validation failed", parsed.error.flatten().fieldErrors as unknown as string[]);
     }
+
+    const { amount, email, fullname, phonenumber } = parsed.data;
 
     const nameParts = (fullname || email).split(" ");
     const firstname = nameParts[0] || email;

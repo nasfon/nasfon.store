@@ -24,14 +24,18 @@ Open the **SQL Editor** in Supabase Dashboard and run the migration files in ord
 
 ## 4. Create Admin User
 
+Run the automated seed script:
+```bash
+cd apps/web && npm run seed:admin
+```
+
+This creates the auth user and inserts the admin role record.
+
+Or manually:
 1. Go to **Authentication → Users** → **Add User**
 2. Create an admin account (e.g., `admin@nasfonstore.com`)
-3. Run the following in SQL Editor (replace the UUID):
-   ```sql
-   insert into users (id, full_name, email, role)
-   values ('<USER_ID_FROM_AUTH>', 'Admin', 'admin@nasfonstore.com', 'admin');
-   ```
+3. Copy the user's UUID and run `supabase/seed-admin.sql` in SQL Editor
 
 ## 5. Seed Data (Optional)
 
-Run `supabase/seed.sql` for sample categories and products.
+Run `supabase/seed.sql` in SQL Editor for sample categories, products, and delivery locations.

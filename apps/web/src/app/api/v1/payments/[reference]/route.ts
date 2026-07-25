@@ -1,7 +1,10 @@
 import { NextRequest } from "next/server";
 import { successResponse, errorResponse } from "@/lib/api";
+import { z } from "zod";
 import { getCharge } from "@/services/flutterwave";
 import { confirmPaymentFromFlutterwave, expirePayment } from "@/services/payment.service";
+
+const referenceSchema = z.string().min(1).max(100);
 
 export async function GET(
   _request: NextRequest,
@@ -9,6 +12,8 @@ export async function GET(
 ) {
   try {
     const { reference } = await params;
+    const parsed = referenceSchema.safeParse(reference);
+    if (!parsed.success) return errorResponse("Invalid reference");
 
     if (!process.env.FLUTTERWAVE_CLIENT_ID || !process.env.FLUTTERWAVE_CLIENT_SECRET) {
       return errorResponse("Payment not configured", [], 503);
@@ -39,6 +44,8 @@ export async function PATCH(
 ) {
   try {
     const { reference } = await params;
+    const parsed = referenceSchema.safeParse(reference);
+    if (!parsed.success) return errorResponse("Invalid reference");
     const result = await expirePayment(reference);
     return successResponse(result);
   } catch (err) {

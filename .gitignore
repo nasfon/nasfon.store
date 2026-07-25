@@ -2,3 +2,5 @@ node_modules/
 .next/
 .env
 .env.local
+apps/web/playwright-report/
+apps/web/test-results/

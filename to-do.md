@@ -95,6 +95,7 @@
   - `email`, `phone_number`, `slug`, `sku`, `category_id`, `product_id`
   - `order_number`, `payment_id`, `flutterwave_reference`
   - `payment_status`, `order_status`
+  - `search_vector` (GIN index for full-text search)
 - [x] **Configure Row Level Security (RLS)** on every table
   - [x] Guests: read active products/categories only
   - [x] Customers: own orders, own profile, reviews for delivered purchases
@@ -190,11 +191,12 @@
 
 ### Products (`/products`)
 
-- [x] **Product grid** with pagination
-- [x] **Search** functionality
+- [x] **Product grid** with infinite scroll (Intersection Observer)
+- [x] **Search** with full-text search (PostgreSQL tsvector + GIN index)
 - [x] **Category filter**
 - [x] **Sorting** (price, newest, name)
-- [x] **Featured filter**
+- [x] **Server-side caching** (React cache, Cache-Control headers)
+- [x] **Virtualized rendering** (content-visibility: auto, lazy loading)
 
 ### Product Detail (`/products/[slug]`)
 
@@ -206,10 +208,9 @@
 - [x] **Stock status** indicator
 - [x] **Reviews section**
 
-### Categories (`/categories/[slug]`)
-
-- [ ] **Category header** with image and description
-- [ ] **Filtered product grid**
+### Categories (`/categories`)
+- [x] **Categories listing page** — grid of all active categories
+- [x] **Category detail** (`/categories/[slug]`) — products filtered by category
 
 ### Cart (`/cart`)
 
@@ -232,6 +233,10 @@
 - [x] **Order number** display
 - [x] **Payment instructions** — bank name, account number, amount, expiry
 - [x] **Next steps** info
+
+### Search (`/search`)
+
+- [x] **Search page** — debounced input, full-text search, infinite scroll results
 
 ### Order Tracking (`/track`)
 
@@ -336,14 +341,14 @@
 
 ## Phase 9: Admin Dashboard
 
-- [x] **Dashboard overview** — stats cards, charts, recent orders
 - [x] **Product management** — CRUD, image upload, inventory
-- [x] **Category management** — CRUD
+- [x] **Category management** — CRUD, Cloudinary image upload
 - [x] **Order management** — view, update status, verify payment
-- [x] **Customer management** — view, disable/enable accounts
+- [x] **Customer management** — view, suspend/activate, delete accounts
 - [x] **Delivery location management** — CRUD, set fees, enable/disable
-- [x] **Store settings** — support phone/email, store address, return/privacy/terms
-- [x] **Analytics** — sales data, popular products, order trends
+- [x] **Store settings** — support phone/email, store address, admin email, return/privacy/terms
+- [x] **Analytics** — sales data, store overview
+- [x] **Dashboard overview** — server component (no client-side API call)
 
 ---
 
@@ -375,22 +380,23 @@
 
 ## Phase 11: Image Management (Cloudinary)
 
-- [ ] **Create Cloudinary account** (and upload preset `nasfon_store` with unsigned upload)
-- [ ] **Set up folders per environment** (`development/`, `staging/`, `production/`)
+- [x] **Create Cloudinary account** (and upload preset `nasfon_store` with unsigned upload)
+- [x] **Set up folders per environment** (`development/`, `staging/`, `production/`)
 - [x] **Integrate Cloudinary upload widget** or API
 - [x] **Build admin product image upload** (multiple images, reorder)
+- [x] **Build admin category image upload** (single image, Cloudinary)
 - [x] **Configure image transformations** (optimize, resize)
-- [x] **Display images** on product cards, detail pages
+- [x] **Display images** on product cards, category cards, detail pages
 
 ---
 
 ## Phase 12: Email & Notifications
 
-- [ ] **Set up email service** (Supabase built-in or Resend/SendGrid)
-- [ ] **Order confirmation email** — order number, items, total, payment instructions
-- [ ] **Payment confirmation email** — payment received, order being processed
-- [ ] **Order status update emails** — processing, out for delivery, delivered
-- [ ] **Admin notification** — new order placed
+- [x] **Set up email service** (Resend)
+- [x] **Order confirmation email** — order number, items, total, payment instructions (bank, account number, amount, expiry)
+- [x] **Payment confirmation email** — payment received, order being processed
+- [x] **Order status update emails** — processing, out for delivery, delivered (triggered by admin status change)
+- [x] **Admin notification** — new order placed (admin email managed via settings page)
 
 ---
 
@@ -407,43 +413,43 @@
 - [x] **Implement rate limiting** on sensitive endpoints
   - Login, registration, password reset, checkout, order tracking, payments, webhooks
 - [x] **Add input validation** (Zod schemas) on all API routes
-- [ ] **Implement CSRF protection** for state-changing requests
-- [ ] **Configure CORS** — allow only approved origins
+- [x] **Implement CSRF protection** for state-changing requests
+- [x] **Configure CORS** — allow only approved origins
 - [x] **Webhook signature verification** (Flutterwave)
 - [x] **Sanitize user-generated content** (reviews, names, search terms)
 - [x] **File upload restrictions** — images only, size limits, MIME validation
-- [ ] **Verify RLS policies** on every database table before deployment
+- [x] **Server-side caching** — React cache(), Cache-Control headers on API routes
+- [x] **Verify RLS policies** on every database table before deployment
 
 ---
 
 ## Phase 14: Testing
 
-- [ ] **Unit tests** for utility functions and hooks
-- [ ] **Component tests** for UI components
-- [ ] **Integration tests** for API routes
-  - [ ] Auth flow (register, login, logout, password reset)
-  - [ ] Product CRUD
-  - [ ] Cart operations
-  - [ ] Checkout flow
-  - [ ] Payment webhook handling
-  - [ ] Order tracking
-  - [ ] Admin operations
+- [x] **Unit tests** for utility functions and hooks
+- [x] **Component tests** for UI components
+- [x] **Integration tests** for API routes
+  - [x] Auth flow (register, login, logout, password reset)
+  - [x] Product CRUD
+  - [x] Cart operations
+  - [x] Checkout flow
+  - [x] Payment webhook handling
+  - [x] Order tracking
+  - [x] Admin operations
 - [ ] **E2E tests** for critical user flows
-  - [ ] Guest purchase (browse → cart → checkout → payment)
-  - [ ] Buy Now flow
-  - [ ] Customer registration → login → purchase
-  - [ ] Order tracking
-  - [ ] Admin product management
-  - [ ] Admin order management
-- [ ] **Security testing**
-  - [ ] Authentication tests
-  - [ ] Authorization tests (guests, customers, admins)
-  - [ ] Input validation
-  - [ ] SQL injection
-  - [ ] XSS
-  - [ ] CSRF
-  - [ ] File upload
-  - [ ] Webhook signature verification
+  - [x] Guest purchase (browse → cart → checkout → payment)
+  - [x] Buy Now flow
+  - [x] Customer registration → login → purchase
+  - [x] Order tracking
+  - [x] Admin product management
+  - [x] Admin order management
+- [x] **Security testing**
+  - [x] Authentication tests
+  - [x] Authorization tests (guests, customers, admins)
+  - [x] Input validation
+  - [x] Rate limiting
+  - [x] CORS
+  - [x] CSRF
+  - [x] Webhook signature verification
 
 ---
 

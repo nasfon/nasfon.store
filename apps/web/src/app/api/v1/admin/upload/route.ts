@@ -1,6 +1,19 @@
 import { NextRequest } from "next/server";
 import { successResponse, errorResponse, requireAdmin } from "@/lib/api";
 
+const IMAGE_MAGIC_BYTES: { signature: number[]; mime: string }[] = [
+  { signature: [0xFF, 0xD8, 0xFF], mime: "image/jpeg" },
+  { signature: [0x89, 0x50, 0x4E, 0x47], mime: "image/png" },
+  { signature: [0x52, 0x49, 0x46, 0x46], mime: "image/webp" },
+  { signature: [0x47, 0x49, 0x46, 0x38], mime: "image/gif" },
+];
+
+function validateImageMagicBytes(buffer: Buffer): boolean {
+  return IMAGE_MAGIC_BYTES.some(({ signature }) =>
+    signature.every((byte, i) => buffer[i] === byte)
+  );
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { error } = await requireAdmin(request);
@@ -30,6 +43,10 @@ export async function POST(request: NextRequest) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
+    if (!validateImageMagicBytes(buffer)) {
+      return errorResponse("File content does not match image format");
+    }
+
     const base64 = buffer.toString("base64");
 
     const timestamp = Math.floor(Date.now() / 1000);

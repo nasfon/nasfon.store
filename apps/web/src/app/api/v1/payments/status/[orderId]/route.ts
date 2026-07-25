@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { successResponse, errorResponse } from "@/lib/api";
+import { uuidSchema } from "@/lib/validation";
 import { getPaymentStatus } from "@/services/payment.service";
 
 export async function GET(
@@ -8,6 +9,8 @@ export async function GET(
 ) {
   try {
     const { orderId } = await params;
+    const parsed = uuidSchema.safeParse(orderId);
+    if (!parsed.success) return errorResponse("Invalid order ID");
     const result = await getPaymentStatus(orderId);
     return successResponse(result);
   } catch (err) {
