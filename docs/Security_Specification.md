@@ -113,6 +113,11 @@ Access is governed by **Role-Based Access Control (RBAC)** — each role carries
 
 * Own resources only
 
+## Seller Role
+
+* Own products only
+* Read-only access to orders containing their products
+
 ## Admin Role
 
 * Full administrative resources
@@ -142,6 +147,17 @@ Requires authentication
 * Orders
 * Profile
 * Reviews
+* Become a Seller
+
+---
+
+## Seller
+
+Requires authentication and verified seller role
+
+* Dashboard
+* Products
+* Orders (read-only)
 
 ---
 
@@ -167,6 +183,12 @@ Customers
 * Read and update only their own profile
 * Read only their own orders
 * Create reviews only for products they purchased and received
+
+Sellers
+
+* Everything a Customer can do
+* CRUD on own products
+* Read orders containing their products
 
 Guests
 

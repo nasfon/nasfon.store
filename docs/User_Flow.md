@@ -232,9 +232,63 @@ Visitor
 
 ---
 
+## 15. Seller Application Flow
+
+Customer Dashboard or /seller/apply
+  → Click "Become a Seller"
+  → Fill Application Form
+      → Business Name
+      → Business Description
+      → Upload Government ID (NIN, Driver's License, Int'l Passport)
+      → Upload Business Registration Certificate
+  → Submit
+  → Status: Pending Review
+  → Admin Approves or Rejects
+      → Approved → Access /seller dashboard
+      → Rejected → Can re-apply with updated info
+
+---
+
+## 16. Seller Product Management Flow
+
+Seller Dashboard
+  → Products
+  → Add Product
+      → Upload Images
+      → Enter Product Information
+      → Set Price
+      → Set Stock
+      → Publish
+  → Edit Product
+  → Delete Product
+
+---
+
+## 17. Seller Order Visibility Flow
+
+Seller Dashboard
+  → Orders
+  → View orders containing own products
+  → View order details (read-only)
+  → Cannot update order status
+
+---
+
+## 18. Admin Seller Management Flow
+
+Admin Dashboard
+  → Sellers
+  → View all applications (pending, approved, rejected, suspended)
+  → Select Application
+  → View uploaded documents
+  → Approve / Reject
+  → Suspend / Unsuspend approved sellers
+
+---
+
 # MVP User Roles (RBAC)
 
-The application uses **Role-Based Access Control (RBAC)** with three distinct roles.
+The application uses **Role-Based Access Control (RBAC)** with four distinct roles (Guest + 3 registered roles).
 
 ### Guest Role
 
@@ -251,13 +305,25 @@ The application uses **Role-Based Access Control (RBAC)** with three distinct ro
 * View order history
 * Save profile
 * Submit reviews
+* Apply to become a seller
+
+### Seller Role
+
+* Everything a Customer can do
+* Seller dashboard
+* Manage own products (CRUD)
+* Upload product images
+* Manage inventory
+* View orders containing own products (read-only)
+* View sales analytics
 
 ### Admin Role
 
-* Manage products
+* Manage products (all)
 * Manage categories
 * Manage delivery locations
 * Manage customers
+* Manage sellers (approve, reject, suspend)
 * Manage orders
 * View analytics
 * Configure store settings, including customer service phone number and shop address

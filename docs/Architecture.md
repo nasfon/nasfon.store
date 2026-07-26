@@ -102,6 +102,7 @@ Supabase
 * Authentication
 * Order Tracking
 * Customer Dashboard
+* Seller Dashboard
 * Admin Dashboard
 * Settings
 
@@ -191,6 +192,18 @@ Responsible for:
 
 ---
 
+## Seller Module
+
+Responsible for:
+
+* Seller Application & Verification
+* Own Product Management
+* Product Images
+* Order Visibility (read-only)
+* Sales Dashboard
+
+---
+
 ## Admin Module
 
 Responsible for:
@@ -199,6 +212,7 @@ Responsible for:
 * Categories
 * Orders
 * Customers
+* Sellers (approve, reject, suspend)
 * Delivery Locations
 * Store Settings
 * Analytics
@@ -264,7 +278,7 @@ Customer Receives Product
 * HTTPS Everywhere
 * Supabase Authentication
 * Row Level Security (RLS)
-* **Role-Based Access Control (RBAC)** — customer and admin roles enforced server-side
+* **Role-Based Access Control (RBAC)** — customer, seller, and admin roles enforced server-side
 * Protected Admin Routes
 * Server-side Authorization
 * Secure Environment Variables

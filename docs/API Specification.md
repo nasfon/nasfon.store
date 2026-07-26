@@ -24,6 +24,7 @@ Authorization
 
 * Public
 * Authenticated Customer
+* Seller (verified sellers only)
 * Admin
 
 Protected endpoints require a valid access token.
@@ -408,6 +409,135 @@ PATCH
 
 ---
 
+# Seller APIs
+
+All endpoints require a verified Seller or Admin role.
+
+---
+
+## Seller Application
+
+### Submit Application
+
+POST
+
+```
+/seller/apply
+```
+
+Sends application for admin review.
+
+### Get Application Status
+
+GET
+
+```
+/seller/application
+```
+
+---
+
+## Seller Product Management
+
+### List Own Products
+
+GET
+
+```
+/seller/products
+```
+
+### Create Product
+
+POST
+
+```
+/seller/products
+```
+
+### Get Product Details
+
+GET
+
+```
+/seller/products/{id}
+```
+
+### Update Product
+
+PATCH
+
+```
+/seller/products/{id}
+```
+
+### Delete Product
+
+DELETE
+
+```
+/seller/products/{id}
+```
+
+### Upload Product Image
+
+POST
+
+```
+/seller/products/{id}/images
+```
+
+### Delete Product Image
+
+DELETE
+
+```
+/seller/products/{id}/images/{imageId}
+```
+
+---
+
+## Seller Order Visibility
+
+### List Orders (read-only)
+
+GET
+
+```
+/seller/orders
+```
+
+Orders containing the seller's products.
+
+### Order Details (read-only)
+
+GET
+
+```
+/seller/orders/{id}
+```
+
+---
+
+## Seller Dashboard
+
+### Dashboard Stats
+
+GET
+
+```
+/seller/dashboard
+```
+
+Returns
+
+* Total Products
+* Total Orders
+* Revenue
+* Recent Orders
+
+---
+
 # Admin APIs
 
 All endpoints require an Admin role (RBAC enforcement).
@@ -564,6 +694,60 @@ PATCH
 
 ---
 
+## Seller Management
+
+### List Seller Applications
+
+GET
+
+```
+/admin/sellers
+```
+
+### View Seller Details
+
+GET
+
+```
+/admin/sellers/{id}
+```
+
+Includes uploaded documents.
+
+### Approve Seller
+
+POST
+
+```
+/admin/sellers/{id}/approve
+```
+
+### Reject Seller
+
+POST
+
+```
+/admin/sellers/{id}/reject
+```
+
+### Suspend Seller
+
+POST
+
+```
+/admin/sellers/{id}/suspend
+```
+
+### Unsuspend Seller
+
+POST
+
+```
+/admin/sellers/{id}/unsuspend
+```
+
+---
+
 ## Dashboard
 
 GET
@@ -579,6 +763,7 @@ Returns
 * Pending Orders
 * Products
 * Customers
+* Sellers
 * Low Stock Products
 * Recent Orders
 

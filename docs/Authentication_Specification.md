@@ -57,7 +57,7 @@ Authentication using:
 
 # Role-Based Access Control (RBAC)
 
-The application enforces **Role-Based Access Control (RBAC)** — access to resources is determined by the user's assigned role (`customer` or `admin`). Guests are assigned an implicit role with the least privilege.
+The application enforces **Role-Based Access Control (RBAC)** — access to resources is determined by the user's assigned role (`customer`, `seller`, or `admin`). Guests are assigned an implicit role with the least privilege.
 
 ## Guest Role
 
@@ -79,6 +79,26 @@ Everything available to Guests, plus:
 * Manage profile
 * Leave product reviews
 * Faster future checkout
+* Apply to become a seller
+
+---
+
+## Seller Role
+
+Permissions
+
+Everything available to Customers, plus:
+
+* Seller dashboard
+* Manage own products (CRUD)
+* Upload product images
+* Manage inventory
+* View orders containing own products (read-only)
+* View sales analytics
+
+Seller must be verified (approved by admin) before accessing seller features.
+
+Verification statuses: `pending` → `approved` | `rejected` | `suspended`
 
 ---
 
@@ -235,6 +255,17 @@ Authentication required.
 * My Orders
 * Profile
 * Reviews
+* Become a Seller
+
+---
+
+## Seller Routes
+
+Authentication and verified seller role required.
+
+* Dashboard
+* Products
+* Orders (read-only)
 
 ---
 
@@ -247,6 +278,7 @@ Authentication and Admin role required.
 * Categories
 * Orders
 * Customers
+* Sellers (approve, reject, suspend)
 * Delivery Locations
 * Analytics
 * Settings
@@ -260,6 +292,7 @@ Authorization is enforced via **RBAC** using the user's role stored in the datab
 Available roles:
 
 * customer
+* seller
 * admin
 
 Every protected request must verify:
@@ -291,9 +324,15 @@ Customers
 * Read only their own orders
 * Create reviews only for delivered orders they purchased
 
+Sellers
+
+* Everything a Customer can do
+* CRUD on own products (where seller_id = their user id)
+* Read orders containing their products
+
 Admins
 
-* Full access to administrative resources
+* Full access to all resources
 
 Guests
 

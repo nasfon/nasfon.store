@@ -118,13 +118,21 @@ Users should be able to:
 * Order tracking
 * Product reviews
 
+### Seller
+
+* Seller application & verification
+* Product management (own products)
+* Order visibility (read-only)
+* Sales dashboard
+
 ### Admin
 
 * Dashboard
-* Product management
+* Product management (all)
 * Category management
 * Order management
 * Customer management
+* Seller management (approve, reject, suspend)
 * Address management
 * Analytics
 * Settings
@@ -169,9 +177,17 @@ Customers can:
 * Leave reviews after delivery.
 * Select from available delivery locations created by admin.
 
+Sellers can (after verification):
+
+* Manage own products.
+* Manage own inventory.
+* Upload product images.
+* View orders containing own products (read-only).
+* View sales dashboard.
+
 Admins can:
 
-* Manage products.
+* Manage products (all, including seller products).
 * Manage categories.
 * Manage inventory.
 * Create and manage delivery addresses.
@@ -179,6 +195,7 @@ Admins can:
 * Update order status.
 * View analytics.
 * Manage customers.
+* Manage sellers (approve, reject, suspend, view documents).
 
 ---
 

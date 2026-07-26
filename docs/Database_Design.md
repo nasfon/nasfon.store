@@ -27,7 +27,7 @@ A single payment can be linked to **many orders**, allowing grouped checkout or 
 
 Purpose
 
-Stores registered customer accounts.
+Stores registered customer and seller accounts.
 
 Fields
 
@@ -36,9 +36,27 @@ Fields
 * email
 * phone_number
 * password (Managed by Supabase Auth)
-* role (customer, admin)
+* role (customer, seller, admin)
 * avatar_url
 * is_active
+* seller_verification_status (none, pending, approved, rejected, suspended)
+* created_at
+* updated_at
+
+---
+
+## seller_documents
+
+Purpose
+
+Documents uploaded by sellers for verification.
+
+Fields
+
+* id (UUID)
+* user_id (FK to users.id)
+* document_type (government_id, business_registration)
+* file_url
 * created_at
 * updated_at
 
@@ -71,7 +89,7 @@ Category → Many Products
 
 Purpose
 
-Store products sold by the store.
+Store products sold by the store. Products can be created by admins or verified sellers.
 
 Fields
 
@@ -88,12 +106,14 @@ Fields
 * featured_image
 * is_featured
 * is_active
+* seller_id (nullable FK to users.id — null for admin products)
 * created_at
 * updated_at
 
 Relationship
 
 Product belongs to one Category.
+Product may belong to one Seller (nullable).
 
 ---
 
@@ -287,7 +307,18 @@ delivery_locations
 ## User Role
 
 * customer
+* seller
 * admin
+
+---
+
+## Seller Verification Status
+
+* none
+* pending
+* approved
+* rejected
+* suspended
 
 ---
 
@@ -340,6 +371,13 @@ Customers
 * View only their own orders
 * View payment records linked to their own orders
 * Create reviews only for delivered orders they purchased
+
+Sellers
+
+* Everything a Customer can do
+* CRUD on own products and images (where seller_id = auth.uid())
+* Read orders containing their products
+* Read/write own seller documents
 
 Guests
 
