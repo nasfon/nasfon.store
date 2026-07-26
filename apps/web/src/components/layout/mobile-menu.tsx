@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Menu, X, LayoutDashboard, Package, User, Star, LogOut, ChevronRight } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { createClient } from "@/utils/supabase/client";
 
 const links = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -23,7 +24,8 @@ export function MobileMenu() {
 
   const handleLogout = async () => {
     close();
-    await fetch("/api/v1/auth/logout", { method: "POST" });
+    const supabase = createClient();
+    await supabase.auth.signOut();
     router.push("/");
     router.refresh();
   };
