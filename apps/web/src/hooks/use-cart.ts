@@ -52,10 +52,16 @@ export function useAddCartItem() {
       const previous = queryClient.getQueryData<CartResponse>(["cart"]);
       const items = [...(previous?.items ?? [])];
       const existing = items.find((i) => i.product_id === data.product_id);
+      const currentQty = existing?.quantity ?? 0;
+      const newTotal = currentQty + data.quantity;
+
+      if (data.stock_quantity < newTotal) {
+        return { previous };
+      }
 
       if (existing) {
-        existing.quantity += data.quantity;
-        existing.subtotal = existing.product.selling_price * existing.quantity;
+        existing.quantity = newTotal;
+        existing.subtotal = existing.product.selling_price * newTotal;
       } else {
         items.push({
           product_id: data.product_id,
@@ -98,6 +104,11 @@ export function useUpdateCartItem() {
       const previous = queryClient.getQueryData<CartResponse>(["cart"]);
 
       if (previous) {
+        const item = previous.items.find((i) => i.product_id === data.product_id);
+        if (item && data.quantity > item.product.stock_quantity) {
+          return { previous };
+        }
+
         const updatedItems = previous.items.map((item) => {
           if (item.product_id !== data.product_id) return item;
           return {
