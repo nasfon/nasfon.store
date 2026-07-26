@@ -2,15 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Grid3X3, Search, ShoppingCart, User } from "lucide-react";
+import { Home, Grid3X3, ShoppingCart, User } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 
 const items = [
   { href: "/", label: "Home", icon: Home },
   { href: "/categories", label: "Categories", icon: Grid3X3 },
-  { href: "/search", label: "Search", icon: Search },
   { href: "/cart", label: "Cart", icon: ShoppingCart },
-  { href: "/dashboard/profile", label: "Profile", icon: User },
+  { href: "/dashboard", label: "Dashboard", icon: User },
 ];
 
 export function BottomNav() {
@@ -19,7 +18,7 @@ export function BottomNav() {
   const itemCount = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
       <div className="mx-4 mb-3 rounded-2xl border border-gray-100 bg-white/90 px-2 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] backdrop-blur-lg">
         <div className="flex items-center justify-around py-1">
           {items.map((item) => {
