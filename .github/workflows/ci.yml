@@ -9,9 +9,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/web
 
     steps:
       - uses: actions/checkout@v4
@@ -25,16 +22,16 @@ jobs:
         with:
           node-version: 22
           cache: "pnpm"
-          cache-dependency-path: apps/web/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Lint
-        run: pnpm lint
+        run: pnpm --filter web lint
 
       - name: Type check
-        run: npx tsc --noEmit
+        run: pnpm --filter web exec tsc --noEmit
 
       - name: Run tests
-        run: pnpm test
+        run: pnpm --filter web test
