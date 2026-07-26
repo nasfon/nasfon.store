@@ -27,9 +27,6 @@
     "sonner": "^2.0.7",
     "zod": "^4.4.3"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": ["sharp", "unrs-resolver"]
-  },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
     "@tailwindcss/postcss": "^4",
