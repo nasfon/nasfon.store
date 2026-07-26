@@ -17,6 +17,7 @@ import {
   useProductImages,
   useAddProductImage,
   useDeleteProductImage,
+  useUpdateProductImage,
 } from "@/hooks/use-admin";
 import { toast } from "sonner";
 
@@ -29,7 +30,12 @@ export default function AdminProductsPage() {
   const [showModal, setShowModal] = useState(false);
   const { data: categories } = useAdminCategories(showModal);
   const [showImagesModal, setShowImagesModal] = useState<string | null>(null);
-  const [editing, setEditing] = useState<Record<string, unknown> | null>(null);
+  const [editing, setEditing] = useState<{
+    id: string; name: string; slug: string; sku: string;
+    category_id: string; selling_price: number; compare_price?: number | null;
+    stock_quantity: number; description?: string | null; brand?: string | null;
+    featured_image?: string | null; is_featured: boolean; is_active: boolean;
+  } | null>(null);
   const [form, setForm] = useState({
     name: "", slug: "", sku: "", category_id: "",
     selling_price: 0, compare_price: "", stock_quantity: 0,
@@ -42,7 +48,12 @@ export default function AdminProductsPage() {
     setShowModal(true);
   };
 
-  const openEdit = (product: Record<string, unknown>) => {
+  const openEdit = (product: {
+    id: string; name: string; slug: string; sku: string;
+    category_id: string; selling_price: number; compare_price?: number | null;
+    stock_quantity: number; description?: string | null; brand?: string | null;
+    featured_image?: string | null; is_featured: boolean; is_active: boolean;
+  }) => {
     setEditing(product);
     setForm({
       name: product.name, slug: product.slug, sku: product.sku,
@@ -70,7 +81,7 @@ export default function AdminProductsPage() {
         onError: (err) => toast.error(err.message),
       });
     } else {
-      createProduct.mutate(payload as Record<string, unknown>, {
+      createProduct.mutate(payload, {
         onSuccess: () => {
           toast.success("Product created");
           setShowModal(false);
@@ -218,7 +229,7 @@ function ImagesModal({ productId, onClose }: { productId: string | null; onClose
 
       for (const img of toAdd) {
         const result = await addImage.mutateAsync({ productId, ...img });
-        addedIds.set(img.image_url, (result as Record<string, unknown>).id as string);
+        addedIds.set(img.image_url, (result as { id: string }).id);
       }
 
       const allImages = [

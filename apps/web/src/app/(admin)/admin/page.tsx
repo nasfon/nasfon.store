@@ -40,7 +40,7 @@ export default async function AdminDashboard() {
             Low Stock Alert
           </h2>
           <div className="mt-3 space-y-2">
-            {data.low_stock_products.map((p: Record<string, unknown>) => (
+            {data.low_stock_products.map((p: { id: string; name: string; stock_quantity: number }) => (
               <div key={p.id} className="flex items-center justify-between text-sm">
                 <span className="text-yellow-700">{p.name}</span>
                 <span className="font-medium text-yellow-800">{p.stock_quantity} left</span>
@@ -54,7 +54,7 @@ export default async function AdminDashboard() {
         <h2 className="text-lg font-semibold text-gray-900">Recent Orders</h2>
         {data.recent_orders && data.recent_orders.length > 0 ? (
           <div className="mt-4 space-y-2">
-            {data.recent_orders.map((order: Record<string, unknown>) => (
+            {data.recent_orders.map((order: { id: string; order_number: string; customer_name: string; total_amount: number }) => (
               <Link
                 key={order.id}
                 href={`/admin/orders`}

@@ -18,7 +18,11 @@ export default function AdminCategoriesPage() {
   const deleteCategory = useDeleteCategory();
 
   const [showModal, setShowModal] = useState(false);
-  const [editing, setEditing] = useState<Record<string, unknown> | null>(null);
+  const [editing, setEditing] = useState<{
+    id: string; name: string; slug: string; description?: string | null;
+    image_url?: string | null; is_active: boolean;
+  } | null>(null);
+
   const [form, setForm] = useState({ name: "", slug: "", description: "", image_url: "", is_active: true });
 
   const openCreate = () => {
@@ -27,7 +31,10 @@ export default function AdminCategoriesPage() {
     setShowModal(true);
   };
 
-  const openEdit = (cat: Record<string, unknown>) => {
+  const openEdit = (cat: {
+    id: string; name: string; slug: string; description?: string | null;
+    image_url?: string | null; is_active: boolean;
+  }) => {
     setEditing(cat);
     setForm({ name: cat.name, slug: cat.slug, description: cat.description || "", image_url: cat.image_url || "", is_active: cat.is_active });
     setShowModal(true);
@@ -43,7 +50,7 @@ export default function AdminCategoriesPage() {
         onError: (err) => toast.error(err.message),
       });
     } else {
-      createCategory.mutate(payload as Record<string, unknown>, {
+      createCategory.mutate(payload, {
         onSuccess: () => { toast.success("Category created"); setShowModal(false); },
         onError: (err) => toast.error(err.message),
       });
