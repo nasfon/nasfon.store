@@ -199,8 +199,8 @@ function PaymentContent({
 
   const timerColor = timeLeft !== null && timeLeft <= 10 ? "text-error" : "text-gray-500";
 
-  return (
-    <div className="mx-auto max-w-lg px-4 py-16 text-center">
+  const paymentContent = (
+    <>
       <Building2 size={48} className="mx-auto text-primary" />
       <h1 className="mt-4 text-2xl font-bold text-gray-900">Complete Your Payment</h1>
       <p className="mt-2 text-gray-500">
@@ -276,9 +276,6 @@ function PaymentContent({
         >
           {verifying ? "Verifying..." : "I Made the Payment"}
         </Button>
-        <Link href="/products">
-          <Button variant="outline" size="lg" className="w-full">Continue Shopping</Button>
-        </Link>
       </div>
 
       <Modal open={showCancelModal} onClose={() => setShowCancelModal(false)} title="Cancel Payment?">
@@ -319,6 +316,22 @@ function PaymentContent({
           </Button>
         </div>
       </Modal>
+    </>
+  );
+
+  if (payment.virtual_account_number) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-white">
+        <div className="w-full max-w-lg px-4 py-12">
+          {paymentContent}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto max-w-lg px-4 py-16 text-center">
+      {paymentContent}
     </div>
   );
 }
