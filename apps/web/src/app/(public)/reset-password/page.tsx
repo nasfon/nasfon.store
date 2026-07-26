@@ -8,44 +8,52 @@ import { Input } from "@/components/ui/input";
 import { createClient } from "@/utils/supabase/client";
 import { toast } from "sonner";
 
+function getHashError(): string | null {
+  if (typeof window === "undefined") return null;
+  const hash = window.location.hash;
+  if (!hash || !hash.includes("type=recovery")) {
+    return "Invalid or expired reset link. Please request a new one.";
+  }
+  const params = new URLSearchParams(hash.replace("#", "?"));
+  if (!params.get("access_token")) {
+    return "Invalid reset link. Please request a new one.";
+  }
+  return null;
+}
+
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [sessionReady, setSessionReady] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<string | null>(getHashError);
   const router = useRouter();
 
   useEffect(() => {
+    if (error || sessionReady) return;
     const supabase = createClient();
     const hash = window.location.hash;
-
-    if (!hash || !hash.includes("type=recovery")) {
-      setError("Invalid or expired reset link. Please request a new one.");
-      return;
-    }
-
     const params = new URLSearchParams(hash.replace("#", "?"));
-    const accessToken = params.get("access_token");
-    const refreshToken = params.get("refresh_token");
+    const accessToken = params.get("access_token")!;
+    const refreshToken = params.get("refresh_token") || "";
 
-    if (!accessToken) {
-      setError("Invalid reset link. Please request a new one.");
-      return;
-    }
+    const controller = new AbortController();
 
     supabase.auth.setSession({
       access_token: accessToken,
-      refresh_token: refreshToken || "",
+      refresh_token: refreshToken,
     }).then(({ error: sessionError }) => {
+      if (controller.signal.aborted) return;
       if (sessionError) {
         setError(sessionError.message);
-        return;
+      } else {
+        setSessionReady(true);
+        window.location.hash = "";
       }
-      setSessionReady(true);
-      window.location.hash = "";
     });
-  }, []);
+
+    return () => controller.abort();
+  }, [error, sessionReady]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

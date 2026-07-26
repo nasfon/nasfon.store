@@ -17,7 +17,7 @@ export default function AdminDeliveryLocationsPage() {
   const deleteLocation = useDeleteDeliveryLocation();
 
   const [showModal, setShowModal] = useState(false);
-  const [editing, setEditing] = useState<any>(null);
+  const [editing, setEditing] = useState<Record<string, unknown> | null>(null);
   const [form, setForm] = useState({ name: "", delivery_fee: 0, estimated_delivery_days: 1, is_active: true });
 
   const openCreate = () => {
@@ -26,7 +26,7 @@ export default function AdminDeliveryLocationsPage() {
     setShowModal(true);
   };
 
-  const openEdit = (loc: any) => {
+  const openEdit = (loc: Record<string, unknown>) => {
     setEditing(loc);
     setForm({ name: loc.name, delivery_fee: loc.delivery_fee, estimated_delivery_days: loc.estimated_delivery_days, is_active: loc.is_active });
     setShowModal(true);
@@ -42,7 +42,7 @@ export default function AdminDeliveryLocationsPage() {
         onError: (err) => toast.error(err.message),
       });
     } else {
-      createLocation.mutate(payload as any, {
+      createLocation.mutate(payload as Record<string, unknown>, {
         onSuccess: () => { toast.success("Location created"); setShowModal(false); },
         onError: (err) => toast.error(err.message),
       });

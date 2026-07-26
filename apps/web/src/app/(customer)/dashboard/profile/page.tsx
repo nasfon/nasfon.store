@@ -1,25 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useProfile, useUpdateProfile } from "@/hooks/use-profile";
 import { toast } from "sonner";
 
-export default function ProfilePage() {
-  const { data: profile, isLoading } = useProfile();
+function ProfileForm({ profile }: { profile: NonNullable<ReturnType<typeof useProfile>["data"]> }) {
   const updateProfile = useUpdateProfile();
 
-  const [fullName, setFullName] = useState("");
-  const [phone, setPhone] = useState("");
-
-  useEffect(() => {
-    if (profile) {
-      setFullName(profile.full_name || "");
-      setPhone(profile.phone_number || "");
-    }
-  }, [profile]);
+  const [fullName, setFullName] = useState(profile.full_name || "");
+  const [phone, setPhone] = useState(profile.phone_number || "");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,18 +24,6 @@ export default function ProfilePage() {
     );
   };
 
-  if (isLoading) {
-    return (
-      <div>
-        <Skeleton className="h-8 w-48" />
-        <div className="mt-6 space-y-4">
-          <Skeleton className="h-24 w-full rounded-lg" />
-          <Skeleton className="h-10 w-32" />
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-900">Profile</h1>
@@ -53,7 +33,7 @@ export default function ProfilePage() {
           id="email"
           label="Email"
           type="email"
-          value={profile?.email || ""}
+          value={profile.email || ""}
           disabled
         />
         <Input
@@ -76,4 +56,22 @@ export default function ProfilePage() {
       </form>
     </div>
   );
+}
+
+export default function ProfilePage() {
+  const { data: profile, isLoading } = useProfile();
+
+  if (isLoading) {
+    return (
+      <div>
+        <Skeleton className="h-8 w-48" />
+        <div className="mt-6 space-y-4">
+          <Skeleton className="h-24 w-full rounded-lg" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+      </div>
+    );
+  }
+
+  return <ProfileForm key={profile?.id} profile={profile!} />;
 }

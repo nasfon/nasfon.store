@@ -2,7 +2,7 @@
 
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { api } from "@/lib/fetch";
-import type { Product, ApiResponse } from "@/types";
+import type { Product } from "@/types";
 
 interface ProductsResponse {
   products: Product[];

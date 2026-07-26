@@ -22,7 +22,7 @@ export default function AdminOrdersPage() {
   const { data: orders, isLoading } = useAdminOrders();
   const updateOrder = useUpdateOrder();
 
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [selectedOrder, setSelectedOrder] = useState<Record<string, unknown> | null>(null);
 
   const handleStatusChange = (id: string, status: string) => {
     updateOrder.mutate({ id, order_status: status }, {
@@ -54,7 +54,7 @@ export default function AdminOrdersPage() {
                 <tr key={i}><td colSpan={7} className="px-4 py-3"><Skeleton className="h-6 w-full" /></td></tr>
               ))
             ) : orders?.length ? (
-              orders.map((order: any) => (
+              orders.map((order: Record<string, unknown>) => (
                 <tr key={order.id} className="border-b last:border-b-0 hover:bg-gray-50">
                   <td className="px-4 py-3 font-mono text-sm font-medium">{order.order_number}</td>
                   <td className="px-4 py-3">

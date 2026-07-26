@@ -66,7 +66,7 @@ describe('POST /api/v1/auth/login', () => {
       user: { id: 'user-1', email: 'test@example.com' },
       role: 'customer' as const,
     };
-    // @ts-ignore
+    // @ts-expect-error - mock return type mismatch
     mockLogin.mockResolvedValue(mockResult);
 
     const req = new NextRequest('http://localhost:3000/api/v1/auth/login', {

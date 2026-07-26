@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { successResponse, errorResponse, requireAdmin } from "@/lib/api";
 import { adminSettingsSchema } from "@/lib/validation";
-import { sanitizeName, sanitizePlainText, sanitizePhone } from "@/lib/sanitize";
+import { sanitizePlainText, sanitizePhone } from "@/lib/sanitize";
 import * as settingsService from "@/services/admin/settings.service";
 
 export async function GET() {

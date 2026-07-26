@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { Plus, Pencil, Trash2, Images } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +17,6 @@ import {
   useProductImages,
   useAddProductImage,
   useDeleteProductImage,
-  useUpdateProductImage,
 } from "@/hooks/use-admin";
 import { toast } from "sonner";
 
@@ -27,13 +25,11 @@ export default function AdminProductsPage() {
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
   const deleteProduct = useDeleteProduct();
-  const addImage = useAddProductImage();
-  const deleteImage = useDeleteProductImage();
 
   const [showModal, setShowModal] = useState(false);
   const { data: categories } = useAdminCategories(showModal);
   const [showImagesModal, setShowImagesModal] = useState<string | null>(null);
-  const [editing, setEditing] = useState<any>(null);
+  const [editing, setEditing] = useState<Record<string, unknown> | null>(null);
   const [form, setForm] = useState({
     name: "", slug: "", sku: "", category_id: "",
     selling_price: 0, compare_price: "", stock_quantity: 0,
@@ -46,7 +42,7 @@ export default function AdminProductsPage() {
     setShowModal(true);
   };
 
-  const openEdit = (product: any) => {
+  const openEdit = (product: Record<string, unknown>) => {
     setEditing(product);
     setForm({
       name: product.name, slug: product.slug, sku: product.sku,
@@ -74,8 +70,8 @@ export default function AdminProductsPage() {
         onError: (err) => toast.error(err.message),
       });
     } else {
-      createProduct.mutate(payload as any, {
-        onSuccess: (product) => {
+      createProduct.mutate(payload as Record<string, unknown>, {
+        onSuccess: () => {
           toast.success("Product created");
           setShowModal(false);
         },
@@ -222,7 +218,7 @@ function ImagesModal({ productId, onClose }: { productId: string | null; onClose
 
       for (const img of toAdd) {
         const result = await addImage.mutateAsync({ productId, ...img });
-        addedIds.set(img.image_url, (result as any).id);
+        addedIds.set(img.image_url, (result as Record<string, unknown>).id as string);
       }
 
       const allImages = [

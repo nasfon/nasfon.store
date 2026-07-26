@@ -63,7 +63,6 @@ function PaymentContent({
 
   const payment = data?.payment;
   const order = data?.order;
-  const isPaid = data?.payment_status === "paid";
   const isExpired = data?.payment_status === "expired" || expired;
   const amountMismatch = data?.amount_mismatch === true;
 

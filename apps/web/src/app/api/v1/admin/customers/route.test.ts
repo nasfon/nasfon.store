@@ -1,7 +1,6 @@
 /**
  * @jest-environment node
  */
-import { NextRequest } from 'next/server';
 import { GET } from './route';
 import * as customersService from '@/services/admin/customers.service';
 import * as apiLib from '@/lib/api';
