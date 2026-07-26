@@ -32,11 +32,21 @@ export function envOrFallback(name: string, fallback: string): string {
 }
 
 export function getSupabaseUrl(): string {
-  return requireEnv("NEXT_PUBLIC_SUPABASE_URL");
+  const value = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!value) {
+    if (isServer) throw new Error("Missing required environment variable: NEXT_PUBLIC_SUPABASE_URL");
+    return "";
+  }
+  return value;
 }
 
 export function getSupabaseAnonKey(): string {
-  return requireEnv("NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY");
+  const value = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  if (!value) {
+    if (isServer) throw new Error("Missing required environment variable: NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY");
+    return "";
+  }
+  return value;
 }
 
 export function getServiceRoleKey(): string | null {
