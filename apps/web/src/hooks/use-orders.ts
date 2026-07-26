@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/fetch";
 import type { Order } from "@/types";
 
@@ -42,6 +42,8 @@ export function useTrackOrder() {
 }
 
 export function useCheckout() {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (data: {
       customer_name: string;
@@ -50,6 +52,9 @@ export function useCheckout() {
       delivery_location_id: string;
       notes?: string;
     }) => api.post<CheckoutResponse>("/checkout", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
   });
 }
 
