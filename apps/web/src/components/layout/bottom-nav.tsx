@@ -4,18 +4,20 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, Grid3X3, ShoppingCart, User } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
-
-const items = [
-  { href: "/", label: "Home", icon: Home },
-  { href: "/categories", label: "Categories", icon: Grid3X3 },
-  { href: "/cart", label: "Cart", icon: ShoppingCart },
-  { href: "/dashboard", label: "Dashboard", icon: User },
-];
+import { useAuth } from "@/hooks/use-auth";
 
 export function BottomNav() {
   const pathname = usePathname();
+  const { user } = useAuth();
   const { data: cart } = useCart();
   const itemCount = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
+
+  const items = [
+    { href: "/", label: "Home", icon: Home },
+    { href: "/categories", label: "Categories", icon: Grid3X3 },
+    { href: "/cart", label: "Cart", icon: ShoppingCart },
+    { href: user ? "/dashboard" : "/login", label: user ? "Profile" : "Login", icon: User },
+  ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
