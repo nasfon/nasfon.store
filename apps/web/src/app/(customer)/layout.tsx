@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { Package, User, Star, LayoutDashboard } from "lucide-react";
+import { MobileMenu } from "@/components/layout/mobile-menu";
 
 const sidebarLinks = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -63,7 +64,10 @@ export default async function CustomerLayout({ children }: { children: React.Rea
           })}
         </nav>
       </aside>
-      <div className="flex-1 min-w-0">{children}</div>
+      <div className="flex-1 min-w-0">
+        <MobileMenu />
+        {children}
+      </div>
     </div>
   );
 }
