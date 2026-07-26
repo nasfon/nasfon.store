@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useAddCartItem } from "@/hooks/use-cart";
+import { useCart, useAddCartItem } from "@/hooks/use-cart";
 import { toast } from "sonner";
 import type { Product } from "@/types";
 
@@ -14,7 +14,10 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const addToCart = useAddCartItem();
-  const inStock = product.stock_quantity > 0;
+  const { data: cart } = useCart();
+  const cartQty = cart?.items?.find((i) => i.product_id === product.id)?.quantity ?? 0;
+  const availableStock = product.stock_quantity - cartQty;
+  const inStock = availableStock > 0;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -68,7 +71,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </Link>
 
         {product.brand && (
-          <p className="mt-0.5 text-xs text-gray-400">{product.brand}</p>
+          <p className="mt-0.5 hidden text-xs text-gray-400 md:block">{product.brand}</p>
         )}
 
         <div className="mt-2 flex items-center gap-2">
@@ -80,9 +83,12 @@ export function ProductCard({ product }: ProductCardProps) {
               ₦{product.compare_price.toLocaleString()}
             </span>
           )}
+          <span className={`ml-auto text-xs font-medium md:hidden ${inStock ? "text-green-600" : "text-red-600"}`}>
+            {availableStock}
+          </span>
         </div>
 
-        <div className="mt-2 flex items-center justify-between">
+        <div className="mt-2 hidden items-center justify-between md:flex">
           <Badge variant={inStock ? "success" : "error"}>
             {inStock ? "In Stock" : "Out of Stock"}
           </Badge>
