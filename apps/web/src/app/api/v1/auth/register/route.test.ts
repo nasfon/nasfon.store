@@ -59,7 +59,7 @@ describe('POST /api/v1/auth/register', () => {
 
   it('should return 201 on successful registration', async () => {
     const mockResult = { user: { id: 'user-1', email: 'test@example.com' } };
-    // @ts-ignore
+    // @ts-expect-error - mock return type mismatch
     mockRegister.mockResolvedValue(mockResult);
 
     const req = new NextRequest('http://localhost:3000/api/v1/auth/register', {

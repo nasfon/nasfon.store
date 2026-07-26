@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useEffect, useRef, useCallback } from "react";
+import { Suspense, useState, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,60 +13,50 @@ import { useAuth } from "@/hooks/use-auth";
 
 const CHECKOUT_DRAFT_KEY = "checkout_draft";
 
-function CheckoutContent() {
+function initFormState(profile: { full_name?: string | null; email?: string | null; phone_number?: string | null } | null | undefined) {
+  try {
+    const raw = sessionStorage.getItem(CHECKOUT_DRAFT_KEY);
+    if (raw) {
+      const draft = JSON.parse(raw);
+      sessionStorage.removeItem(CHECKOUT_DRAFT_KEY);
+      return {
+        name: draft.name || profile?.full_name || "",
+        email: draft.email || profile?.email || "",
+        phone: draft.phone || profile?.phone_number || "",
+        locationId: draft.location_id || "",
+        notes: draft.notes || "",
+        hasDraft: true,
+      };
+    }
+  } catch {}
+  return {
+    name: profile?.full_name || "",
+    email: profile?.email || "",
+    phone: profile?.phone_number || "",
+    locationId: "",
+    notes: "",
+    hasDraft: false,
+  };
+}
+
+function CheckoutForm({ cart, locations, isBuyNow, buyNowProductId, buyNowQty, buyNowPrice, profile }: {
+  cart: ReturnType<typeof useCart>["data"];
+  locations: ReturnType<typeof useDeliveryLocations>["data"];
+  isBuyNow: boolean; buyNowProductId: string; buyNowQty: number; buyNowPrice: number;
+  profile: ReturnType<typeof useAuth>["profile"];
+}) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const { user, profile } = useAuth();
-  const { data: cart, isLoading: cartLoading } = useCart();
-  const { data: locations } = useDeliveryLocations();
   const checkout = useCheckout();
   const buyNow = useBuyNow();
 
-  const isBuyNow = searchParams.has("buy_now");
-  const buyNowProductId = searchParams.get("buy_now") || "";
-  const buyNowQty = parseInt(searchParams.get("qty") || "1");
-  const buyNowPrice = parseFloat(searchParams.get("price") || "0");
-
-  const [name, setName] = useState(profile?.full_name || "");
-  const [email, setEmail] = useState(profile?.email || "");
-  const [phone, setPhone] = useState(profile?.phone_number || "");
-  const [locationId, setLocationId] = useState("");
-  const [notes, setNotes] = useState("");
-  const [hasDraft, setHasDraft] = useState(false);
-  const redirecting = useRef(false);
-
-  const restoreDraft = useCallback(() => {
-    try {
-      const raw = sessionStorage.getItem(CHECKOUT_DRAFT_KEY);
-      if (!raw) return false;
-      const draft = JSON.parse(raw);
-      setName(draft.name || "");
-      setEmail(draft.email || "");
-      setPhone(draft.phone || "");
-      setLocationId(draft.location_id || "");
-      setNotes(draft.notes || "");
-      sessionStorage.removeItem(CHECKOUT_DRAFT_KEY);
-      setHasDraft(true);
-      return true;
-    } catch {
-      return false;
-    }
-  }, []);
-
-  useEffect(() => {
-    if (profile && !restoreDraft()) {
-      setName(profile.full_name || "");
-      setEmail(profile.email || "");
-      setPhone(profile.phone_number || "");
-    }
-  }, [profile, restoreDraft]);
-
-  useEffect(() => {
-    if (!isBuyNow && !cartLoading && !cart?.items.length && !hasDraft && !redirecting.current) {
-      redirecting.current = true;
-      router.push("/cart");
-    }
-  }, [isBuyNow, cartLoading, cart, hasDraft, router]);
+  const initial = useMemo(() => initFormState(profile), [profile]);
+  const [name, setName] = useState(initial.name);
+  const [email, setEmail] = useState(initial.email);
+  const [phone, setPhone] = useState(initial.phone);
+  const [locationId, setLocationId] = useState(initial.locationId);
+  const [notes, setNotes] = useState(initial.notes);
+  const [hasDraft] = useState(initial.hasDraft);
+  const [redirected, setRedirected] = useState(false);
 
   const selectedLocation = locations?.find((l) => l.id === locationId);
   const cartTotal = isBuyNow ? buyNowPrice * buyNowQty : (cart?.total || 0);
@@ -99,7 +89,7 @@ function CheckoutContent() {
       }));
       const result = await mutation;
       const from = isBuyNow ? "product" : "cart";
-      redirecting.current = true;
+      setRedirected(true);
       const paymentParams = new URLSearchParams({ from });
       if (isBuyNow) {
         paymentParams.set("buy_now", buyNowProductId);
@@ -113,19 +103,9 @@ function CheckoutContent() {
     }
   };
 
-  if (cartLoading) {
-    return (
-      <div className="mx-auto max-w-3xl px-4 py-8">
-        <Skeleton className="h-8 w-48" />
-        <div className="mt-6 space-y-4">
-          <Skeleton className="h-48 w-full rounded-lg" />
-          <Skeleton className="h-48 w-full rounded-lg" />
-        </div>
-      </div>
-    );
-  }
-
-  if (!isBuyNow && !hasDraft && !cart?.items.length && redirecting.current) {
+  if (!isBuyNow && !hasDraft && !cart?.items.length && !redirected) {
+    setRedirected(true);
+    router.push("/cart");
     return null;
   }
 
@@ -255,6 +235,42 @@ function CheckoutContent() {
         </div>
       </form>
     </div>
+  );
+}
+
+function CheckoutContent() {
+  const searchParams = useSearchParams();
+  const { profile } = useAuth();
+  const { data: cart, isLoading: cartLoading } = useCart();
+  const { data: locations } = useDeliveryLocations();
+
+  const isBuyNow = searchParams.has("buy_now");
+  const buyNowProductId = searchParams.get("buy_now") || "";
+  const buyNowQty = parseInt(searchParams.get("qty") || "1");
+  const buyNowPrice = parseFloat(searchParams.get("price") || "0");
+
+  if (cartLoading) {
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-8">
+        <Skeleton className="h-8 w-48" />
+        <div className="mt-6 space-y-4">
+          <Skeleton className="h-48 w-full rounded-lg" />
+          <Skeleton className="h-48 w-full rounded-lg" />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <CheckoutForm
+      cart={cart}
+      locations={locations}
+      isBuyNow={isBuyNow}
+      buyNowProductId={buyNowProductId}
+      buyNowQty={buyNowQty}
+      buyNowPrice={buyNowPrice}
+      profile={profile}
+    />
   );
 }
 

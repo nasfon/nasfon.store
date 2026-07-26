@@ -7,8 +7,7 @@ import { POST as checkoutPOST } from '@/app/api/v1/checkout/route';
 import { GET as adminProductsGET } from '@/app/api/v1/admin/products/route';
 import { POST as adminProductsPOST } from '@/app/api/v1/admin/products/route';
 import * as authService from '@/services/auth.service';
-import * as checkoutService from '@/services/checkout.service';
-import * as productsService from '@/services/admin/products.service';
+
 import * as apiLib from '@/lib/api';
 
 jest.mock('@/services/auth.service', () => ({

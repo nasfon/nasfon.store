@@ -1,7 +1,6 @@
 /**
  * @jest-environment node
  */
-import { NextRequest } from 'next/server';
 import { GET } from './route';
 import * as ordersService from '@/services/admin/orders.service';
 import * as apiLib from '@/lib/api';
@@ -36,7 +35,6 @@ describe('GET /api/v1/admin/orders', () => {
     });
 
     const res = await GET();
-    const data = await res.json();
     expect(res.status).toBe(401);
   });
 

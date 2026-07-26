@@ -1,7 +1,6 @@
 /**
  * @jest-environment node
  */
-import { NextRequest } from 'next/server';
 import { GET, DELETE } from './route';
 import * as cartService from '@/services/cart.service';
 

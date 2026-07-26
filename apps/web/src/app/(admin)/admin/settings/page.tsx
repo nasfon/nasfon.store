@@ -1,35 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAdminSettings, useUpdateSettings } from "@/hooks/use-admin";
 import { toast } from "sonner";
 
-export default function AdminSettingsPage() {
-  const { data: settings, isLoading } = useAdminSettings();
+function SettingsForm({ settings }: { settings: NonNullable<ReturnType<typeof useAdminSettings>["data"]> }) {
   const updateSettings = useUpdateSettings();
 
   const [form, setForm] = useState({
-    support_phone: "", support_email: "", store_address: "",
-    return_policy: "", privacy_policy: "", terms_conditions: "",
-    admin_email: "",
+    support_phone: settings.support_phone || "",
+    support_email: settings.support_email || "",
+    store_address: settings.store_address || "",
+    return_policy: settings.return_policy || "",
+    privacy_policy: settings.privacy_policy || "",
+    terms_conditions: settings.terms_conditions || "",
+    admin_email: settings.admin_email || "",
   });
-
-  useEffect(() => {
-    if (settings) {
-      setForm({
-        support_phone: settings.support_phone || "",
-        support_email: settings.support_email || "",
-        store_address: settings.store_address || "",
-        return_policy: settings.return_policy || "",
-        privacy_policy: settings.privacy_policy || "",
-        terms_conditions: settings.terms_conditions || "",
-        admin_email: settings.admin_email || "",
-      });
-    }
-  }, [settings]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,17 +27,6 @@ export default function AdminSettingsPage() {
       onError: (err) => toast.error(err.message),
     });
   };
-
-  if (isLoading) {
-    return (
-      <div>
-        <Skeleton className="h-8 w-48" />
-        <div className="mt-6 space-y-4">
-          <Skeleton className="h-96 w-full rounded-lg" />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div>
@@ -93,4 +71,21 @@ export default function AdminSettingsPage() {
       </form>
     </div>
   );
+}
+
+export default function AdminSettingsPage() {
+  const { data: settings, isLoading } = useAdminSettings();
+
+  if (isLoading) {
+    return (
+      <div>
+        <Skeleton className="h-8 w-48" />
+        <div className="mt-6 space-y-4">
+          <Skeleton className="h-96 w-full rounded-lg" />
+        </div>
+      </div>
+    );
+  }
+
+  return <SettingsForm key={settings?.support_phone} settings={settings!} />;
 }

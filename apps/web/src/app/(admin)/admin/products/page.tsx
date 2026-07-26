@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { Plus, Pencil, Trash2, Images } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,13 +26,16 @@ export default function AdminProductsPage() {
   const createProduct = useCreateProduct();
   const updateProduct = useUpdateProduct();
   const deleteProduct = useDeleteProduct();
-  const addImage = useAddProductImage();
-  const deleteImage = useDeleteProductImage();
 
   const [showModal, setShowModal] = useState(false);
   const { data: categories } = useAdminCategories(showModal);
   const [showImagesModal, setShowImagesModal] = useState<string | null>(null);
-  const [editing, setEditing] = useState<any>(null);
+  const [editing, setEditing] = useState<{
+    id: string; name: string; slug: string; sku: string;
+    category_id: string; selling_price: number; compare_price?: number | null;
+    stock_quantity: number; description?: string | null; brand?: string | null;
+    featured_image?: string | null; is_featured: boolean; is_active: boolean;
+  } | null>(null);
   const [form, setForm] = useState({
     name: "", slug: "", sku: "", category_id: "",
     selling_price: 0, compare_price: "", stock_quantity: 0,
@@ -46,7 +48,12 @@ export default function AdminProductsPage() {
     setShowModal(true);
   };
 
-  const openEdit = (product: any) => {
+  const openEdit = (product: {
+    id: string; name: string; slug: string; sku: string;
+    category_id: string; selling_price: number; compare_price?: number | null;
+    stock_quantity: number; description?: string | null; brand?: string | null;
+    featured_image?: string | null; is_featured: boolean; is_active: boolean;
+  }) => {
     setEditing(product);
     setForm({
       name: product.name, slug: product.slug, sku: product.sku,
@@ -74,8 +81,8 @@ export default function AdminProductsPage() {
         onError: (err) => toast.error(err.message),
       });
     } else {
-      createProduct.mutate(payload as any, {
-        onSuccess: (product) => {
+      createProduct.mutate(payload, {
+        onSuccess: () => {
           toast.success("Product created");
           setShowModal(false);
         },
@@ -222,7 +229,7 @@ function ImagesModal({ productId, onClose }: { productId: string | null; onClose
 
       for (const img of toAdd) {
         const result = await addImage.mutateAsync({ productId, ...img });
-        addedIds.set(img.image_url, (result as any).id);
+        addedIds.set(img.image_url, (result as { id: string }).id);
       }
 
       const allImages = [

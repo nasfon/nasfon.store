@@ -1,7 +1,6 @@
 import {
   registerSchema,
   loginSchema,
-  buyNowSchema,
   paginationSchema,
   adminSettingsSchema,
 } from './validation';
