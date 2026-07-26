@@ -62,8 +62,8 @@ export function ProductCard({ product }: ProductCardProps) {
 
       <div className="p-3">
         <Link href={`/products/${product.slug}`}>
-          <h3 className="text-sm font-medium text-gray-900 line-clamp-2 hover:text-primary">
-            {product.name}
+          <h3 className="text-sm font-medium text-gray-900 hover:text-primary" title={product.name}>
+            {product.name.length > 15 ? product.name.slice(0, 15) + "..." : product.name}
           </h3>
         </Link>
 
