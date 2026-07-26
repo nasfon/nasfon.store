@@ -65,8 +65,8 @@ export function ProductCard({ product }: ProductCardProps) {
 
       <div className="p-3">
         <Link href={`/products/${product.slug}`}>
-          <h3 className="text-sm font-medium text-gray-900 hover:text-primary" title={product.name}>
-            {product.name.length > 15 ? product.name.slice(0, 15) + "..." : product.name}
+          <h3 className="truncate text-sm font-medium text-gray-900 hover:text-primary" title={product.name}>
+            {product.name}
           </h3>
         </Link>
 
@@ -74,21 +74,21 @@ export function ProductCard({ product }: ProductCardProps) {
           <p className="mt-0.5 hidden text-xs text-gray-400 md:block">{product.brand}</p>
         )}
 
-        <div className="mt-2 flex items-center gap-2">
-          <span className="text-lg font-bold text-gray-900">
+        <div className="mt-1.5 flex items-center gap-1.5">
+          <span className="text-base font-bold text-gray-900 md:text-lg">
             ₦{product.selling_price.toLocaleString()}
           </span>
           {product.compare_price && product.compare_price > product.selling_price && (
-            <span className="text-sm text-gray-400 line-through">
+            <span className="text-xs text-gray-400 line-through">
               ₦{product.compare_price.toLocaleString()}
             </span>
           )}
-          <span className={`ml-auto text-xs font-medium md:hidden ${inStock ? "text-green-600" : "text-red-600"}`}>
+          <span className={`text-xs font-medium md:hidden ${inStock ? "text-green-600" : "text-red-600"}`}>
             {availableStock}
           </span>
         </div>
 
-        <div className="mt-2 hidden items-center justify-between md:flex">
+        <div className="mt-1.5 hidden items-center gap-2 md:flex">
           <Badge variant={inStock ? "success" : "error"}>
             {inStock ? "In Stock" : "Out of Stock"}
           </Badge>
@@ -100,7 +100,7 @@ export function ProductCard({ product }: ProductCardProps) {
         <Button
           variant="secondary"
           size="sm"
-          className="mt-3 w-full"
+          className="mt-2 w-full"
           disabled={addToCart.isPending}
           onClick={handleAddToCart}
         >
