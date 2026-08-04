@@ -89,7 +89,9 @@ export default function ProductDetailPage({
   const allImages = [
     ...(product.featured_image ? [{ id: "featured", image_url: product.featured_image }] : []),
     ...(product.images?.map((img) => ({ id: img.id, image_url: img.image_url })) ?? []),
-  ];
+  ].filter(
+    (img, i, arr) => arr.findIndex((x) => x.image_url === img.image_url) === i
+  );
   const safeIdx = Math.min(selectedIdx, Math.max(0, allImages.length - 1));
   const selectedImage = allImages[safeIdx];
 

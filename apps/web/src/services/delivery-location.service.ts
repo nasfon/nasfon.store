@@ -12,5 +12,11 @@ export async function getActiveDeliveryLocations() {
     .order("name", { ascending: true });
 
   if (error) throw new Error("Failed to fetch delivery locations");
-  return data || [];
+  const seen = new Set<string>();
+  return (data || []).filter((loc) => {
+    const key = loc.name.trim().toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
