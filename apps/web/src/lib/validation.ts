@@ -73,10 +73,18 @@ export const orderTrackSchema = z.object({
   phone_number: z.string().min(5, "Phone number is required"),
 });
 
+export const slugify = (value: string): string =>
+  value.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "").replace(/-+/g, "-").replace(/^-+|-+$/g, "");
+
+export const slugField = z.preprocess(
+  (v) => (typeof v === "string" ? slugify(v) : v),
+  z.string().min(2, "Slug is required").max(100).regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers and hyphens")
+);
+
 export const adminProductSchema = z.object({
   category_id: z.string().uuid("Invalid category"),
   name: z.string().min(2, "Name must be at least 2 characters"),
-  slug: z.string().min(2, "Slug is required"),
+  slug: slugField,
   description: z.string().optional().nullable(),
   sku: z.string().min(1, "SKU is required"),
   selling_price: z.number().positive("Price must be positive"),
@@ -92,7 +100,7 @@ export const adminProductUpdateSchema = adminProductSchema.partial();
 
 export const adminCategorySchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  slug: z.string().min(2, "Slug is required"),
+  slug: slugField,
   description: z.string().optional().nullable(),
   image_url: z.string().optional().nullable(),
   is_active: z.boolean().default(true),
