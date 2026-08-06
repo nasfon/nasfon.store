@@ -5,6 +5,7 @@ import { Package, Clock, CheckCircle, XCircle, Store } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { useOrders } from "@/hooks/use-orders";
+import { useSellerProfile } from "@/hooks/use-seller";
 
 const statusLabels: Record<string, { label: string; variant: "info" | "success" | "warning" | "error" }> = {
   pending: { label: "Pending", variant: "warning" },
@@ -18,6 +19,8 @@ const statusLabels: Record<string, { label: string; variant: "info" | "success" 
 
 export default function CustomerDashboard() {
   const { data: orders, isLoading } = useOrders();
+  const { data: sellerProfile } = useSellerProfile();
+  const isApprovedSeller = sellerProfile?.verification_status === "approved";
   const recentOrders = orders?.slice(0, 5) || [];
 
   const stats = {
@@ -44,12 +47,21 @@ export default function CustomerDashboard() {
     <div>
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <Link
-          href="/seller/apply"
-          className="flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
-        >
-          <Store size={16} /> Become a Seller
-        </Link>
+        {isApprovedSeller ? (
+          <Link
+            href="/seller/dashboard"
+            className="flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+          >
+            <Store size={16} /> Seller Dashboard
+          </Link>
+        ) : (
+          <span
+            className="flex cursor-not-allowed items-center gap-2 rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-400"
+            title="Seller registration is currently disabled"
+          >
+            <Store size={16} /> Become a Seller
+          </span>
+        )}
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
