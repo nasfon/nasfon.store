@@ -22,8 +22,11 @@ function isApiRoute(pathname: string): boolean {
 function csrfCheck(request: NextRequest): NextResponse | null {
   if (!STATE_CHANGING_METHODS.includes(request.method)) return null;
 
-  // Exempt flutterwave webhook from CSRF
-  if (request.nextUrl.pathname.startsWith('/api/v1/payments/webhook/flutterwave')) {
+  // Exempt payment webhooks from CSRF
+  if (
+    request.nextUrl.pathname.startsWith('/api/v1/payments/webhook/flutterwave') ||
+    request.nextUrl.pathname.startsWith('/api/v1/payments/webhook/paystack')
+  ) {
     return null;
   }
 

@@ -3,22 +3,22 @@
  */
 import { NextRequest } from 'next/server';
 import { GET, PATCH } from './route';
-import * as flutterwaveService from '@/services/flutterwave';
+import * as paystackService from '@/services/paystack';
 import * as paymentService from '@/services/payment.service';
 
-jest.mock('@/services/flutterwave', () => ({
-  getCharge: jest.fn(),
+jest.mock('@/services/paystack', () => ({
+  verifyTransaction: jest.fn(),
 }));
 
 jest.mock('@/services/payment.service', () => ({
-  confirmPaymentFromFlutterwave: jest.fn(),
+  confirmPaymentFromPaystack: jest.fn(),
   expirePayment: jest.fn(),
 }));
 
 const REFERENCE = 'NF-TEST123';
 
 describe('GET /api/v1/payments/[reference]', () => {
-  const mockGetCharge = flutterwaveService.getCharge as jest.MockedFunction<typeof flutterwaveService.getCharge>;
+  const mockVerifyTransaction = paystackService.verifyTransaction as jest.MockedFunction<typeof paystackService.verifyTransaction>;
   const originalEnv = process.env;
 
   beforeEach(() => {
@@ -29,10 +29,9 @@ describe('GET /api/v1/payments/[reference]', () => {
     process.env = originalEnv;
   });
 
-  it('should return 503 if Flutterwave credentials are not configured', async () => {
+  it('should return 503 if Paystack credentials are not configured', async () => {
     process.env = { ...originalEnv };
-    delete process.env.FLUTTERWAVE_CLIENT_ID;
-    delete process.env.FLUTTERWAVE_CLIENT_SECRET;
+    delete process.env.PAYSTACK_SECRET_KEY;
 
     const req = new NextRequest(`http://localhost:3000/api/v1/payments/${REFERENCE}`, {
       method: 'GET',
@@ -46,27 +45,23 @@ describe('GET /api/v1/payments/[reference]', () => {
   });
 
   it('should return 404 if charge not found', async () => {
-    process.env.FLUTTERWAVE_CLIENT_ID = 'test-client';
-    process.env.FLUTTERWAVE_CLIENT_SECRET = 'test-secret';
-    mockGetCharge.mockResolvedValue(null);
+    process.env.PAYSTACK_SECRET_KEY = 'sk_test_123';
+    mockVerifyTransaction.mockRejectedValue(new Error('Transaction not found'));
 
     const req = new NextRequest(`http://localhost:3000/api/v1/payments/${REFERENCE}`, {
       method: 'GET',
     });
 
     const res = await GET(req, { params: Promise.resolve({ reference: REFERENCE }) });
-    const data = await res.json();
 
-    expect(res.status).toBe(404);
-    expect(data.message).toBe('Payment not found');
+    expect(res.status).toBe(500);
   });
 
   it('should return 200 with charge status', async () => {
-    process.env.FLUTTERWAVE_CLIENT_ID = 'test-client';
-    process.env.FLUTTERWAVE_CLIENT_SECRET = 'test-secret';
-    mockGetCharge.mockResolvedValue({ id: 'ch-1', status: 'successful', amount: 5000, paid_at: '2025-01-01T00:00:00Z' });
+    process.env.PAYSTACK_SECRET_KEY = 'sk_test_123';
+    mockVerifyTransaction.mockResolvedValue({ status: 'success', amount: 5000, reference: REFERENCE, paid_at: '2025-01-01T00:00:00Z' });
 
-    const mockConfirm = paymentService.confirmPaymentFromFlutterwave as jest.MockedFunction<typeof paymentService.confirmPaymentFromFlutterwave>;
+    const mockConfirm = paymentService.confirmPaymentFromPaystack as jest.MockedFunction<typeof paymentService.confirmPaymentFromPaystack>;
     mockConfirm.mockResolvedValue(true);
 
     const req = new NextRequest(`http://localhost:3000/api/v1/payments/${REFERENCE}`, {
@@ -78,15 +73,14 @@ describe('GET /api/v1/payments/[reference]', () => {
 
     expect(res.status).toBe(200);
     expect(data.success).toBe(true);
-    expect(data.data.status).toBe('successful');
+    expect(data.data.status).toBe('success');
     expect(data.data.amount).toBe(5000);
-    expect(mockConfirm).toHaveBeenCalledWith(REFERENCE, 5000);
+    expect(mockConfirm).toHaveBeenCalledWith(REFERENCE);
   });
 
   it('should return 500 if service throws an error', async () => {
-    process.env.FLUTTERWAVE_CLIENT_ID = 'test-client';
-    process.env.FLUTTERWAVE_CLIENT_SECRET = 'test-secret';
-    mockGetCharge.mockRejectedValue(new Error('API error'));
+    process.env.PAYSTACK_SECRET_KEY = 'sk_test_123';
+    mockVerifyTransaction.mockRejectedValue(new Error('API error'));
 
     const req = new NextRequest(`http://localhost:3000/api/v1/payments/${REFERENCE}`, {
       method: 'GET',

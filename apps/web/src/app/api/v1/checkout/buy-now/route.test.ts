@@ -74,12 +74,10 @@ describe('POST /api/v1/checkout/buy-now', () => {
       payment: {
         id: 'pay-1',
         flutterwave_reference: 'NF-ABC123',
-        bank_name: 'GTBank',
-        virtual_account_number: '1234567890',
-        account_name: 'John Doe',
         amount: 5500,
         payment_status: 'pending',
         reference: 'NF-ABC123',
+        payment_url: 'https://checkout.paystack.com/test-access-code',
         expires_at: new Date(Date.now() + 3600000).toISOString(),
       },
     };

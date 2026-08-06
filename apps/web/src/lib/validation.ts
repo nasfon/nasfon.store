@@ -139,13 +139,6 @@ export const searchQuerySchema = z.object({
   limit: z.coerce.number().int().positive().max(50).default(20),
 });
 
-export const dynamicAccountSchema = z.object({
-  amount: z.number().positive("Amount must be positive"),
-  email: z.string().email("Invalid email"),
-  fullname: z.string().max(200).optional(),
-  phonenumber: z.string().max(20).optional(),
-});
-
 export const productImageSchema = z.object({
   image_url: z.string().url("Invalid image URL"),
   display_order: z.number().int().min(0).optional(),

@@ -7,12 +7,10 @@ import type { Order } from "@/types";
 interface PaymentInfo {
   id: string;
   flutterwave_reference: string;
-  virtual_account_number: string | null;
-  bank_name: string | null;
-  account_name: string | null;
   amount: number;
   payment_status: string;
   reference: string;
+  payment_url?: string | null;
 }
 
 interface CheckoutResponse {

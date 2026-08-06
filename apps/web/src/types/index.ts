@@ -109,9 +109,6 @@ export interface OrderItem {
 export interface Payment {
   id: string;
   flutterwave_reference: string;
-  virtual_account_number: string;
-  bank_name: string;
-  account_name: string;
   amount: number;
   payment_status: PaymentStatus;
   paid_at: string | null;

@@ -116,12 +116,8 @@ export default function OrderDetailPage({
               <h2 className="font-semibold text-gray-900">Payment</h2>
               <div className="mt-2 space-y-1 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-500">Bank</span>
-                  <span>{order.payment.bank_name}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Account</span>
-                  <span className="font-mono">{order.payment.virtual_account_number}</span>
+                  <span className="text-gray-500">Reference</span>
+                  <span className="font-mono">{order.payment.flutterwave_reference}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Status</span>

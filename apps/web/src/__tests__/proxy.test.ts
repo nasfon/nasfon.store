@@ -100,5 +100,15 @@ describe('proxy middleware', () => {
       const res = await middleware(req);
       expect(res.status).not.toBe(403);
     });
+
+    it('should exempt Paystack webhook from CSRF', async () => {
+      const req = new NextRequest('http://localhost:3000/api/v1/payments/webhook/paystack', {
+        method: 'POST',
+        body: JSON.stringify({}),
+      });
+
+      const res = await middleware(req);
+      expect(res.status).not.toBe(403);
+    });
   });
 });

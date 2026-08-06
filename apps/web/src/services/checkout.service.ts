@@ -2,7 +2,6 @@ import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { getCart, clearCart } from "./cart.service";
 import { generatePayment } from "./payment.service";
-import { sendOrderConfirmation } from "./email.service";
 
 export async function createCheckout(data: {
   customer_name: string;
@@ -21,21 +20,6 @@ export async function createCheckout(data: {
   const result = await processPayment(supabase, items, data);
 
   await clearCart();
-
-  sendOrderConfirmation({
-    email: data.customer_email,
-    name: data.customer_name,
-    orderNumber: "",
-    items: result.items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price })),
-    total: result.payment.amount,
-    payment: {
-      bank_name: result.payment.bank_name,
-      account_number: result.payment.virtual_account_number,
-      account_name: result.payment.account_name,
-      amount: result.payment.amount,
-      expires_at: result.payment.expires_at || null,
-    },
-  });
 
   return { payment: result.payment };
 }
@@ -62,21 +46,6 @@ export async function buyNow(data: {
     delivery_location_id: data.delivery_location_id,
     notes: data.notes,
     user_id: data.user_id,
-  });
-
-  sendOrderConfirmation({
-    email: data.customer_email,
-    name: data.customer_name,
-    orderNumber: "",
-    items: result.items.map((i) => ({ name: i.name, quantity: i.quantity, price: i.price })),
-    total: result.payment.amount,
-    payment: {
-      bank_name: result.payment.bank_name,
-      account_number: result.payment.virtual_account_number,
-      account_name: result.payment.account_name,
-      amount: result.payment.amount,
-      expires_at: result.payment.expires_at || null,
-    },
   });
 
   return { payment: result.payment };

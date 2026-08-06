@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
 import { successResponse, errorResponse } from "@/lib/api";
 import { z } from "zod";
-import { getCharge } from "@/services/flutterwave";
-import { confirmPaymentFromFlutterwave, expirePayment } from "@/services/payment.service";
+import { verifyTransaction } from "@/services/paystack";
+import { confirmPaymentFromPaystack, expirePayment } from "@/services/payment.service";
 
 const referenceSchema = z.string().min(1).max(100);
 
@@ -15,17 +15,17 @@ export async function GET(
     const parsed = referenceSchema.safeParse(reference);
     if (!parsed.success) return errorResponse("Invalid reference");
 
-    if (!process.env.FLUTTERWAVE_CLIENT_ID || !process.env.FLUTTERWAVE_CLIENT_SECRET) {
+    if (!process.env.PAYSTACK_SECRET_KEY) {
       return errorResponse("Payment not configured", [], 503);
     }
 
-    const charge = await getCharge(reference);
+    const charge = await verifyTransaction(reference);
     if (!charge) {
       return errorResponse("Payment not found", [], 404);
     }
 
-    if (charge.status === "successful") {
-      await confirmPaymentFromFlutterwave(reference, charge.amount);
+    if (charge.status === "success") {
+      await confirmPaymentFromPaystack(reference);
     }
 
     return successResponse({

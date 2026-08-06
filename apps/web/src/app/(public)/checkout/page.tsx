@@ -88,16 +88,14 @@ function CheckoutForm({ cart, locations, isBuyNow, buyNowProductId, buyNowQty, b
         ...(isBuyNow ? { buy_now: buyNowProductId, qty: buyNowQty, price: buyNowPrice } : {}),
       }));
       const result = await mutation;
-      const from = isBuyNow ? "product" : "cart";
       setRedirected(true);
-      const paymentParams = new URLSearchParams({ from });
-      if (isBuyNow) {
-        paymentParams.set("buy_now", buyNowProductId);
-        paymentParams.set("qty", String(buyNowQty));
-        paymentParams.set("price", String(buyNowPrice));
+      const paymentUrl = result.payment.payment_url;
+      if (paymentUrl) {
+        window.location.href = paymentUrl;
+      } else {
+        router.push(`/payment/${result.payment.reference}`);
       }
-      router.push(`/payment/${result.payment.reference}?${paymentParams}`);
-      toast.success("Proceed to payment!");
+      toast.success("Redirecting to payment...");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Checkout failed");
     }
@@ -229,7 +227,7 @@ function CheckoutForm({ cart, locations, isBuyNow, buyNowProductId, buyNowQty, b
               {checkout.isPending || buyNow.isPending ? "Placing Order..." : "Place Order"}
             </Button>
             <p className="mt-3 text-center text-xs text-gray-400">
-              Secure payment via Flutterwave bank transfer
+              You&apos;ll be redirected to Paystack to complete your payment securely.
             </p>
           </div>
         </div>

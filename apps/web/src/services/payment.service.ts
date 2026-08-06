@@ -1,11 +1,7 @@
 import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/admin";
-import {
-  createVirtualAccount,
-  findOrCreateCustomer,
-  getCharge,
-} from "@/services/flutterwave";
+import { initializeTransaction, verifyTransaction } from "@/services/paystack";
 import { sendPaymentConfirmation, sendAdminNewOrderNotification } from "./email.service";
 
 interface CheckoutData {
@@ -23,67 +19,37 @@ interface CheckoutData {
 
 const PAYMENT_EXPIRY_MS = parseInt(process.env.PAYMENT_EXPIRY_MINUTES || "30") * 60 * 1000;
 
+function getAppUrl(): string {
+  return process.env.APP_URL || "http://localhost:3000";
+}
+
 export async function generatePayment(checkoutData: CheckoutData) {
   const adminClient = createAdminClient();
 
   const txRef = `NF-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
   const expiresAt = new Date(Date.now() + PAYMENT_EXPIRY_MS).toISOString();
 
-  const hasV4Credentials =
-    process.env.FLUTTERWAVE_CLIENT_ID && process.env.FLUTTERWAVE_CLIENT_SECRET;
+  let paymentUrl: string | null = null;
+  let accessCode: string | null = null;
+  let paystackError: Error | null = null;
 
-  if (hasV4Credentials) {
+  if (process.env.PAYSTACK_SECRET_KEY) {
     try {
-      const nameParts = (checkoutData.customer_name || checkoutData.customer_email).split(" ");
-      const firstName = nameParts[0] || checkoutData.customer_email;
-      const lastName = nameParts.slice(1).join(" ") || firstName;
-
-      const customerId = await findOrCreateCustomer({
+      const tx = await initializeTransaction({
         email: checkoutData.customer_email,
-        firstName,
-        lastName,
-        phone: checkoutData.customer_phone,
-      });
-
-      const va = await createVirtualAccount({
-        customer_id: customerId,
         amount: checkoutData.total_amount,
         reference: txRef,
-        narration: checkoutData.customer_name,
+        callback_url: `${getAppUrl()}/payment/${txRef}`,
+        metadata: {
+          customer_name: checkoutData.customer_name,
+          customer_phone: checkoutData.customer_phone,
+        },
       });
-
-      const { data: payment } = await adminClient
-        .from("payments")
-        .insert({
-          flutterwave_reference: txRef,
-          virtual_account_number: va.account_number,
-          bank_name: va.account_bank_name,
-          account_name: checkoutData.customer_name,
-          amount: checkoutData.total_amount,
-          payment_status: "pending",
-          webhook_payload: {
-            checkout_data: checkoutData,
-            va_id: va.id,
-            expiry_date: va.account_expiration_datetime,
-            expires_at: expiresAt,
-          },
-        })
-        .select()
-        .single();
-
-      return {
-        id: payment?.id || "",
-        flutterwave_reference: txRef,
-        virtual_account_number: va.account_number,
-        bank_name: va.account_bank_name,
-        account_name: checkoutData.customer_name,
-        amount: checkoutData.total_amount,
-        payment_status: "pending",
-        reference: txRef,
-        expires_at: expiresAt,
-      };
+      paymentUrl = tx.authorization_url || null;
+      accessCode = tx.access_code || null;
     } catch (err) {
-      console.error("[Flutterwave v4] Virtual account generation failed:", err);
+      console.error("[Paystack] Transaction initialization failed:", err);
+      paystackError = err instanceof Error ? err : new Error("Paystack initialization failed");
     }
   }
 
@@ -92,27 +58,41 @@ export async function generatePayment(checkoutData: CheckoutData) {
     .insert({
       flutterwave_reference: txRef,
       virtual_account_number: "",
-      bank_name: "Bank Transfer",
-      account_name: checkoutData.customer_name,
+      bank_name: null,
+      account_name: null,
       amount: checkoutData.total_amount,
       payment_status: "pending",
       webhook_payload: {
         checkout_data: checkoutData,
+        payment_url: paymentUrl,
+        access_code: accessCode,
         expires_at: expiresAt,
       },
     })
     .select()
     .single();
 
+  if (paymentUrl) {
+    return {
+      id: payment?.id || "",
+      flutterwave_reference: txRef,
+      amount: checkoutData.total_amount,
+      payment_status: "pending",
+      reference: txRef,
+      payment_url: paymentUrl,
+      expires_at: expiresAt,
+    };
+  }
+
+  if (paystackError) throw new Error(paystackError.message);
+
   return {
     id: payment?.id || "",
     flutterwave_reference: txRef,
-    virtual_account_number: null,
-    bank_name: null,
-    account_name: null,
     amount: checkoutData.total_amount,
     payment_status: "pending",
     reference: txRef,
+    payment_url: null,
     expires_at: expiresAt,
   };
 }
@@ -255,13 +235,13 @@ export async function createOrderFromPayment(flutterwaveReference: string) {
   return order;
 }
 
-export async function confirmPaymentFromFlutterwave(txRef: string, actualAmount?: number) {
+async function markPaymentPaid(reference: string, actualAmount?: number) {
   const supabase = createAdminClient();
 
   const { data: payment } = await supabase
     .from("payments")
     .select("id, payment_status, amount, webhook_payload")
-    .eq("flutterwave_reference", txRef)
+    .eq("flutterwave_reference", reference)
     .single();
 
   if (!payment) return false;
@@ -301,13 +281,13 @@ export async function confirmPaymentFromFlutterwave(txRef: string, actualAmount?
       })
       .eq("id", payment.id);
     if (checkoutData) {
-      const order = await createOrderFromPayment(txRef);
+      const order = await createOrderFromPayment(reference);
       return !!order;
     }
     return true;
   }
 
-  await createOrderFromPayment(txRef);
+  await createOrderFromPayment(reference);
   await supabase
     .from("payments")
     .update({
@@ -316,6 +296,21 @@ export async function confirmPaymentFromFlutterwave(txRef: string, actualAmount?
     })
     .eq("id", payment.id);
   return true;
+}
+
+export async function confirmPaymentFromFlutterwave(txRef: string, actualAmount?: number) {
+  return markPaymentPaid(txRef, actualAmount);
+}
+
+export async function confirmPaymentFromPaystack(reference: string) {
+  let charge;
+  try {
+    charge = await verifyTransaction(reference);
+  } catch {
+    return false;
+  }
+  if (!charge || charge.status !== "success") return false;
+  return markPaymentPaid(reference, charge.amount);
 }
 
 export async function getPaymentByReference(reference: string) {
@@ -337,13 +332,10 @@ export async function getPaymentByReference(reference: string) {
         .update({ payment_status: "expired" })
         .eq("id", payment.id);
       payment.payment_status = "expired";
-    } else if (process.env.FLUTTERWAVE_CLIENT_ID && process.env.FLUTTERWAVE_CLIENT_SECRET) {
+    } else if (process.env.PAYSTACK_SECRET_KEY) {
       try {
-        const charge = await getCharge(reference);
-        if (charge && charge.status === "successful") {
-          await confirmPaymentFromFlutterwave(reference, charge.amount);
-          payment.payment_status = "paid";
-        }
+        const verified = await confirmPaymentFromPaystack(reference);
+        if (verified) payment.payment_status = "paid";
       } catch {
         // ignore verification errors
       }
@@ -381,22 +373,18 @@ export async function getPaymentStatus(orderId: string) {
 
   const payment = order.payment as {
     flutterwave_reference?: string;
-    virtual_account_number?: string;
-    bank_name?: string;
-    account_name?: string;
-    amount?: number;
     payment_status?: string;
   } | null;
 
   if (payment?.flutterwave_reference && order.payment_status === "pending") {
     try {
-      const charge = await getCharge(payment.flutterwave_reference);
-      if (charge && charge.status === "successful") {
+      const verified = await confirmPaymentFromPaystack(payment.flutterwave_reference);
+      if (verified) {
         await supabase
           .from("payments")
           .update({
             payment_status: "paid",
-            paid_at: charge.paid_at || new Date().toISOString(),
+            paid_at: new Date().toISOString(),
           })
           .eq("flutterwave_reference", payment.flutterwave_reference);
 
