@@ -36,8 +36,32 @@ export interface Category {
   updated_at: string;
 }
 
+export type VerificationStatus = "pending" | "approved" | "rejected";
+
+export interface Seller {
+  id: string;
+  user_id: string;
+  shop_name: string;
+  shop_slug: string;
+  shop_address: string;
+  shop_logo_url: string | null;
+  contact_phone: string;
+  contact_email: string;
+  support_contact: string | null;
+  business_description: string | null;
+  verification_status: VerificationStatus;
+  verification_documents: string[];
+  paystack_public_key: string | null;
+  paystack_secret_key: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  user?: User;
+}
+
 export interface Product {
   id: string;
+  seller_id: string | null;
   category_id: string;
   name: string;
   slug: string;
@@ -53,6 +77,7 @@ export interface Product {
   created_at: string;
   updated_at: string;
   category?: Category;
+  seller?: Seller;
   images?: ProductImage[];
 }
 
@@ -66,12 +91,14 @@ export interface ProductImage {
 
 export interface DeliveryLocation {
   id: string;
+  seller_id: string | null;
   name: string;
   delivery_fee: number;
   estimated_delivery_days: number;
   is_active: boolean;
   created_at: string;
   updated_at: string;
+  seller?: Seller;
 }
 
 export interface Order {
