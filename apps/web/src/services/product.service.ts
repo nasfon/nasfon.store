@@ -67,7 +67,7 @@ export async function getProductBySlug(slug: string) {
 
   const { data, error } = await supabase
     .from("products")
-    .select("*, category:categories(*), images:product_images(*)")
+    .select("*, category:categories(*), images:product_images(*), seller:sellers(id, shop_name, shop_slug, shop_logo_url, verification_status)")
     .eq("slug", slug)
     .eq("is_active", true)
     .single();

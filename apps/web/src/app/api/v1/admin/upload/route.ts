@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { successResponse, errorResponse, requireAdmin } from "@/lib/api";
+import { successResponse, errorResponse, requireUser } from "@/lib/api";
 
 const IMAGE_MAGIC_BYTES: { signature: number[]; mime: string }[] = [
   { signature: [0xFF, 0xD8, 0xFF], mime: "image/jpeg" },
@@ -16,7 +16,7 @@ function validateImageMagicBytes(buffer: Buffer): boolean {
 
 export async function POST(request: NextRequest) {
   try {
-    const { error } = await requireAdmin(request);
+    const { error } = await requireUser(request);
     if (error) return error;
 
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;

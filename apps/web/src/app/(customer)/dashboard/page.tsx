@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Package, Clock, CheckCircle, XCircle } from "lucide-react";
+import { Package, Clock, CheckCircle, XCircle, Store } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { useOrders } from "@/hooks/use-orders";
@@ -42,7 +42,15 @@ export default function CustomerDashboard() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <Link
+          href="/seller/apply"
+          className="flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+        >
+          <Store size={16} /> Become a Seller
+        </Link>
+      </div>
 
       <div className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
         {[

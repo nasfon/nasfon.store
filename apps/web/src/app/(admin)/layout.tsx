@@ -5,7 +5,7 @@ import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import {
   LayoutDashboard, Package, Grid3X3, ShoppingCart, Users,
-  MapPin, BarChart3, Settings,
+  MapPin, BarChart3, Settings, Store,
 } from "lucide-react";
 
 const sidebarLinks = [
@@ -13,6 +13,7 @@ const sidebarLinks = [
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/categories", label: "Categories", icon: Grid3X3 },
   { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
+  { href: "/admin/sellers", label: "Sellers", icon: Store },
   { href: "/admin/customers", label: "Customers", icon: Users },
   { href: "/admin/delivery-locations", label: "Delivery Locations", icon: MapPin },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },

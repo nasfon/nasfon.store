@@ -10,6 +10,7 @@ if (!ok) {
 const STATE_CHANGING_METHODS = ["POST", "PATCH", "PUT", "DELETE"];
 const customerRoutes = ["/dashboard"];
 const adminRoutes = ["/admin"];
+const sellerRoutes = ["/seller/dashboard", "/seller/apply"];
 
 function isRouteMatch(pathname: string, routes: string[]): boolean {
   return routes.some((route) => pathname === route || pathname.startsWith(route + "/"));
@@ -86,7 +87,9 @@ export async function middleware(request: NextRequest) {
 
   const isAuthRoute = isRouteMatch(pathname, ["/login", "/register"]);
   const isProtectedRoute =
-    isRouteMatch(pathname, adminRoutes) || isRouteMatch(pathname, customerRoutes);
+    isRouteMatch(pathname, adminRoutes) ||
+    isRouteMatch(pathname, customerRoutes) ||
+    isRouteMatch(pathname, sellerRoutes);
 
   if (!isAuthRoute && !isProtectedRoute) {
     return supabaseResponse;

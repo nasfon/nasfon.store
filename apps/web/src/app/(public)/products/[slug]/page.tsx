@@ -2,7 +2,7 @@
 
 import { use } from "react";
 import Link from "next/link";
-import { ArrowLeft, ShoppingCart, Star, Minus, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ShoppingCart, Star, Minus, Plus, ChevronLeft, ChevronRight, Store, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -197,6 +197,30 @@ export default function ProductDetailPage({
               {inStock ? `In Stock (${product.stock_quantity} available)` : "Out of Stock"}
             </Badge>
           </div>
+
+          {product.seller && (
+            <Link
+              href={`/sellers/${product.seller.shop_slug}`}
+              className="mt-5 flex items-center gap-3 rounded-xl border bg-white p-3 transition hover:border-gray-300 hover:shadow-sm"
+            >
+              <div className="relative h-12 w-12 overflow-hidden rounded-full border bg-gray-100">
+                {product.seller.shop_logo_url ? (
+                  <img src={product.seller.shop_logo_url} alt={product.seller.shop_name} className="h-full w-full object-cover" />
+                ) : (
+                  <Store size={22} className="absolute inset-0 m-auto text-gray-400" />
+                )}
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-gray-900">
+                  {product.seller.shop_name}
+                </p>
+                <p className="text-xs text-green-700 flex items-center gap-1">
+                  <CheckCircle2 size={12} /> Verified Seller
+                </p>
+              </div>
+              <span className="text-sm text-gray-400">View store →</span>
+            </Link>
+          )}
 
           {product.description && (
             <p className="mt-6 text-gray-600 leading-relaxed whitespace-pre-line">
