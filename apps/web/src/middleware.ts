@@ -57,7 +57,7 @@ export async function middleware(request: NextRequest) {
   if (request.method === 'OPTIONS' && isApiRoute(pathname)) {
     const origin = request.headers.get('origin');
     const headers = new Headers();
-    if (origin && (origin === process.env.APP_URL || origin === 'https://nasfon.store' || origin === 'http://localhost:3000')) {
+    if (origin && (origin === process.env.APP_URL || origin === 'https://market.nasfon.com' || origin === 'http://localhost:3000')) {
       headers.set('Access-Control-Allow-Origin', origin);
       headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
       headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
@@ -77,7 +77,7 @@ export async function middleware(request: NextRequest) {
   // Add CORS headers to the response
   if (isApiRoute(pathname)) {
     const origin = request.headers.get('origin');
-    if (origin && (origin === process.env.APP_URL || origin === 'https://nasfon.store' || origin === 'http://localhost:3000')) {
+    if (origin && (origin === process.env.APP_URL || origin === 'https://market.nasfon.com' || origin === 'http://localhost:3000')) {
       supabaseResponse.headers.set('Access-Control-Allow-Origin', origin);
       supabaseResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
       supabaseResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');

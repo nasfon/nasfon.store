@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import type { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Phone, Mail, CheckCircle2, Store } from "lucide-react";
 import * as sellerService from "@/services/seller.service";
@@ -7,11 +8,39 @@ import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
 import Link from "next/link";
 
-export default async function SellerProfilePage({
-  params,
-}: {
+interface SellerPageProps {
   params: Promise<{ slug: string }>;
-}) {
+}
+
+export async function generateMetadata({ params }: SellerPageProps): Promise<Metadata> {
+  const { slug } = await params;
+  try {
+    const seller = await sellerService.getSellerBySlug(slug);
+    const title = seller.shop_name;
+    const description =
+      seller.business_description?.slice(0, 160) ||
+      `Shop ${seller.shop_name} on Market by NasFon. Verified seller with trusted delivery in Nigeria.`;
+
+    return {
+      title,
+      description,
+      alternates: { canonical: `/sellers/${slug}` },
+      openGraph: {
+        title,
+        description,
+        url: `/sellers/${slug}`,
+        type: "website",
+        images: seller.shop_logo_url
+          ? [{ url: seller.shop_logo_url, width: 1200, height: 630, alt: seller.shop_name }]
+          : undefined,
+      },
+    };
+  } catch {
+    return { title: "Seller Not Found" };
+  }
+}
+
+export default async function SellerProfilePage({ params }: SellerPageProps) {
   const { slug } = await params;
   let seller;
   try {

@@ -33,10 +33,10 @@ export function Footer() {
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <Link href="/" className="text-lg font-bold text-primary">
-              NasFon Store
+              Market
             </Link>
             <p className="mt-2 text-sm text-gray-500">
-              Nigeria&apos;s most trusted online store for genuine phone accessories.
+              Nigeria&apos;s most trusted online store for genuine phone accessories, powered by NasFon.
             </p>
           </div>
           {sections.map((section) => (
@@ -60,7 +60,7 @@ export function Footer() {
           ))}
         </div>
         <div className="mt-8 border-t border-gray-200 pt-6 text-center text-sm text-gray-400">
-          &copy; {new Date().getFullYear()} NasFon Store. All rights reserved.
+          &copy; {new Date().getFullYear()} Market. All rights reserved.
         </div>
       </div>
     </footer>

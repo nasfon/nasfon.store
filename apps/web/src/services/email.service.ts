@@ -2,7 +2,7 @@ import { Resend } from "resend";
 import { createAdminClient } from "@/utils/supabase/admin";
 
 const resendApiKey = process.env.RESEND_API_KEY;
-const fromEmail = process.env.FROM_EMAIL || "NasFon Store <noreply@nasfon.store>";
+const fromEmail = process.env.FROM_EMAIL || "Market <noreply@market.nasfon.com>";
 
 function getResend() {
   if (!resendApiKey) return null;
@@ -44,12 +44,12 @@ function layout(content: string): string {
   <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:24px 16px">
     <table width="480" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden">
       <tr><td style="padding:32px 32px 0;text-align:center">
-        <h1 style="margin:0;font-size:22px;color:#1a73e8">NasFon Store</h1>
+        <h1 style="margin:0;font-size:22px;color:#1a73e8">Market</h1>
       </td></tr>
       ${content}
       <tr><td style="padding:24px 32px 32px;text-align:center;border-top:1px solid #eee">
         <p style="margin:0;font-size:12px;color:#999">
-          NasFon Store &mdash; Trusted Online Shopping<br>
+          Market &mdash; Trusted Online Shopping by NasFon<br>
           Need help? Reply to this email or contact our support team.
         </p>
       </td></tr>
