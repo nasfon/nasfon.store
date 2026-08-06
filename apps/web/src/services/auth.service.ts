@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/admin";
+import { siteConfig } from "@/lib/seo";
 
 async function cleanupAuthUser(userId: string) {
   try {
@@ -141,7 +142,7 @@ export async function getMe() {
 export async function forgotPassword(email: string) {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
-  const appUrl = process.env.APP_URL || "http://localhost:3000";
+  const appUrl = process.env.APP_URL || siteConfig.url;
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${appUrl}/reset-password`,

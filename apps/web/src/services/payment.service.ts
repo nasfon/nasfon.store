@@ -3,6 +3,7 @@ import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { initializeTransaction, verifyTransaction } from "@/services/paystack";
 import { sendPaymentConfirmation, sendAdminNewOrderNotification } from "./email.service";
+import { siteConfig } from "@/lib/seo";
 
 interface CheckoutData {
   items: { product_id: string; quantity: number }[];
@@ -20,7 +21,7 @@ interface CheckoutData {
 const PAYMENT_EXPIRY_MS = parseInt(process.env.PAYMENT_EXPIRY_MINUTES || "30") * 60 * 1000;
 
 function getAppUrl(): string {
-  return process.env.APP_URL || "http://localhost:3000";
+  return process.env.APP_URL || siteConfig.url;
 }
 
 export async function generatePayment(checkoutData: CheckoutData) {
