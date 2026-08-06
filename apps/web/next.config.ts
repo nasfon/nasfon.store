@@ -43,6 +43,14 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "**.cloudinary.com",
+      },
+    ],
+  },
   async headers() {
     return [
       {

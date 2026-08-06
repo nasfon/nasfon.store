@@ -20,7 +20,8 @@ export default function SellerApplyPage() {
     business_description: "",
   });
   const [logoImages, setLogoImages] = useState<{ image_url: string; display_order: number }[]>([]);
-  const [docImages, setDocImages] = useState<{ image_url: string; display_order: number }[]>([]);
+  const [cacImages, setCacImages] = useState<{ image_url: string; display_order: number }[]>([]);
+  const [govIdImages, setGovIdImages] = useState<{ image_url: string; display_order: number }[]>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,11 +30,14 @@ export default function SellerApplyPage() {
     try {
       const res = await fetch("/api/v1/seller/apply", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "X-Requested-With": "XMLHttpRequest",
+        },
         body: JSON.stringify({
           ...form,
           shop_logo_url: logoImages[0]?.image_url || "",
-          verification_documents: docImages.map((img) => img.image_url),
+          verification_documents: [...cacImages, ...govIdImages].map((img) => img.image_url),
         }),
       });
 
@@ -136,13 +140,20 @@ export default function SellerApplyPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Verification Documents (CAC certificate, Government ID, Utility bill)
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">CAC Certificate</label>
           <ImageUpload
-            images={docImages}
-            onChange={setDocImages}
-            maxImages={3}
+            images={cacImages}
+            onChange={setCacImages}
+            maxImages={1}
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Government ID</label>
+          <ImageUpload
+            images={govIdImages}
+            onChange={setGovIdImages}
+            maxImages={1}
           />
         </div>
 

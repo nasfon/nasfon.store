@@ -9,10 +9,33 @@ export async function getSellerProducts(sellerId: string) {
     .from("products")
     .select("*, category:categories(*), images:product_images(*)")
     .eq("seller_id", sellerId)
+    .eq("is_active", true)
     .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);
   return data || [];
+}
+
+async function generateUniqueSlug(supabase: ReturnType<typeof createClient>, baseSlug: string, excludeId?: string) {
+  let slug = baseSlug;
+  let counter = 2;
+
+  for (;;) {
+    let query = supabase
+      .from("products")
+      .select("id")
+      .eq("slug", slug);
+
+    if (excludeId) query = query.neq("id", excludeId);
+
+    const { data, error } = await query.maybeSingle();
+
+    if (error) throw new Error(error.message);
+    if (!data) return slug;
+
+    slug = `${baseSlug}-${counter}`;
+    counter += 1;
+  }
 }
 
 export async function createSellerProduct(sellerId: string, productData: {
@@ -30,10 +53,16 @@ export async function createSellerProduct(sellerId: string, productData: {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
+  const baseSlug =
+    productData.slug ||
+    productData.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  const slug = await generateUniqueSlug(supabase, baseSlug);
+
   const { data, error } = await supabase
     .from("products")
     .insert({
       ...productData,
+      slug,
       seller_id: sellerId,
       is_active: true,
     })
@@ -48,9 +77,15 @@ export async function updateSellerProduct(sellerId: string, productId: string, p
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
+  const updateData: Record<string, unknown> = { ...productData };
+
+  if (typeof updateData.slug === "string" && updateData.slug) {
+    updateData.slug = await generateUniqueSlug(supabase, updateData.slug, productId);
+  }
+
   const { data, error } = await supabase
     .from("products")
-    .update(productData)
+    .update(updateData)
     .eq("id", productId)
     .eq("seller_id", sellerId)
     .select()
@@ -64,13 +99,17 @@ export async function deleteSellerProduct(sellerId: string, productId: string) {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("products")
     .update({ is_active: false })
     .eq("id", productId)
-    .eq("seller_id", sellerId);
+    .eq("seller_id", sellerId)
+    .select("id");
 
   if (error) throw new Error(error.message);
+  if (!data || data.length === 0) {
+    throw new Error("Product not found or does not belong to this seller");
+  }
 }
 
 export async function getSellerDeliveryLocations(sellerId: string) {
