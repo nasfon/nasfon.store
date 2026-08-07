@@ -25,7 +25,6 @@ function csrfCheck(request: NextRequest): NextResponse | null {
 
   // Exempt payment webhooks from CSRF
   if (
-    request.nextUrl.pathname.startsWith('/api/v1/payments/webhook/flutterwave') ||
     request.nextUrl.pathname.startsWith('/api/v1/payments/webhook/paystack')
   ) {
     return null;

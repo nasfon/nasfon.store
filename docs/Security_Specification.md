@@ -57,10 +57,10 @@ Supabase PostgreSQL
 
 ## Layer 4 — Payment Security
 
-Flutterwave
+Paystack
 
-* Dynamic virtual accounts
-* Webhook signature verification
+* Redirect checkout
+* Webhook signature verification (HMAC SHA-512)
 * Payment reference validation
 * Idempotent webhook handling
 * Verify payment before updating any order
@@ -282,7 +282,7 @@ Product images
 
 Before confirming payment:
 
-* Verify Flutterwave webhook signature
+* Verify Paystack webhook signature
 * Verify payment reference
 * Confirm amount matches the order
 * Confirm payment status
@@ -312,8 +312,7 @@ Examples:
 * Supabase URL
 * Supabase Anon Key
 * Supabase Service Role Key
-* Flutterwave Secret Key
-* Flutterwave Webhook Secret
+* Paystack Secret Key
 * Cloudinary Credentials
 
 Never commit secrets to version control.

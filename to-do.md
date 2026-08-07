@@ -69,8 +69,7 @@
   NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=
   CLOUDINARY_API_KEY=
   CLOUDINARY_API_SECRET=
-  FLUTTERWAVE_SECRET_KEY=
-  FLUTTERWAVE_WEBHOOK_SECRET=
+  PAYSTACK_SECRET_KEY=
   APP_URL=
   ```
 
@@ -93,7 +92,7 @@
   - [x] `settings`
 - [x] **Add database indexes**
   - `email`, `phone_number`, `slug`, `sku`, `category_id`, `product_id`
-  - `order_number`, `payment_id`, `flutterwave_reference`
+  - `order_number`, `payment_id`, `reference`
   - `payment_status`, `order_status`
   - `search_vector` (GIN index for full-text search)
 - [x] **Configure Row Level Security (RLS)** on every table
@@ -294,9 +293,9 @@
 
 ### Payment Endpoints (`/api/v1/payments/...`)
 
-- [x] `POST /payments/dynamic-account` — generate Flutterwave virtual account
+- [x] `POST /payments/initialize` — initialize Paystack transaction
 - [x] `GET /payments/[reference]` — verify payment
-- [x] `POST /payments/webhook/flutterwave` — Flutterwave webhook handler
+- [x] `POST /payments/webhook/paystack` — Paystack webhook handler
   - Verify webhook signature
   - Confirm payment
   - Update payment record
@@ -352,16 +351,16 @@
 
 ---
 
-## Phase 10: Payment Integration (Flutterwave)
+## Phase 10: Payment Integration
 
-- [x] **Create Flutterwave account** (sandbox + live)
+- [x] **Create Paystack account** (test + live)
 - [x] **Generate API keys** (secret key, webhook secret)
 - [x] **Implement dynamic virtual bank account generation**
   - `POST /api/v1/payments/dynamic-account`
   - Return bank name, account number, account name, amount, expiry
 - [x] **Implement payment verification**
   - `GET /api/v1/payments/[reference]`
-- [x] **Implement Flutterwave webhook handler**
+- [x] **Implement Paystack webhook handler**
   - Verify webhook signature
   - Idempotent processing (prevent duplicates)
   - Update payment status
@@ -371,7 +370,7 @@
   - Payment instructions display
   - Payment status polling
   - Payment confirmation page
-- [ ] **Configure webhook endpoints** in Flutterwave dashboard
+- [ ] **Configure webhook endpoint** in Paystack dashboard
   - Development: ngrok/local tunnel
   - Staging: staging URL
   - Production: production URL
@@ -415,7 +414,7 @@
 - [x] **Add input validation** (Zod schemas) on all API routes
 - [x] **Implement CSRF protection** for state-changing requests
 - [x] **Configure CORS** — allow only approved origins
-- [x] **Webhook signature verification** (Flutterwave)
+- [x] **Webhook signature verification** (Paystack HMAC SHA-512)
 - [x] **Sanitize user-generated content** (reviews, names, search terms)
 - [x] **File upload restrictions** — images only, size limits, MIME validation
 - [x] **Server-side caching** — React cache(), Cache-Control headers on API routes
@@ -459,7 +458,7 @@
 - [ ] **Create staging Vercel project** (linked to `develop` branch)
 - [ ] **Configure staging environment variables**
 - [ ] **Set up Cloudinary staging folder**
-- [ ] **Configure Flutterwave sandbox keys** for staging
+- [ ] **Configure Paystack test keys** for staging
 - [ ] **Set up staging webhook endpoints**
 - [ ] **Deploy staging** via Vercel (auto-deploy from `develop`)
 - [ ] **Verify all flows on staging**
@@ -484,7 +483,7 @@
 - [ ] No linting errors
 - [ ] Environment variables configured in Vercel
 - [ ] Database migrations reviewed and applied
-- [ ] Payment webhook verified (Flutterwave live)
+- [ ] Payment webhook verified (Paystack live)
 - [ ] Cloudinary production credentials verified
 - [ ] HTTPS enabled
 - [ ] Security headers enabled
@@ -501,8 +500,8 @@
 - [ ] **Create production Vercel project** (linked to `main` branch)
 - [ ] **Configure production environment variables**
 - [ ] **Set up Cloudinary production folder**
-- [ ] **Configure Flutterwave live keys**
-- [ ] **Set up production webhook endpoints** in Flutterwave dashboard
+- [ ] **Configure Paystack live keys**
+- [ ] **Set up production webhook endpoint** in Paystack dashboard
 - [ ] **Merge `develop` → `main`** (triggers auto-deploy to Vercel)
 - [ ] **Verify production deployment**
 
@@ -519,7 +518,7 @@
 - [ ] Cart works
 - [ ] Checkout works
 - [ ] Dynamic bank account generation works
-- [ ] Flutterwave webhook updates payments correctly
+- [ ] Paystack webhook updates payments correctly
 - [ ] Orders are created
 - [ ] Order tracking works
 - [ ] Admin dashboard works

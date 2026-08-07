@@ -87,10 +87,9 @@ describe('POST /api/v1/checkout', () => {
     const mockResult = {
       payment: {
         id: 'pay-1',
-        flutterwave_reference: 'NF-ABC123',
+        reference: 'NF-ABC123',
         amount: 5500,
         payment_status: 'pending',
-        reference: 'NF-ABC123',
         payment_url: 'https://checkout.paystack.com/test-access-code',
         expires_at: new Date(Date.now() + 3600000).toISOString(),
       },

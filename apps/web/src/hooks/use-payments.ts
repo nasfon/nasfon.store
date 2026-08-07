@@ -6,7 +6,7 @@ import { api } from "@/lib/fetch";
 interface PaymentStatusResponse {
   payment_status: string;
   payment: {
-    flutterwave_reference?: string;
+    reference?: string;
     amount?: number;
     payment_status?: string;
   } | null;
@@ -17,7 +17,7 @@ interface PaymentByReferenceResponse {
   order: { id: string; order_number: string; order_status: string; payment_status: string } | null;
   payment: {
     id: string;
-    flutterwave_reference: string;
+    reference: string;
     amount: number;
     payment_status: string;
     webhook_payload: Record<string, unknown>;

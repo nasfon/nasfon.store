@@ -7,7 +7,7 @@
 - [Supabase](https://supabase.com/) account
 - [Vercel](https://vercel.com/) account
 - [Cloudinary](https://cloudinary.com/) account
-- [Flutterwave](https://flutterwave.com/) account (live keys for production)
+- [Paystack](https://paystack.com/) account (live keys for production)
 - [Resend](https://resend.com/) account
 
 ---
@@ -32,8 +32,7 @@
 3. **Root Directory**: `apps/web`
 4. **Framework Preset**: Next.js (auto-detected)
 5. **Environment Variables** — add all variables from `.env.example` with staging values
-6. Set `FLUTTERWAVE_ENVIRONMENT=sandbox`
-7. Deploy — Vercel will auto-deploy from the `develop` branch
+6. Deploy — Vercel will auto-deploy from the `develop` branch
 
 ### 1.3 Configure Cloudinary Staging Folder
 
@@ -43,10 +42,10 @@
 ### 1.4 Set Up Staging Webhook
 
 1. Get the staging URL: `https://nasfon-store-staging.vercel.app`
-2. In Flutterwave dashboard, add webhook:
-   - URL: `https://nasfon-store-staging.vercel.app/api/v1/payments/webhook/flutterwave`
-   - Secret hash: Generate a strong random value
-3. Set `FLUTTERWAVE_WEBHOOK_SECRET` to the hash in Vercel env vars
+2. In the Paystack dashboard, add a webhook:
+   - URL: `https://nasfon-store-staging.vercel.app/api/v1/payments/webhook/paystack`
+   - Event: `charge.success`
+3. Set `PAYSTACK_SECRET_KEY` to the staging secret key in Vercel env vars
 
 ### 1.5 Seed Admin User
 
@@ -63,7 +62,7 @@ Or via Supabase dashboard:
 
 - Home page loads
 - Products visible, search works
-- Cart + checkout + dynamic bank account generation works
+- Cart + checkout + Paystack payment works
 - Webhook processes payment
 - Order tracking works
 - Admin dashboard works
@@ -80,7 +79,7 @@ Or via Supabase dashboard:
 - [ ] No lint errors: `npm run lint`
 - [ ] Environment variables configured in Vercel
 - [ ] Database migrations reviewed
-- [ ] Payment webhook verified with Flutterwave live
+- [ ] Payment webhook verified with Paystack live
 - [ ] Cloudinary production credentials verified
 - [ ] HTTPS enabled (Vercel default)
 - [ ] Security headers confirmed (check Vercel response headers)
@@ -109,10 +108,7 @@ Or via Supabase dashboard:
    NEXT_PUBLIC_SUPABASE_URL=<production-url>
    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<production-anon-key>
    SUPABASE_SERVICE_ROLE_KEY=<production-service-role-key>
-   FLUTTERWAVE_CLIENT_ID=<live-client-id>
-   FLUTTERWAVE_CLIENT_SECRET=<live-client-secret>
-   FLUTTERWAVE_ENVIRONMENT=live
-   FLUTTERWAVE_WEBHOOK_SECRET=<strong-random-hash>
+   PAYSTACK_SECRET_KEY=<live-secret-key>
    NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=<cloud-name>
    CLOUDINARY_API_KEY=<api-key>
    CLOUDINARY_API_SECRET=<api-secret>
@@ -123,11 +119,11 @@ Or via Supabase dashboard:
    ```
 6. **Production Branch**: `main`
 
-### 2.4 Configure Flutterwave Live
+### 2.4 Configure Paystack Live
 
-1. In Flutterwave live dashboard, add webhook endpoint:
-   - URL: `https://nasfon.store/api/v1/payments/webhook/flutterwave`
-   - Secret hash: Use the same value as `FLUTTERWAVE_WEBHOOK_SECRET`
+1. In the Paystack live dashboard, add a webhook endpoint:
+   - URL: `https://nasfon.store/api/v1/payments/webhook/paystack`
+   - Event: `charge.success`
 2. Verify webhook signature with a test transaction
 
 ### 2.5 Cloudinary Production Folder
@@ -171,10 +167,7 @@ Run through the full verification checklist from Phase 17 of `to-do.md`.
 | `NEXT_PUBLIC_SUPABASE_URL` | staging project URL | production project URL |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | staging anon key | production anon key |
 | `SUPABASE_SERVICE_ROLE_KEY` | staging service key | production service key |
-| `FLUTTERWAVE_CLIENT_ID` | sandbox | live |
-| `FLUTTERWAVE_CLIENT_SECRET` | sandbox | live |
-| `FLUTTERWAVE_ENVIRONMENT` | `sandbox` | `live` |
-| `FLUTTERWAVE_WEBHOOK_SECRET` | staging webhook hash | production webhook hash |
+| `PAYSTACK_SECRET_KEY` | test secret key | live secret key |
 | `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` | same (or separate) | same (or separate) |
 | `CLOUDINARY_API_KEY` | same | same |
 | `CLOUDINARY_API_SECRET` | same | same |

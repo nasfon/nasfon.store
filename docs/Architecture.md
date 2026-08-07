@@ -48,9 +48,9 @@ NasFon Store uses a modern, modular architecture that is easy to maintain, secur
 
 ## Payment
 
-* Flutterwave
-* Dynamic Virtual Bank Accounts
-* Flutterwave Webhooks
+* Paystack
+* Redirect Checkout
+* Paystack Webhooks
 
 ---
 
@@ -84,8 +84,8 @@ Supabase
       ├────────────► Cloudinary
       │               Product Images
       │
-      └────────────► Flutterwave
-                      Dynamic Account
+      └────────────► Paystack
+                      Redirect Checkout
                       Payment Webhook
 ```
 
@@ -154,7 +154,7 @@ Responsible for:
 
 Responsible for:
 
-* Generate Flutterwave Dynamic Account
+* Initialize Paystack transaction
 * Receive Payment Webhooks
 * Verify Payment
 * Update Order Status
@@ -235,7 +235,7 @@ Customer Makes Transfer
 
 ↓
 
-Flutterwave Webhook
+Paystack Webhook
 
 ↓
 
@@ -304,11 +304,11 @@ Purpose
 
 ---
 
-## Flutterwave
+## Paystack
 
 Purpose
 
-* Dynamic Bank Account Generation
+* Redirect Checkout
 * Payment Confirmation
 * Payment Webhooks
 

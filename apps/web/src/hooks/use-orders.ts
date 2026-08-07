@@ -6,10 +6,9 @@ import type { Order } from "@/types";
 
 interface PaymentInfo {
   id: string;
-  flutterwave_reference: string;
+  reference: string;
   amount: number;
   payment_status: string;
-  reference: string;
   payment_url?: string | null;
 }
 

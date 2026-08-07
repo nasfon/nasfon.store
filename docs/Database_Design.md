@@ -191,12 +191,12 @@ Fields
 
 Purpose
 
-Store Flutterwave payment information that can be linked to one or more orders.
+Store payment information that can be linked to one or more orders.
 
 Fields
 
 * id
-* flutterwave_reference
+* reference
 * virtual_account_number
 * bank_name
 * account_name
@@ -325,7 +325,7 @@ Create indexes for:
 * product_id
 * order_number
 * payment_id
-* flutterwave_reference
+* reference
 * payment_status
 * order_status
 

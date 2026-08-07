@@ -92,10 +92,11 @@ create table if not exists delivery_locations (
 -- 2.6 payments
 create table if not exists payments (
   id uuid primary key default gen_random_uuid(),
-  flutterwave_reference text not null unique,
-  virtual_account_number text not null,
-  bank_name text not null,
-  account_name text not null,
+  reference text not null unique,
+  provider text,
+  virtual_account_number text,
+  bank_name text,
+  account_name text,
   amount numeric(10, 2) not null check (amount >= 0),
   payment_status payment_status not null default 'pending',
   paid_at timestamptz,
@@ -186,7 +187,7 @@ create index if not exists idx_orders_delivery_location on orders(delivery_locat
 create index if not exists idx_order_items_order on order_items(order_id);
 create index if not exists idx_order_items_product on order_items(product_id);
 
-create index if not exists idx_payments_reference on payments(flutterwave_reference);
+create index if not exists idx_payments_reference on payments(reference);
 
 create index if not exists idx_reviews_product on reviews(product_id);
 create index if not exists idx_reviews_user on reviews(user_id);

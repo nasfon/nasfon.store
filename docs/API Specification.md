@@ -281,21 +281,22 @@ Responsibilities
 
 # Payment Endpoints
 
-## Generate Dynamic Account
+## Initialize Payment
 
 POST
 
 ```
-/payments/dynamic-account
+/payments/initialize
 ```
+
+Creates a Paystack transaction and returns an authorization URL plus the payment reference.
 
 Returns
 
-* Bank Name
-* Account Number
-* Account Name
-* Amount
-* Expiry Time
+* reference
+* amount
+* payment_url
+* expires_at
 
 ---
 
@@ -309,17 +310,17 @@ GET
 
 ---
 
-## Flutterwave Webhook
+## Paystack Webhook
 
 POST
 
 ```
-/payments/webhook/flutterwave
+/payments/webhook/paystack
 ```
 
 Responsibilities
 
-* Verify webhook signature
+* Verify webhook signature (HMAC SHA-512)
 * Confirm payment
 * Update payment
 * Update linked order(s)

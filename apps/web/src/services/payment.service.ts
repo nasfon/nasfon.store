@@ -57,7 +57,8 @@ export async function generatePayment(checkoutData: CheckoutData) {
   const { data: payment, error: insertError } = await adminClient
     .from("payments")
     .insert({
-      flutterwave_reference: txRef,
+      reference: txRef,
+      provider: "paystack",
       virtual_account_number: "",
       bank_name: "",
       account_name: "",
@@ -81,10 +82,9 @@ export async function generatePayment(checkoutData: CheckoutData) {
   if (paymentUrl) {
     return {
       id: payment?.id || "",
-      flutterwave_reference: txRef,
+      reference: txRef,
       amount: checkoutData.total_amount,
       payment_status: "pending",
-      reference: txRef,
       payment_url: paymentUrl,
       expires_at: expiresAt,
     };
@@ -94,10 +94,9 @@ export async function generatePayment(checkoutData: CheckoutData) {
 
   return {
     id: payment?.id || "",
-    flutterwave_reference: txRef,
+    reference: txRef,
     amount: checkoutData.total_amount,
     payment_status: "pending",
-    reference: txRef,
     payment_url: null,
     expires_at: expiresAt,
   };
@@ -109,7 +108,7 @@ export async function expirePayment(reference: string) {
   const { data: payment } = await supabase
     .from("payments")
     .select("id, payment_status")
-    .eq("flutterwave_reference", reference)
+    .eq("reference", reference)
     .single();
 
   if (!payment) throw new Error("Payment not found");
@@ -123,13 +122,13 @@ export async function expirePayment(reference: string) {
   return { expired: true };
 }
 
-export async function createOrderFromPayment(flutterwaveReference: string) {
+export async function createOrderFromPayment(reference: string) {
   const supabase = createAdminClient();
 
   const { data: payment, error: paymentError } = await supabase
     .from("payments")
     .select("*")
-    .eq("flutterwave_reference", flutterwaveReference)
+    .eq("reference", reference)
     .single();
 
   if (paymentError || !payment) throw new Error("Payment not found");
@@ -247,7 +246,7 @@ async function markPaymentPaid(reference: string, actualAmount?: number) {
   const { data: payment } = await supabase
     .from("payments")
     .select("id, payment_status, amount, webhook_payload")
-    .eq("flutterwave_reference", reference)
+    .eq("reference", reference)
     .single();
 
   if (!payment) return false;
@@ -304,10 +303,6 @@ async function markPaymentPaid(reference: string, actualAmount?: number) {
   return true;
 }
 
-export async function confirmPaymentFromFlutterwave(txRef: string, actualAmount?: number) {
-  return markPaymentPaid(txRef, actualAmount);
-}
-
 export async function confirmPaymentFromPaystack(reference: string) {
   let charge;
   try {
@@ -325,7 +320,7 @@ export async function getPaymentByReference(reference: string) {
   const { data: payment } = await supabase
     .from("payments")
     .select("*")
-    .eq("flutterwave_reference", reference)
+    .eq("reference", reference)
     .single();
 
   if (!payment) throw new Error("Payment not found");
@@ -378,13 +373,13 @@ export async function getPaymentStatus(orderId: string) {
   if (!order) throw new Error("Order not found");
 
   const payment = order.payment as {
-    flutterwave_reference?: string;
+    reference?: string;
     payment_status?: string;
   } | null;
 
-  if (payment?.flutterwave_reference && order.payment_status === "pending") {
+  if (payment?.reference && order.payment_status === "pending") {
     try {
-      const verified = await confirmPaymentFromPaystack(payment.flutterwave_reference);
+      const verified = await confirmPaymentFromPaystack(payment.reference);
       if (verified) {
         await supabase
           .from("payments")
@@ -392,7 +387,7 @@ export async function getPaymentStatus(orderId: string) {
             payment_status: "paid",
             paid_at: new Date().toISOString(),
           })
-          .eq("flutterwave_reference", payment.flutterwave_reference);
+          .eq("reference", payment.reference);
 
         await supabase
           .from("orders")

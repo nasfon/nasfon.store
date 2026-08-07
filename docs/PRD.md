@@ -208,7 +208,7 @@ Included:
 * Categories
 * Cart
 * Checkout
-* Flutterwave payments
+* Paystack payments
 * Order management
 * User dashboard
 * Admin dashboard
@@ -246,7 +246,7 @@ Storage:
 
 Payments:
 
-* Flutterwave
+* Paystack
 
 Deployment:
 

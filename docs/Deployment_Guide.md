@@ -30,8 +30,8 @@ Next.js Application
       ├────────────► Cloudinary
       │               Product Images
       │
-      └────────────► Flutterwave
-                      Dynamic Accounts
+      └────────────► Paystack
+                      Payment Checkout
                       Payment Webhooks
 ```
 
@@ -52,7 +52,7 @@ Services
 * Local Next.js
 * Development Supabase Project
 * Cloudinary Development Folder
-* Flutterwave Sandbox
+* Paystack (test mode)
 
 ---
 
@@ -69,7 +69,7 @@ Services
 * Staging Vercel Project
 * Staging Supabase Project
 * Staging Cloudinary Folder
-* Flutterwave Sandbox
+* Paystack (test mode)
 
 ---
 
@@ -84,7 +84,7 @@ Services
 * Production Vercel Project
 * Production Supabase Project
 * Production Cloudinary Folder
-* Flutterwave Live
+ * Paystack (live mode)
 
 ---
 
@@ -169,8 +169,7 @@ NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
 
-FLUTTERWAVE_SECRET_KEY=
-FLUTTERWAVE_WEBHOOK_SECRET=
+PAYSTACK_SECRET_KEY=
 
 APP_URL=
 ```
@@ -235,14 +234,14 @@ production/
 
 ## Development
 
-* Flutterwave Sandbox
+* Paystack (test mode)
 * Test webhook endpoint
 
 ---
 
 ## Production
 
-* Flutterwave Live Keys
+* Paystack live keys
 * Production webhook endpoint
 * Signature verification enabled
 
@@ -328,7 +327,7 @@ Before Production Deployment
 * Admin login verified
 * Customer checkout verified
 * Order tracking verified
-* Bank transfer payment flow verified
+* Paystack payment flow verified
 
 ---
 
@@ -342,8 +341,8 @@ Confirm that:
 * Buy Now works
 * Cart works
 * Checkout works
-* Dynamic bank account generation works
-* Flutterwave webhook updates payments correctly
+* Paystack payment works
+* Paystack webhook updates payments correctly
 * Orders are created
 * Order tracking works
 * Admin dashboard works

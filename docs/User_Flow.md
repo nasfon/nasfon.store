@@ -11,7 +11,7 @@ Home Page
 → Proceed to Checkout
 → Enter Customer Information (Name, Phone Number, and Email)
 → Select Delivery Location
-→ Choose Payment Method (Bank Transfer via Dynamic Account Number Generated from Flutterwave)
+→ Choose Payment Method (Paystack Redirect)
 → Complete Payment (Bank Transfer to Dynamic Account Number)
 → Payment Successful
 → Order Confirmation
@@ -29,7 +29,7 @@ Home Page
 → Proceed to Checkout
 → Enter Customer Information (Name, Phone Number, and Email)
 → Select Delivery Location
-→ Choose Payment Method (Bank Transfer via Dynamic Account Number Generated from Flutterwave)
+→ Choose Payment Method (Paystack Redirect)
 → Complete Payment (Bank Transfer to Dynamic Account Number)
 → Payment Successful
 → Order Confirmation
@@ -70,7 +70,7 @@ Login
 → Add to Cart
 → Checkout
 → Select Delivery Location
-→ Payment (Bank Transfer via Dynamic Account Number Generated from Flutterwave)
+→ Payment (Paystack Redirect)
 → Order Confirmation
 → Track Order
 
@@ -82,7 +82,7 @@ Login
 → Buy Now
 → Checkout
 → Select Delivery Location
-→ Payment (Bank Transfer via Dynamic Account Number Generated from Flutterwave)
+→ Payment (Paystack Redirect)
 → Order Confirmation
 → Track Order
 
@@ -175,7 +175,7 @@ Dashboard
 Dashboard
 → Orders
 → View Order
-→ Verify Bank Transfer Payment via Flutterwave Dynamic Account Number
+→ Verify Payment via Paystack
 → Accept Order
 → Update Status
 → Mark as Delivered
@@ -242,7 +242,7 @@ The application uses **Role-Based Access Control (RBAC)** with three distinct ro
 * Add to cart
 * Buy now from product details page
 * Checkout with name, phone number, and email required
-* Pay via bank transfer using a dynamic account number generated from Flutterwave
+* Pay via Paystack redirect
 * Track order using order number
 
 ### Customer Role

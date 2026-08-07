@@ -117,7 +117,7 @@ export default function OrderDetailPage({
               <div className="mt-2 space-y-1 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-500">Reference</span>
-                  <span className="font-mono">{order.payment.flutterwave_reference}</span>
+                  <span className="font-mono">{order.payment.reference}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Status</span>

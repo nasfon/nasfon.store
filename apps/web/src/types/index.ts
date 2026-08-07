@@ -135,7 +135,7 @@ export interface OrderItem {
 
 export interface Payment {
   id: string;
-  flutterwave_reference: string;
+  reference: string;
   amount: number;
   payment_status: PaymentStatus;
   paid_at: string | null;
