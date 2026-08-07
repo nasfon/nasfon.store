@@ -20,7 +20,14 @@ export async function POST(request: NextRequest) {
       full_name: sanitizeName(parsed.data.full_name),
     };
 
-    const result = await authService.register(sanitized);
+    const data = {
+      full_name: sanitized.full_name,
+      email: sanitized.email,
+      password: sanitized.password,
+      phone_number: sanitized.phone_number,
+    };
+
+    const result = await authService.register(data);
     return successResponse(result, "Account created successfully", 201);
   } catch (err) {
     return errorResponse(err instanceof Error ? err.message : "Registration failed", [], 400);

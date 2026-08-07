@@ -14,10 +14,37 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (password.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+    if (!/[A-Z]/.test(password)) {
+      toast.error("Password must contain at least one capital letter");
+      return;
+    }
+    if (!/[a-z]/.test(password)) {
+      toast.error("Password must contain at least one lowercase letter");
+      return;
+    }
+    if (!/[0-9]/.test(password)) {
+      toast.error("Password must contain at least one number");
+      return;
+    }
+    if (!/[^A-Za-z0-9]/.test(password)) {
+      toast.error("Password must contain at least one symbol");
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
     setLoading(true);
 
     const res = await fetch("/api/v1/auth/register", {
@@ -27,6 +54,7 @@ export default function RegisterPage() {
         full_name: fullName,
         email,
         password,
+        confirm_password: confirmPassword,
         phone_number: phone || undefined,
       }),
     });
@@ -84,8 +112,22 @@ export default function RegisterPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          minLength={6}
+          minLength={8}
         />
+        <Input
+          id="confirm_password"
+          label="Confirm Password"
+          type="password"
+          placeholder="Re-enter your password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          required
+          minLength={8}
+        />
+        <p className="text-xs text-gray-500">
+          Password must be at least 8 characters and include a capital letter, lowercase
+          letter, number, and symbol.
+        </p>
         <Button type="submit" size="lg" className="w-full" disabled={loading}>
           {loading ? "Creating account..." : "Create Account"}
         </Button>

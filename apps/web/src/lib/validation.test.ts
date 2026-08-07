@@ -7,23 +7,20 @@ import {
 
 describe('validation schemas', () => {
   describe('registerSchema', () => {
+    const validBase = {
+      full_name: 'John Doe',
+      email: 'john@example.com',
+      password: 'Secure#Pass123',
+      confirm_password: 'Secure#Pass123',
+    };
+
     it('should validate valid data', () => {
-      const data = {
-        full_name: 'John Doe',
-        email: 'john@example.com',
-        password: 'password123',
-      };
-      const result = registerSchema.safeParse(data);
+      const result = registerSchema.safeParse(validBase);
       expect(result.success).toBe(true);
     });
 
     it('should reject invalid email', () => {
-      const data = {
-        full_name: 'John Doe',
-        email: 'invalid-email',
-        password: 'password123',
-      };
-      const result = registerSchema.safeParse(data);
+      const result = registerSchema.safeParse({ ...validBase, email: 'invalid-email' });
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].message).toBe('Invalid email address');
@@ -31,12 +28,32 @@ describe('validation schemas', () => {
     });
 
     it('should reject short password', () => {
-      const data = {
-        full_name: 'John Doe',
-        email: 'john@example.com',
-        password: 'pass',
-      };
-      const result = registerSchema.safeParse(data);
+      const result = registerSchema.safeParse({ ...validBase, password: 'Ab#1' });
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject password without capital letter', () => {
+      const result = registerSchema.safeParse({ ...validBase, password: 'secure#pass123' });
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject password without lowercase letter', () => {
+      const result = registerSchema.safeParse({ ...validBase, password: 'SECURE#PASS123' });
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject password without a number', () => {
+      const result = registerSchema.safeParse({ ...validBase, password: 'Secure#PassWord' });
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject password without a symbol', () => {
+      const result = registerSchema.safeParse({ ...validBase, password: 'SecurePass123' });
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject mismatched confirm password', () => {
+      const result = registerSchema.safeParse({ ...validBase, confirm_password: 'Different!2' });
       expect(result.success).toBe(false);
     });
   });
