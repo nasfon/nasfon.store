@@ -54,13 +54,13 @@ export async function generatePayment(checkoutData: CheckoutData) {
     }
   }
 
-  const { data: payment } = await adminClient
+  const { data: payment, error: insertError } = await adminClient
     .from("payments")
     .insert({
       flutterwave_reference: txRef,
       virtual_account_number: "",
-      bank_name: null,
-      account_name: null,
+      bank_name: "",
+      account_name: "",
       amount: checkoutData.total_amount,
       payment_status: "pending",
       webhook_payload: {
@@ -72,6 +72,11 @@ export async function generatePayment(checkoutData: CheckoutData) {
     })
     .select()
     .single();
+
+  if (insertError || !payment) {
+    console.error("[Paystack] Failed to create payment record:", insertError);
+    throw new Error(insertError?.message || "Failed to create payment record");
+  }
 
   if (paymentUrl) {
     return {
