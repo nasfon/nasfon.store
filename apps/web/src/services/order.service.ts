@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 
 export async function trackOrder(orderNumber: string, phoneNumber: string) {
   const cookieStore = await cookies();
@@ -17,8 +18,7 @@ export async function trackOrder(orderNumber: string, phoneNumber: string) {
 }
 
 export async function getCustomerOrders(userId: string) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from("orders")
@@ -31,8 +31,7 @@ export async function getCustomerOrders(userId: string) {
 }
 
 export async function getOrderById(orderId: string, userId?: string) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createAdminClient();
 
   let query = supabase
     .from("orders")
