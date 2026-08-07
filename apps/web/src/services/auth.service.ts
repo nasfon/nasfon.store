@@ -1,16 +1,7 @@
 import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/admin";
-import { siteConfig } from "@/lib/seo";
-
-async function cleanupAuthUser(userId: string) {
-  try {
-    const adminClient = createAdminClient();
-    await adminClient.auth.admin.deleteUser(userId);
-  } catch {
-    console.warn("Could not clean up auth user — SUPABASE_SERVICE_ROLE_KEY may not be set");
-  }
-}
+import { createAndSendOtp, createPendingRegistration } from "@/services/otp.service";
 
 export async function register(data: {
   full_name: string;
@@ -18,36 +9,32 @@ export async function register(data: {
   password: string;
   phone_number?: string;
 }) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
   const adminClient = createAdminClient();
 
-  const { data: authData, error: signUpError } = await supabase.auth.signUp({
+  const { data: existing } = await adminClient
+    .from("users")
+    .select("id")
+    .eq("email", data.email)
+    .maybeSingle();
+  if (existing) throw new Error("An account with this email already exists");
+
+  // No account is created yet. We stage the signup and only create the
+  // Supabase user + profile after the email is verified via OTP.
+  const { expiresAt } = await createPendingRegistration({
     email: data.email,
+    full_name: data.full_name,
+    phone_number: data.phone_number,
     password: data.password,
   });
 
-  if (signUpError) throw new Error(signUpError.message);
-  if (!authData.user) throw new Error("Failed to create user");
-
-  const { error: profileError } = await adminClient.from("users").insert({
-    id: authData.user.id,
-    full_name: data.full_name,
-    email: data.email,
-    phone_number: data.phone_number || null,
-    role: "customer",
-    is_active: true,
-  });
-
-  if (profileError) {
-    await cleanupAuthUser(authData.user.id);
-    throw new Error("Failed to create profile");
-  }
-
-  return { user: authData.user };
+  return { requiresOtp: true, email: data.email, expiresAt };
 }
 
-export async function login(data: { email: string; password: string }) {
+export async function login(data: {
+  email: string;
+  password: string;
+  otp_reverify?: boolean;
+}) {
   const cookieStore = await cookies();
   const supabase = createClient(cookieStore);
   const adminClient = createAdminClient();
@@ -61,7 +48,7 @@ export async function login(data: { email: string; password: string }) {
 
   const { data: existing } = await adminClient
     .from("users")
-    .select("role, is_active")
+    .select("role, is_active, email_verified_at")
     .eq("id", authData.user.id)
     .maybeSingle();
 
@@ -74,6 +61,7 @@ export async function login(data: { email: string; password: string }) {
       email: authData.user.email || "",
       role,
       is_active: true,
+      email_verified_at: new Date().toISOString(),
     });
 
     if (insertError) {
@@ -83,9 +71,28 @@ export async function login(data: { email: string; password: string }) {
   } else if (!existing.is_active) {
     await supabase.auth.signOut();
     throw new Error("Account has been suspended. Please contact support.");
+  } else if (!existing.email_verified_at) {
+    await supabase.auth.signOut();
+    throw new Error(
+      "Your email has not been verified. Please check your inbox for the verification code."
+    );
   }
 
-  return { session: authData.session, user: authData.user, role: role as "customer" | "admin" };
+  // Re-verification after an expired session: keep the session but require OTP.
+  if (data.otp_reverify) {
+    await createAndSendOtp({
+      userId: authData.user.id,
+      email: authData.user.email || "",
+      purpose: "login",
+    });
+  }
+
+  return {
+    session: authData.session,
+    user: authData.user,
+    role: role as "customer" | "admin",
+    requiresOtp: Boolean(data.otp_reverify),
+  };
 }
 
 export async function logout() {
@@ -137,24 +144,4 @@ export async function getMe() {
   if (!profile.is_active) throw new Error("Account has been suspended");
 
   return { ...user, profile };
-}
-
-export async function forgotPassword(email: string) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
-  const appUrl = process.env.APP_URL || siteConfig.url;
-
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${appUrl}/reset-password`,
-  });
-
-  if (error) throw new Error(error.message);
-}
-
-export async function resetPassword(password: string) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
-
-  const { error } = await supabase.auth.updateUser({ password });
-  if (error) throw new Error(error.message);
 }

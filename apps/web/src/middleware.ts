@@ -20,6 +20,15 @@ function isApiRoute(pathname: string): boolean {
   return pathname.startsWith("/api");
 }
 
+function hasAuthCookie(request: NextRequest): boolean {
+  for (const cookie of request.cookies.getAll()) {
+    if (cookie.name.startsWith("sb-") && cookie.name.includes("auth-token")) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function csrfCheck(request: NextRequest): NextResponse | null {
   if (!STATE_CHANGING_METHODS.includes(request.method)) return null;
 
@@ -101,6 +110,11 @@ export async function middleware(request: NextRequest) {
   if (isProtectedRoute && !user) {
     const loginUrl = new URL("/login", request.url);
     loginUrl.searchParams.set("redirect", pathname);
+    // If a session cookie exists but the token is no longer valid, the session
+    // expired — require OTP re-verification on the next login.
+    if (hasAuthCookie(request)) {
+      loginUrl.searchParams.set("reason", "token_expired");
+    }
     return NextResponse.redirect(loginUrl);
   }
 

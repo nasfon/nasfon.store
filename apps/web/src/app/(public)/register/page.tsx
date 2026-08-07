@@ -67,8 +67,8 @@ export default function RegisterPage() {
       return;
     }
 
-    toast.success("Account created successfully!");
-    router.push("/dashboard");
+    toast.success("Check your email to verify your account!");
+    router.push(`/otp?purpose=signup&email=${encodeURIComponent(email)}`);
   };
 
   return (

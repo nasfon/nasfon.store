@@ -12,11 +12,15 @@ function LoginContent() {
   const searchParams = useSearchParams();
   const redirect = searchParams.get("redirect") || "/dashboard";
   const errorParam = searchParams.get("error");
+  const verifiedParam = searchParams.get("verified");
+  const reason = searchParams.get("reason");
 
   const [email, setEmail] = useState("");
   const [suspendedAlert, setSuspendedAlert] = useState(errorParam === "suspended");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const needsOtpAfterLogin = reason === "token_expired";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +29,7 @@ function LoginContent() {
     const res = await fetch("/api/v1/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, otp_reverify: needsOtpAfterLogin || undefined }),
     });
 
     const data = await res.json();
@@ -41,6 +45,12 @@ function LoginContent() {
 
     const role = data.data?.profile?.role || "customer";
     toast.success("Welcome back!");
+
+    if (reason === "token_expired") {
+      router.push(`/otp?purpose=login&email=${encodeURIComponent(email)}`);
+      return;
+    }
+
     if (role === "admin") {
       router.push("/admin");
     } else {
@@ -52,6 +62,18 @@ function LoginContent() {
     <div className="mx-auto max-w-sm px-4 py-16">
       <h1 className="text-center text-2xl font-bold text-gray-900">Login</h1>
       <p className="mt-2 text-center text-sm text-gray-500">Welcome back! Sign in to your account.</p>
+
+      {reason === "token_expired" && (
+        <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          Your session has expired. Sign in and confirm your identity to continue.
+        </div>
+      )}
+
+      {verifiedParam === "1" && (
+        <div className="mt-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          Your email has been verified successfully. You can now sign in.
+        </div>
+      )}
 
       {suspendedAlert && (
         <div className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

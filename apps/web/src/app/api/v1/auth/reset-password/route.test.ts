@@ -7,7 +7,7 @@ import * as passwordResetService from '@/services/passwordReset.service';
 import * as apiLib from '@/lib/api';
 
 jest.mock('@/services/passwordReset.service', () => ({
-  sendPasswordResetCode: jest.fn(),
+  resetPasswordWithCode: jest.fn(),
 }));
 
 jest.mock('@/lib/api', () => {
@@ -18,9 +18,15 @@ jest.mock('@/lib/api', () => {
   };
 });
 
-describe('POST /api/v1/auth/forgot-password', () => {
-  const mockSendCode = passwordResetService.sendPasswordResetCode as jest.MockedFunction<typeof passwordResetService.sendPasswordResetCode>;
+describe('POST /api/v1/auth/reset-password', () => {
+  const mockReset = passwordResetService.resetPasswordWithCode as jest.MockedFunction<typeof passwordResetService.resetPasswordWithCode>;
   const mockWithRateLimit = apiLib.withRateLimit as jest.MockedFunction<typeof apiLib.withRateLimit>;
+
+  const validBody = JSON.stringify({
+    email: 'test@example.com',
+    code: '123456',
+    password: 'MyP@ssword1',
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -28,9 +34,9 @@ describe('POST /api/v1/auth/forgot-password', () => {
   });
 
   it('should return 400 if validation fails', async () => {
-    const req = new NextRequest('http://localhost:3000/api/v1/auth/forgot-password', {
+    const req = new NextRequest('http://localhost:3000/api/v1/auth/reset-password', {
       method: 'POST',
-      body: JSON.stringify({ email: 'invalid-email' }),
+      body: JSON.stringify({ email: 'test@example.com', code: '123', password: 'weak' }),
     });
 
     const res = await POST(req);
@@ -41,12 +47,12 @@ describe('POST /api/v1/auth/forgot-password', () => {
     expect(data.message).toBe('Validation failed');
   });
 
-  it('should return 400 if service throws an error', async () => {
-    mockSendCode.mockRejectedValue(new Error('Email delivery failed'));
+  it('should return 400 if the code is invalid or expired', async () => {
+    mockReset.mockRejectedValue(new Error('Invalid or expired reset code. Please request a new one.'));
 
-    const req = new NextRequest('http://localhost:3000/api/v1/auth/forgot-password', {
+    const req = new NextRequest('http://localhost:3000/api/v1/auth/reset-password', {
       method: 'POST',
-      body: JSON.stringify({ email: 'test@example.com' }),
+      body: validBody,
     });
 
     const res = await POST(req);
@@ -54,15 +60,15 @@ describe('POST /api/v1/auth/forgot-password', () => {
 
     expect(res.status).toBe(400);
     expect(data.success).toBe(false);
-    expect(data.message).toBe('Email delivery failed');
+    expect(data.message).toBe('Invalid or expired reset code. Please request a new one.');
   });
 
   it('should return 200 on success', async () => {
-    mockSendCode.mockResolvedValue();
+    mockReset.mockResolvedValue();
 
-    const req = new NextRequest('http://localhost:3000/api/v1/auth/forgot-password', {
+    const req = new NextRequest('http://localhost:3000/api/v1/auth/reset-password', {
       method: 'POST',
-      body: JSON.stringify({ email: 'test@example.com' }),
+      body: validBody,
     });
 
     const res = await POST(req);
@@ -70,18 +76,11 @@ describe('POST /api/v1/auth/forgot-password', () => {
 
     expect(res.status).toBe(200);
     expect(data.success).toBe(true);
-    expect(data.message).toBe('Password reset email sent');
-  });
-
-  it('should not reveal whether an account exists', async () => {
-    mockSendCode.mockResolvedValue();
-
-    const req = new NextRequest('http://localhost:3000/api/v1/auth/forgot-password', {
-      method: 'POST',
-      body: JSON.stringify({ email: 'unknown@example.com' }),
+    expect(data.message).toBe('Password reset successfully');
+    expect(mockReset).toHaveBeenCalledWith({
+      email: 'test@example.com',
+      code: '123456',
+      newPassword: 'MyP@ssword1',
     });
-
-    const res = await POST(req);
-    expect(res.status).toBe(200);
   });
 });

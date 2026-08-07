@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createClient } from "@/utils/supabase/client";
 import { toast } from "sonner";
 
 export default function ForgotPasswordPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -16,21 +17,28 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     setLoading(true);
 
-    const supabase = createClient();
-    const appUrl = window.location.origin;
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${appUrl}/reset-password`,
-    });
+    try {
+      const res = await fetch("/api/v1/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest" },
+        body: JSON.stringify({ email }),
+      });
 
-    if (error) {
-      toast.error(error.message);
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.message || "Failed to send reset email");
+        setLoading(false);
+        return;
+      }
+
+      setSent(true);
       setLoading(false);
-      return;
+      router.push(`/reset-password?email=${encodeURIComponent(email)}`);
+    } catch {
+      toast.error("Failed to send reset email");
+      setLoading(false);
     }
-
-    setSent(true);
-    setLoading(false);
-    toast.success("Check your email for the reset link");
   };
 
   if (sent) {
@@ -38,11 +46,12 @@ export default function ForgotPasswordPage() {
       <div className="mx-auto max-w-sm px-4 py-16 text-center">
         <h1 className="text-2xl font-bold text-gray-900">Check Your Email</h1>
         <p className="mt-2 text-sm text-gray-500">
-          We&apos;ve sent a password reset link to <strong>{email}</strong>. Please check your inbox.
+          We&apos;ve sent a reset code to <strong>{email}</strong>. Enter it together
+          with your new password.
         </p>
-        <Link href="/login">
+        <Link href={`/reset-password?email=${encodeURIComponent(email)}`}>
           <Button variant="outline" className="mt-6">
-            Back to Login
+            Enter Your Code
           </Button>
         </Link>
       </div>
@@ -53,7 +62,7 @@ export default function ForgotPasswordPage() {
     <div className="mx-auto max-w-sm px-4 py-16">
       <h1 className="text-center text-2xl font-bold text-gray-900">Forgot Password</h1>
       <p className="mt-2 text-center text-sm text-gray-500">
-        Enter your email and we&apos;ll send you a reset link.
+        Enter your email and we&apos;ll send you a reset code.
       </p>
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-4">
@@ -67,7 +76,7 @@ export default function ForgotPasswordPage() {
           required
         />
         <Button type="submit" size="lg" className="w-full" disabled={loading}>
-          {loading ? "Sending..." : "Send Reset Link"}
+          {loading ? "Sending..." : "Send Reset Code"}
         </Button>
       </form>
 

@@ -5,6 +5,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Providers } from "@/components/providers";
+import { PerformancePatch } from "@/components/performance-patch";
 import { siteConfig, absoluteUrl } from "@/lib/seo";
 import "./globals.css";
 
@@ -119,6 +120,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen flex flex-col">
         <Providers>
+          <PerformancePatch />
           <Navbar />
           <main className="flex-1 pb-16 md:pb-0">{children}</main>
           <div className="hidden md:block"><Footer /></div>

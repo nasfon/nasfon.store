@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     };
 
     const result = await authService.register(data);
-    return successResponse(result, "Account created successfully", 201);
+    return successResponse(result, "Verification code sent", 201);
   } catch (err) {
     return errorResponse(err instanceof Error ? err.message : "Registration failed", [], 400);
   }

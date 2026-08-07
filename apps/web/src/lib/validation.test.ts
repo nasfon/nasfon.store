@@ -3,6 +3,8 @@ import {
   loginSchema,
   paginationSchema,
   adminSettingsSchema,
+  otpSendSchema,
+  otpVerifySchema,
 } from './validation';
 
 describe('validation schemas', () => {
@@ -62,6 +64,36 @@ describe('validation schemas', () => {
     it('should validate valid credentials', () => {
       const result = loginSchema.safeParse({ email: 'test@test.com', password: '123' });
       expect(result.success).toBe(true);
+    });
+
+    it('should accept otp_reverify flag', () => {
+      const result = loginSchema.safeParse({ email: 'test@test.com', password: '123', otp_reverify: true });
+      expect(result.success).toBe(true);
+      if (result.success) expect(result.data.otp_reverify).toBe(true);
+    });
+  });
+
+  describe('otpSendSchema', () => {
+    it('should validate valid request', () => {
+      const result = otpSendSchema.safeParse({ purpose: 'signup', email: 'test@test.com' });
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject invalid purpose', () => {
+      const result = otpSendSchema.safeParse({ purpose: 'other', email: 'test@test.com' });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('otpVerifySchema', () => {
+    it('should validate valid 6-digit code', () => {
+      const result = otpVerifySchema.safeParse({ purpose: 'login', email: 'test@test.com', code: '123456' });
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject non-6-digit code', () => {
+      const result = otpVerifySchema.safeParse({ purpose: 'login', email: 'test@test.com', code: '12345' });
+      expect(result.success).toBe(false);
     });
   });
 

@@ -24,13 +24,32 @@ export const registerSchema = z
 export const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
+  otp_reverify: z.boolean().optional(),
+});
+
+export const otpSendSchema = z.object({
+  purpose: z.enum(["signup", "login"]),
+  email: z.string().email("Invalid email address"),
+});
+
+export const otpVerifySchema = z.object({
+  purpose: z.enum(["signup", "login"]),
+  code: z.string().regex(/^\d{6}$/, "Code must be 6 digits"),
+  email: z.string().email("Invalid email address"),
 });
 
 export const forgotPasswordSchema = z.object({
   email: z.string().email("Invalid email address"),
 });
 
+export const resetCodeSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  code: z.string().regex(/^\d{6}$/, "Code must be 6 digits"),
+});
+
 export const resetPasswordSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  code: z.string().regex(/^\d{6}$/, "Code must be 6 digits"),
   password: passwordSchema,
 });
 

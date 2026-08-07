@@ -14,6 +14,16 @@
 
 > **Important:** Environment variables for Vercel are set in the **Vercel Dashboard** (Project → Settings → Environment Variables), **never** uploaded via `.env.local`. The `.env.local` file is for local development only. See `.env.example` for all required variable names.
 
+### Resend (email delivery) troubleshooting
+
+- Registrations and session re-verification **require** `RESEND_API_KEY` and `FROM_EMAIL`. If they are missing, the OTP flow now fails loudly instead of silently pretending the code was sent.
+- The Resend SDK error `application_error` with `statusCode: null` and message `"Unable to fetch data. The request could not be resolved."` means the server **could not reach `https://api.resend.com`** (network-level failure). It is *not* a bad key (`401`) or an unverified domain (`403`/`422`). Check:
+  - Outbound HTTPS access from the runtime (Vercel functions allow it; restricted networks/sandboxes may not).
+  - `RESEND_BASE_URL` is not set to an invalid value (the SDK uses it as the API base URL).
+  - Resend service status at https://resend-status.com — retry later if there is an incident.
+- The `from` domain (`FROM_EMAIL`) must be **verified in Resend** (Domains → Add domain → DNS records). Until it is, delivery requests return HTTP 403/422.
+- Use a matching key and domain: a **test** API key can only send to `@resend.dev` addresses; use a **production** key for real recipients.
+
 ## 1. Staging Deployment
 
 ### 1.1 Create Staging Supabase Project

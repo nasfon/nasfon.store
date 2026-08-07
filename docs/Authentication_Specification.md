@@ -379,13 +379,16 @@ Record the following events for auditing and troubleshooting:
 
 Not included in the MVP:
 
-* Email verification
-* Two-factor authentication (2FA)
 * Phone number OTP
 * Social login providers
 * Login history
 * Trusted devices
 * Account recovery by phone
+
+## Implemented
+
+* **Email verification via OTP**: Registrations are staged (no account is created). The Supabase user and profile are only created once the 6-digit code sent by email is verified. Until then the account does not exist and cannot be signed into.
+* **Session re-verification**: When a session token expires, the next login also requires an OTP before the user can continue.
 
 ---
 
