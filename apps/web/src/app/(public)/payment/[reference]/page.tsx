@@ -26,7 +26,7 @@ function PaymentContent({
   useEffect(() => {
     if (order?.id && !redirectedRef.current) {
       redirectedRef.current = true;
-      router.replace(`/order/confirmation/${order.id}`);
+      router.replace("/dashboard/orders");
     }
   }, [order, router]);
 
