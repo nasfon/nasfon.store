@@ -6,8 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Check, X, Eye, Store, MapPin, Phone, Mail, FileText } from "lucide-react";
-import { useAdminSellers, useAdminVerifySeller } from "@/hooks/use-seller";
+import { Check, X, Eye, Store, MapPin, Phone, Mail, FileText, Ban, RotateCcw, Trash2 } from "lucide-react";
+import { useAdminSellers, useAdminVerifySeller, useAdminSetSellerActive, useAdminDeleteSeller } from "@/hooks/use-seller";
 import { toast } from "sonner";
 import type { Seller } from "@/types";
 
@@ -21,6 +21,8 @@ export default function AdminSellersPage() {
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
   const { data: sellers, isLoading } = useAdminSellers(statusFilter);
   const verifySeller = useAdminVerifySeller();
+  const setSellerActive = useAdminSetSellerActive();
+  const deleteSeller = useAdminDeleteSeller();
   const [viewing, setViewing] = useState<Seller | null>(null);
 
   const handleVerify = (seller: Seller, status: "approved" | "rejected") => {
@@ -34,6 +36,30 @@ export default function AdminSellersPage() {
         onError: (err) => toast.error(err.message),
       }
     );
+  };
+
+  const handleToggleActive = (seller: Seller) => {
+    setSellerActive.mutate(
+      { id: seller.id, is_active: !seller.is_active },
+      {
+        onSuccess: () => {
+          toast.success(seller.is_active ? "Seller deactivated" : "Seller activated");
+          setViewing(null);
+        },
+        onError: (err) => toast.error(err.message),
+      }
+    );
+  };
+
+  const handleDelete = (seller: Seller) => {
+    if (!confirm(`Delete "${seller.shop_name}"? This permanently removes the seller.`)) return;
+    deleteSeller.mutate(seller.id, {
+      onSuccess: () => {
+        toast.success("Seller deleted");
+        setViewing(null);
+      },
+      onError: (err) => toast.error(err.message),
+    });
   };
 
   return (
@@ -109,9 +135,14 @@ export default function AdminSellersPage() {
                     </p>
                   </td>
                   <td className="px-4 py-3">
-                    <Badge className={statusStyles[seller.verification_status]?.className}>
-                      {statusStyles[seller.verification_status]?.label}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge className={statusStyles[seller.verification_status]?.className}>
+                        {statusStyles[seller.verification_status]?.label}
+                      </Badge>
+                      {!seller.is_active && (
+                        <Badge className="bg-gray-100 text-gray-600">Deactivated</Badge>
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
@@ -138,6 +169,21 @@ export default function AdminSellersPage() {
                           </Button>
                         </>
                       )}
+                      <Button variant="outline" size="sm" onClick={() => handleToggleActive(seller)}>
+                        {seller.is_active ? (
+                          <><Ban size={14} /> Deactivate</>
+                        ) : (
+                          <><RotateCcw size={14} /> Activate</>
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-red-700"
+                        onClick={() => handleDelete(seller)}
+                      >
+                        <Trash2 size={14} /> Delete
+                      </Button>
                     </div>
                   </td>
                 </tr>
@@ -243,6 +289,32 @@ export default function AdminSellersPage() {
                 </Button>
               </div>
             )}
+
+            <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-red-700">
+                Danger Zone
+              </p>
+              <div className="mt-3 flex flex-wrap justify-end gap-3">
+                <Button
+                  variant="outline"
+                  className="text-red-700"
+                  onClick={() => handleToggleActive(viewing)}
+                >
+                  {viewing.is_active ? (
+                    <><Ban size={16} /> Deactivate Seller</>
+                  ) : (
+                    <><RotateCcw size={16} /> Activate Seller</>
+                  )}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="text-red-700"
+                  onClick={() => handleDelete(viewing)}
+                >
+                  <Trash2 size={16} /> Delete Seller
+                </Button>
+              </div>
+            </div>
           </div>
         )}
       </Modal>

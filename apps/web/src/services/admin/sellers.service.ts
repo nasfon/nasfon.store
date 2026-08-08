@@ -52,3 +52,43 @@ export async function adminVerifySeller(sellerId: string, status: "approved" | "
   if (error) throw new Error(error.message);
   return data;
 }
+
+export async function adminSetSellerActive(sellerId: string, is_active: boolean) {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const { data, error } = await supabase
+    .from("sellers")
+    .update({ is_active })
+    .eq("id", sellerId)
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+export async function adminDeleteSeller(sellerId: string) {
+  const cookieStore = await cookies();
+  const supabase = createClient(cookieStore);
+
+  const { data: seller } = await supabase
+    .from("sellers")
+    .select("user_id")
+    .eq("id", sellerId)
+    .single();
+
+  const { error } = await supabase
+    .from("sellers")
+    .delete()
+    .eq("id", sellerId);
+
+  if (error) throw new Error(error.message);
+
+  if (seller?.user_id) {
+    await supabase
+      .from("users")
+      .update({ is_active: false })
+      .eq("id", seller.user_id);
+  }
+}

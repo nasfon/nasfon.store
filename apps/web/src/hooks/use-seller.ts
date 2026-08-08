@@ -124,3 +124,20 @@ export function useAdminVerifySeller() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "sellers"] }),
   });
 }
+
+export function useAdminSetSellerActive() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, is_active }: { id: string; is_active: boolean }) =>
+      api.patch<Seller>(`/admin/sellers/${id}`, { is_active }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "sellers"] }),
+  });
+}
+
+export function useAdminDeleteSeller() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.delete(`/admin/sellers/${id}`),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "sellers"] }),
+  });
+}
