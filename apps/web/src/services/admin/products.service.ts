@@ -8,6 +8,7 @@ export async function getAdminProducts() {
   const { data, error } = await supabase
     .from("products")
     .select("*, category:categories(*), images:product_images(*)")
+    .eq("is_active", true)
     .order("created_at", { ascending: false });
 
   if (error) throw new Error("Failed to fetch products");
@@ -44,10 +45,22 @@ export async function updateProduct(id: string, data: z.infer<typeof adminProduc
 export async function deleteProduct(id: string) {
   const supabase = createAdminClient();
 
-  const { error } = await supabase
-    .from("products")
-    .update({ is_active: false })
-    .eq("id", id);
+  const { count } = await supabase
+    .from("order_items")
+    .select("id", { count: "exact", head: true })
+    .eq("product_id", id);
+
+  if ((count ?? 0) > 0) {
+    const { error: softError } = await supabase
+      .from("products")
+      .update({ is_active: false })
+      .eq("id", id);
+
+    if (softError) throw new Error("Failed to delete product");
+    return;
+  }
+
+  const { error } = await supabase.from("products").delete().eq("id", id);
 
   if (error) throw new Error("Failed to delete product");
 }
