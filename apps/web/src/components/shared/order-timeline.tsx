@@ -30,8 +30,9 @@ export function OrderTimeline({ currentStatus }: OrderTimelineProps) {
   return (
     <div className="space-y-3">
       {steps.map((step, index) => {
-        const isCompleted = index < currentIndex;
-        const isCurrent = index === currentIndex;
+        const isDelivered = currentStatus === "delivered";
+        const isCompleted = index < currentIndex || isDelivered;
+        const isCurrent = index === currentIndex && !isDelivered;
         const isActive = isCompleted || isCurrent;
 
         return (

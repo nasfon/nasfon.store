@@ -119,11 +119,6 @@ function LoginContent() {
           Sign up
         </Link>
       </p>
-      <div className="mt-8 text-center">
-        <Link href="/" className="text-sm text-gray-400 hover:text-gray-600">
-          &larr; Continue as Guest
-        </Link>
-      </div>
     </div>
   );
 }

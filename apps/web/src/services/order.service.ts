@@ -1,10 +1,7 @@
-import { cookies } from "next/headers";
-import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 
 export async function trackOrder(orderNumber: string, phoneNumber: string) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from("orders")
