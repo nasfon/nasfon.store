@@ -39,13 +39,13 @@ export default function AdminProductsPage() {
   } | null>(null);
   const [form, setForm] = useState({
     name: "", slug: "", sku: "", category_id: "",
-    selling_price: 0, compare_price: "", stock_quantity: 0,
+    selling_price: "", compare_price: "", stock_quantity: "",
     description: "", brand: "", featured_image: "", is_featured: false, is_active: true,
   });
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ name: "", slug: "", sku: "", category_id: "", selling_price: 0, compare_price: "", stock_quantity: 0, description: "", brand: "", featured_image: "", is_featured: false, is_active: true });
+    setForm({ name: "", slug: "", sku: "", category_id: "", selling_price: "", compare_price: "", stock_quantity: "", description: "", brand: "", featured_image: "", is_featured: false, is_active: true });
     setShowModal(true);
   };
 
@@ -58,9 +58,9 @@ export default function AdminProductsPage() {
     setEditing(product);
     setForm({
       name: product.name, slug: product.slug, sku: product.sku,
-      category_id: product.category_id, selling_price: product.selling_price,
+      category_id: product.category_id, selling_price: String(product.selling_price),
       compare_price: product.compare_price?.toString() || "",
-      stock_quantity: product.stock_quantity, description: product.description || "",
+      stock_quantity: String(product.stock_quantity), description: product.description || "",
       brand: product.brand || "", featured_image: product.featured_image || "",
       is_featured: product.is_featured, is_active: product.is_active,
     });
@@ -72,8 +72,8 @@ export default function AdminProductsPage() {
     const payload = {
       ...form,
       compare_price: form.compare_price ? parseFloat(form.compare_price) : null,
-      selling_price: parseFloat(form.selling_price.toString()),
-      stock_quantity: parseInt(form.stock_quantity.toString()),
+      selling_price: parseFloat(form.selling_price) || 0,
+      stock_quantity: parseInt(form.stock_quantity) || 0,
     };
 
     if (editing) {
@@ -259,9 +259,7 @@ export default function AdminProductsPage() {
                 step="0.01"
                 placeholder="0.00"
                 value={form.selling_price}
-                onChange={(e) =>
-                  setForm({ ...form, selling_price: parseFloat(e.target.value) || 0 })
-                }
+                onChange={(e) => setForm({ ...form, selling_price: e.target.value })}
                 required
               />
               <Input
@@ -286,9 +284,7 @@ export default function AdminProductsPage() {
                 label="Stock Quantity"
                 type="number"
                 value={form.stock_quantity}
-                onChange={(e) =>
-                  setForm({ ...form, stock_quantity: parseInt(e.target.value) || 0 })
-                }
+                onChange={(e) => setForm({ ...form, stock_quantity: e.target.value })}
                 required
               />
               <div className="grid grid-cols-1 gap-3">

@@ -24,9 +24,9 @@ interface ProductForm {
   slug: string;
   sku: string;
   category_id: string;
-  selling_price: number;
+  selling_price: string;
   compare_price: string;
-  stock_quantity: number;
+  stock_quantity: string;
   description: string;
   brand: string;
 }
@@ -36,9 +36,9 @@ const emptyForm: ProductForm = {
   slug: "",
   sku: "",
   category_id: "",
-  selling_price: 0,
+  selling_price: "",
   compare_price: "",
-  stock_quantity: 0,
+  stock_quantity: "",
   description: "",
   brand: "",
 };
@@ -69,9 +69,9 @@ export default function SellerProductsPage() {
       slug: product.slug,
       sku: product.sku,
       category_id: product.category_id,
-      selling_price: product.selling_price,
+      selling_price: String(product.selling_price),
       compare_price: product.compare_price?.toString() || "",
-      stock_quantity: product.stock_quantity,
+      stock_quantity: String(product.stock_quantity),
       description: product.description || "",
       brand: product.brand || "",
     });
@@ -83,9 +83,9 @@ export default function SellerProductsPage() {
     e.preventDefault();
     const payload = {
       ...form,
-      selling_price: parseFloat(form.selling_price.toString()),
+      selling_price: parseFloat(form.selling_price) || 0,
       compare_price: form.compare_price ? parseFloat(form.compare_price) : null,
-      stock_quantity: parseInt(form.stock_quantity.toString()),
+      stock_quantity: parseInt(form.stock_quantity) || 0,
       featured_image: images[0]?.image_url || null,
     };
 
@@ -213,7 +213,7 @@ export default function SellerProductsPage() {
               type="number"
               min={0}
               value={form.selling_price}
-              onChange={(e) => setForm({ ...form, selling_price: parseFloat(e.target.value) || 0 })}
+              onChange={(e) => setForm({ ...form, selling_price: e.target.value })}
               required
             />
             <Input
@@ -231,7 +231,7 @@ export default function SellerProductsPage() {
             type="number"
             min={0}
             value={form.stock_quantity}
-            onChange={(e) => setForm({ ...form, stock_quantity: parseInt(e.target.value) || 0 })}
+            onChange={(e) => setForm({ ...form, stock_quantity: e.target.value })}
             required
           />
           <div>

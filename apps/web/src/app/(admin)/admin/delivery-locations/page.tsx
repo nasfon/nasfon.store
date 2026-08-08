@@ -23,11 +23,11 @@ export default function AdminDeliveryLocationsPage() {
     estimated_delivery_days: number; is_active: boolean;
   } | null>(null);
 
-  const [form, setForm] = useState({ name: "", delivery_fee: 0, estimated_delivery_days: 1, is_active: true });
+  const [form, setForm] = useState({ name: "", delivery_fee: "", estimated_delivery_days: "", is_active: true });
 
   const openCreate = () => {
     setEditing(null);
-    setForm({ name: "", delivery_fee: 0, estimated_delivery_days: 1, is_active: true });
+    setForm({ name: "", delivery_fee: "", estimated_delivery_days: "", is_active: true });
     setShowModal(true);
   };
 
@@ -36,13 +36,13 @@ export default function AdminDeliveryLocationsPage() {
     estimated_delivery_days: number; is_active: boolean;
   }) => {
     setEditing(loc);
-    setForm({ name: loc.name, delivery_fee: loc.delivery_fee, estimated_delivery_days: loc.estimated_delivery_days, is_active: loc.is_active });
+    setForm({ name: loc.name, delivery_fee: String(loc.delivery_fee), estimated_delivery_days: String(loc.estimated_delivery_days), is_active: loc.is_active });
     setShowModal(true);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = { ...form, delivery_fee: parseFloat(form.delivery_fee.toString()), estimated_delivery_days: parseInt(form.estimated_delivery_days.toString()) };
+    const payload = { ...form, delivery_fee: parseFloat(form.delivery_fee) || 0, estimated_delivery_days: parseInt(form.estimated_delivery_days) || 1 };
 
     if (editing) {
       updateLocation.mutate({ id: editing.id, ...payload }, {
@@ -156,7 +156,7 @@ export default function AdminDeliveryLocationsPage() {
                 step="0.01"
                 placeholder="0.00"
                 value={form.delivery_fee}
-                onChange={(e) => setForm({ ...form, delivery_fee: parseFloat(e.target.value) || 0 })}
+                onChange={(e) => setForm({ ...form, delivery_fee: e.target.value })}
                 required
               />
               <Input
@@ -164,7 +164,7 @@ export default function AdminDeliveryLocationsPage() {
                 label="Estimated Delivery Days"
                 type="number"
                 value={form.estimated_delivery_days}
-                onChange={(e) => setForm({ ...form, estimated_delivery_days: parseInt(e.target.value) || 1 })}
+                onChange={(e) => setForm({ ...form, estimated_delivery_days: e.target.value })}
                 required
               />
             </div>
