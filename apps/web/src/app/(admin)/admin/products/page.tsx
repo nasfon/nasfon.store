@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { ImageUpload } from "@/components/shared/image-upload";
 import {
   useAdminProducts,
@@ -155,44 +156,169 @@ export default function AdminProductsPage() {
         </table>
       </div>
 
-      <Modal open={showModal} onClose={() => setShowModal(false)} title={editing ? "Edit Product" : "Add Product"}>
-        <form onSubmit={handleSubmit} className="mt-4 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <Input id="name" label="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-            <Input id="slug" label="Slug" value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} required />
-            <Input id="sku" label="SKU" value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} required />
-            <div>
-              <label className="text-sm font-medium text-gray-700">Category</label>
-              <select value={form.category_id} onChange={(e) => setForm({ ...form, category_id: e.target.value })} className="mt-1.5 h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm" required>
-                <option value="">Select...</option>
-                {categories ? categories.map((cat) => <option key={cat.id} value={cat.id}>{cat.name}</option>) : <option disabled>Loading...</option>}
-              </select>
-            </div>
-            <Input id="selling_price" label="Selling Price" type="number" step="0.01" value={form.selling_price} onChange={(e) => setForm({ ...form, selling_price: parseFloat(e.target.value) || 0 })} required />
-            <Input id="compare_price" label="Compare Price" type="number" step="0.01" value={form.compare_price} onChange={(e) => setForm({ ...form, compare_price: e.target.value })} />
-            <Input id="stock_quantity" label="Stock" type="number" value={form.stock_quantity} onChange={(e) => setForm({ ...form, stock_quantity: parseInt(e.target.value) || 0 })} required />
-            <Input id="brand" label="Brand" value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} />
-          </div>
-          <div>
-            <label className="text-sm font-medium text-gray-700">Description</label>
-            <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} className="mt-1.5 h-20 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm" />
-          </div>
-          <div className="flex items-center gap-4">
-            <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" checked={form.is_featured} onChange={(e) => setForm({ ...form, is_featured: e.target.checked })} />
-              Featured
-            </label>
-            <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} />
-              Active
-            </label>
-          </div>
-          <div className="flex justify-end gap-3">
-            <Button type="button" variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
-            <Button type="submit" disabled={createProduct.isPending || updateProduct.isPending}>
-              {editing ? "Update" : "Create"}
+      <Modal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        title={editing ? "Edit Product" : "Add Product"}
+        description={
+          editing
+            ? "Update the product details below."
+            : "Fill in the details to add a new product to your catalog."
+        }
+        size="xl"
+        footer={
+          <>
+            <Button type="button" variant="outline" onClick={() => setShowModal(false)}>
+              Cancel
             </Button>
-          </div>
+            <Button
+              type="submit"
+              form="product-form"
+              disabled={createProduct.isPending || updateProduct.isPending}
+            >
+              {editing ? "Save Changes" : "Create Product"}
+            </Button>
+          </>
+        }
+      >
+        <form id="product-form" onSubmit={handleSubmit} className="space-y-6">
+          <section>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+              Basic Details
+            </h3>
+            <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <Input
+                  id="name"
+                  label="Name"
+                  placeholder="e.g. Wireless Bluetooth Earbuds"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  required
+                />
+              </div>
+              <Input
+                id="slug"
+                label="Slug"
+                placeholder="auto-generated"
+                value={form.slug}
+                onChange={(e) => setForm({ ...form, slug: e.target.value })}
+                required
+              />
+              <Input
+                id="sku"
+                label="SKU"
+                placeholder="e.g. NF-EB-001"
+                value={form.sku}
+                onChange={(e) => setForm({ ...form, sku: e.target.value })}
+                required
+              />
+              <div className="sm:col-span-2">
+                <Input
+                  id="brand"
+                  label="Brand"
+                  placeholder="Optional brand name"
+                  value={form.brand}
+                  onChange={(e) => setForm({ ...form, brand: e.target.value })}
+                />
+              </div>
+            </div>
+          </section>
+
+          <section className="border-t border-gray-100 pt-5">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+              Classification &amp; Pricing
+            </h3>
+            <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-2">
+                <label className="text-sm font-medium text-gray-700" htmlFor="category_id">
+                  Category
+                </label>
+                <select
+                  id="category_id"
+                  value={form.category_id}
+                  onChange={(e) => setForm({ ...form, category_id: e.target.value })}
+                  className="mt-1.5 h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  required
+                >
+                  <option value="">Select a category...</option>
+                  {categories
+                    ? categories.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </option>
+                      ))
+                    : null}
+                  {!categories && <option disabled>Loading...</option>}
+                </select>
+              </div>
+              <Input
+                id="selling_price"
+                label="Selling Price (₦)"
+                type="number"
+                step="0.01"
+                placeholder="0.00"
+                value={form.selling_price}
+                onChange={(e) =>
+                  setForm({ ...form, selling_price: parseFloat(e.target.value) || 0 })
+                }
+                required
+              />
+              <Input
+                id="compare_price"
+                label="Compare Price (₦)"
+                type="number"
+                step="0.01"
+                placeholder="Optional, for discounts"
+                value={form.compare_price}
+                onChange={(e) => setForm({ ...form, compare_price: e.target.value })}
+              />
+            </div>
+          </section>
+
+          <section className="border-t border-gray-100 pt-5">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+              Inventory &amp; Status
+            </h3>
+            <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Input
+                id="stock_quantity"
+                label="Stock Quantity"
+                type="number"
+                value={form.stock_quantity}
+                onChange={(e) =>
+                  setForm({ ...form, stock_quantity: parseInt(e.target.value) || 0 })
+                }
+                required
+              />
+              <div className="grid grid-cols-1 gap-3">
+                <Switch
+                  checked={form.is_active}
+                  onChange={(v) => setForm({ ...form, is_active: v })}
+                  label="Available"
+                  description="Show this product on the storefront"
+                />
+                <Switch
+                  checked={form.is_featured}
+                  onChange={(v) => setForm({ ...form, is_featured: v })}
+                  label="Featured"
+                  description="Highlight this product in featured sections"
+                />
+              </div>
+            </div>
+          </section>
+
+          <section className="border-t border-gray-100 pt-5">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+              Description
+            </h3>
+            <textarea
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              placeholder="Describe the product, its features, and what's included..."
+              className="mt-3 h-24 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+            />
+          </section>
         </form>
       </Modal>
 

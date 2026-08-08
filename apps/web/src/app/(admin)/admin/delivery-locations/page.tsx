@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Modal } from "@/components/ui/modal";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { useAdminDeliveryLocations, useCreateDeliveryLocation, useUpdateDeliveryLocation, useDeleteDeliveryLocation } from "@/hooks/use-admin";
 import { toast } from "sonner";
 
@@ -101,19 +102,87 @@ export default function AdminDeliveryLocationsPage() {
         </table>
       </div>
 
-      <Modal open={showModal} onClose={() => setShowModal(false)} title={editing ? "Edit Location" : "Add Location"}>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input id="name" label="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-          <Input id="fee" label="Delivery Fee (₦)" type="number" step="0.01" value={form.delivery_fee} onChange={(e) => setForm({ ...form, delivery_fee: parseFloat(e.target.value) || 0 })} required />
-          <Input id="days" label="Estimated Delivery Days" type="number" value={form.estimated_delivery_days} onChange={(e) => setForm({ ...form, estimated_delivery_days: parseInt(e.target.value) || 1 })} required />
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={form.is_active} onChange={(e) => setForm({ ...form, is_active: e.target.checked })} />
-            Active
-          </label>
-          <div className="flex justify-end gap-3">
-            <Button type="button" variant="outline" onClick={() => setShowModal(false)}>Cancel</Button>
-            <Button type="submit">Save</Button>
-          </div>
+      <Modal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        title={editing ? "Edit Location" : "Add Location"}
+        description={
+          editing
+            ? "Update the delivery location details below."
+            : "Add a delivery location available at checkout."
+        }
+        size="md"
+        footer={
+          <>
+            <Button type="button" variant="outline" onClick={() => setShowModal(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              form="location-form"
+              disabled={createLocation.isPending || updateLocation.isPending}
+            >
+              {editing ? "Save Changes" : "Add Location"}
+            </Button>
+          </>
+        }
+      >
+        <form id="location-form" onSubmit={handleSubmit} className="space-y-6">
+          <section>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+              Details
+            </h3>
+            <div className="mt-3">
+              <Input
+                id="name"
+                label="Name"
+                placeholder="e.g. Lagos Mainland"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                required
+              />
+            </div>
+          </section>
+
+          <section className="border-t border-gray-100 pt-5">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+              Delivery &amp; Pricing
+            </h3>
+            <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Input
+                id="fee"
+                label="Delivery Fee (₦)"
+                type="number"
+                step="0.01"
+                placeholder="0.00"
+                value={form.delivery_fee}
+                onChange={(e) => setForm({ ...form, delivery_fee: parseFloat(e.target.value) || 0 })}
+                required
+              />
+              <Input
+                id="days"
+                label="Estimated Delivery Days"
+                type="number"
+                value={form.estimated_delivery_days}
+                onChange={(e) => setForm({ ...form, estimated_delivery_days: parseInt(e.target.value) || 1 })}
+                required
+              />
+            </div>
+          </section>
+
+          <section className="border-t border-gray-100 pt-5">
+            <h3 className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+              Status
+            </h3>
+            <div className="mt-3">
+              <Switch
+                checked={form.is_active}
+                onChange={(v) => setForm({ ...form, is_active: v })}
+                label="Active"
+                description="Offer this location at checkout"
+              />
+            </div>
+          </section>
         </form>
       </Modal>
     </div>
