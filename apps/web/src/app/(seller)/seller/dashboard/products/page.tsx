@@ -193,9 +193,10 @@ export default function SellerProductsPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+            <label htmlFor="seller-category" className="block text-sm font-medium text-gray-700 mb-1">Category</label>
             <select
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-black focus:outline-none"
+              id="seller-category"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-black focus:outline-none focus:ring-2 focus:ring-primary/40"
               value={form.category_id}
               onChange={(e) => setForm({ ...form, category_id: e.target.value })}
               required

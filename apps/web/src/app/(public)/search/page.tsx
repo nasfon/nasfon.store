@@ -50,18 +50,20 @@ export default function SearchPage() {
       <div className="relative mt-4">
         <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
         <input
-          type="text"
+          type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search by product name, brand, or description..."
-          className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-10 text-sm focus:border-primary focus:outline-none"
+          aria-label="Search by product name, brand, or description"
+          className="w-full rounded-lg border border-gray-300 py-2.5 pl-10 pr-10 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40"
         />
         {query && (
           <button
             onClick={() => setQuery("")}
+            aria-label="Clear search"
             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
           >
-            <X size={18} />
+            <X size={18} aria-hidden="true" />
           </button>
         )}
       </div>
@@ -70,13 +72,13 @@ export default function SearchPage() {
         {!debouncedQuery ? (
           <p className="text-center text-gray-400">Type a product name to search.</p>
         ) : isLoading ? (
-          <div className="flex items-center justify-center gap-2 py-12 text-sm text-gray-400">
-            <Loader2 size={16} className="animate-spin" />
+          <div role="status" className="flex items-center justify-center gap-2 py-12 text-sm text-gray-400">
+            <Loader2 size={16} className="animate-spin" aria-hidden="true" />
             Searching...
           </div>
         ) : products.length > 0 ? (
           <>
-            <p className="mb-4 text-sm text-gray-400">
+            <p role="status" className="mb-4 text-sm text-gray-400">
               {data?.pages[0]?.pagination.total || 0} result{data?.pages[0]?.pagination.total !== 1 ? "s" : ""} for &quot;{debouncedQuery}&quot;
             </p>
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
@@ -84,12 +86,20 @@ export default function SearchPage() {
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
-            <div ref={sentinelRef} className="flex justify-center py-8">
+            <div ref={sentinelRef} className="flex flex-col items-center gap-3 py-8">
               {isFetchingNextPage && (
-                <div className="flex items-center gap-2 text-sm text-gray-400">
-                  <Loader2 size={16} className="animate-spin" />
+                <div role="status" className="flex items-center gap-2 text-sm text-gray-400">
+                  <Loader2 size={16} className="animate-spin" aria-hidden="true" />
                   Loading more results...
                 </div>
+              )}
+              {hasNextPage && !isFetchingNextPage && (
+                <button
+                  onClick={() => fetchNextPage()}
+                  className="rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                >
+                  Load more
+                </button>
               )}
             </div>
           </>

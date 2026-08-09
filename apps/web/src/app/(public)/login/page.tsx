@@ -64,19 +64,19 @@ function LoginContent() {
       <p className="mt-2 text-center text-sm text-gray-500">Welcome back! Sign in to your account.</p>
 
       {reason === "token_expired" && (
-        <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+        <div role="alert" className="mt-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
           Your session has expired. Sign in and confirm your identity to continue.
         </div>
       )}
 
       {verifiedParam === "1" && (
-        <div className="mt-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+        <div role="status" className="mt-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
           Your email has been verified successfully. You can now sign in.
         </div>
       )}
 
       {suspendedAlert && (
-        <div className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div role="alert" className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           Your account has been suspended. Please contact support.
         </div>
       )}

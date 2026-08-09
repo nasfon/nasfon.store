@@ -92,17 +92,20 @@ export default function CartPage() {
               <div className="mt-2 flex items-center gap-2">
                 <button
                   onClick={() => handleQuantityChange(item.product_id, item.quantity - 1)}
-                  className="flex h-8 w-8 items-center justify-center rounded border text-gray-500 hover:bg-gray-50"
+                  disabled={item.quantity <= 1}
+                  aria-label={`Decrease quantity of ${item.product.name}`}
+                  className="flex h-8 w-8 items-center justify-center rounded border text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                 >
-                  <Minus size={16} />
+                  <Minus size={16} aria-hidden="true" />
                 </button>
                 <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
                 <button
                   onClick={() => handleQuantityChange(item.product_id, item.quantity + 1)}
                   disabled={item.quantity >= item.product.stock_quantity}
+                  aria-label={`Increase quantity of ${item.product.name}`}
                   className="flex h-8 w-8 items-center justify-center rounded border text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                 >
-                  <Plus size={16} />
+                  <Plus size={16} aria-hidden="true" />
                 </button>
               </div>
             </div>
@@ -118,9 +121,10 @@ export default function CartPage() {
                     onError: (err) => toast.error(err.message),
                   });
                 }}
+                aria-label={`Remove ${item.product.name} from cart`}
                 className="mt-2 rounded-full p-2 text-gray-400 hover:bg-gray-100 hover:text-error"
               >
-                <Trash2 size={18} />
+                <Trash2 size={18} aria-hidden="true" />
               </button>
             </div>
           </div>

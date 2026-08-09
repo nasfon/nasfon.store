@@ -5,6 +5,7 @@ const Skeleton = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
     <div
       ref={ref}
       className={`animate-pulse rounded-md bg-gray-200 ${className ?? ""}`}
+      aria-hidden="true"
       {...props}
     />
   )

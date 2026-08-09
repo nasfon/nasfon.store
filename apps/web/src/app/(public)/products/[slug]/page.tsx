@@ -120,21 +120,25 @@ export default function ProductDetailPage({
                   <>
                     <button
                       onClick={() => setSelectedIdx((i) => (i - 1 + allImages.length) % allImages.length)}
+                      aria-label="Previous image"
                       className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-1.5 text-gray-700 shadow hover:bg-white"
                     >
-                      <ChevronLeft size={20} />
+                      <ChevronLeft size={20} aria-hidden="true" />
                     </button>
                     <button
                       onClick={() => setSelectedIdx((i) => (i + 1) % allImages.length)}
+                      aria-label="Next image"
                       className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white/80 p-1.5 text-gray-700 shadow hover:bg-white"
                     >
-                      <ChevronRight size={20} />
+                      <ChevronRight size={20} aria-hidden="true" />
                     </button>
                     <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
                       {allImages.map((_, i) => (
                         <button
                           key={i}
                           onClick={() => setSelectedIdx(i)}
+                          aria-label={`Go to image ${i + 1} of ${allImages.length}`}
+                          aria-current={i === selectedIdx}
                           className={`h-2 w-2 rounded-full transition-colors ${i === selectedIdx ? "bg-white" : "bg-white/50"}`}
                         />
                       ))}
@@ -154,6 +158,8 @@ export default function ProductDetailPage({
                 <button
                   key={img.id}
                   onClick={() => setSelectedIdx(i)}
+                  aria-label={`Show image ${i + 1} of ${allImages.length}`}
+                  aria-current={i === selectedIdx}
                   className={`h-20 w-20 shrink-0 overflow-hidden rounded-md border-2 object-cover ${i === selectedIdx ? "border-primary" : "border-transparent"}`}
                 >
                   <img
@@ -234,18 +240,20 @@ export default function ProductDetailPage({
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  aria-label="Decrease quantity"
                   className="flex h-8 w-8 items-center justify-center rounded border text-gray-500 hover:bg-gray-50"
                   disabled={quantity <= 1}
                 >
-                  <Minus size={16} />
+                  <Minus size={16} aria-hidden="true" />
                 </button>
                 <span className="w-8 text-center text-sm font-medium">{quantity}</span>
                 <button
                   onClick={() => setQuantity((q) => Math.min(product.stock_quantity, q + 1))}
+                  aria-label="Increase quantity"
                   className="flex h-8 w-8 items-center justify-center rounded border text-gray-500 hover:bg-gray-50"
                   disabled={quantity >= product.stock_quantity}
                 >
-                  <Plus size={16} />
+                  <Plus size={16} aria-hidden="true" />
                 </button>
               </div>
             </div>

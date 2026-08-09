@@ -67,7 +67,7 @@ export default function TrackPage() {
       </form>
 
       {trackOrder.isError && (
-        <div className="mt-6 rounded-lg border border-error/20 bg-error/5 p-4 text-center">
+        <div role="alert" className="mt-6 rounded-lg border border-error/20 bg-error/5 p-4 text-center">
           <p className="text-sm text-error">
             {trackOrder.error instanceof Error ? trackOrder.error.message : "Order not found"}
           </p>

@@ -121,9 +121,10 @@ export default function SellerApplyPage() {
         />
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Business Description</label>
+          <label htmlFor="business-description" className="block text-sm font-medium text-gray-700 mb-1">Business Description</label>
           <textarea
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-black focus:outline-none"
+            id="business-description"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-black focus:outline-none focus:ring-2 focus:ring-primary/40"
             rows={4}
             value={form.business_description}
             onChange={(e) => setForm({ ...form, business_description: e.target.value })}

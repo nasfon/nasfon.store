@@ -143,8 +143,9 @@ function CheckoutForm({ cart, locations, isBuyNow, buyNowProductId, buyNowQty, b
                 required
               />
               <div>
-                <label className="text-sm font-medium text-gray-700">Notes (optional)</label>
+                <label htmlFor="checkout-notes" className="text-sm font-medium text-gray-700">Notes (optional)</label>
                 <textarea
+                  id="checkout-notes"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   className="mt-1.5 h-20 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -157,7 +158,11 @@ function CheckoutForm({ cart, locations, isBuyNow, buyNowProductId, buyNowQty, b
           <div className="rounded-lg border border-gray-200 bg-white p-4">
             <h2 className="text-lg font-semibold text-gray-900">Delivery Location</h2>
             <div className="mt-4">
+              <label htmlFor="delivery-location" className="sr-only">
+                Delivery Location
+              </label>
               <select
+                id="delivery-location"
                 value={locationId}
                 onChange={(e) => setLocationId(e.target.value)}
                 className="h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"

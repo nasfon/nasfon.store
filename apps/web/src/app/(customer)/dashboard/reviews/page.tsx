@@ -72,27 +72,38 @@ export default function ReviewsPage() {
                 </div>
 
                 <div className="mt-3 flex items-center gap-1">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() =>
-                        setReviewForm((prev) => ({
-                          ...prev,
-                          [item.product_id]: { ...prev[item.product_id] || { rating: 0, review: "" }, rating: i + 1 },
-                        }))
-                      }
-                    >
-                      <Star
-                        size={20}
-                        className={
-                          i < form.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+                  <fieldset>
+                    <legend className="sr-only">Rating for {item.product?.name || "product"}</legend>
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() =>
+                          setReviewForm((prev) => ({
+                            ...prev,
+                            [item.product_id]: { ...prev[item.product_id] || { rating: 0, review: "" }, rating: i + 1 },
+                          }))
                         }
-                      />
-                    </button>
-                  ))}
+                        aria-label={`Rate ${i + 1} star${i === 0 ? "" : "s"}`}
+                        aria-pressed={i < form.rating}
+                      >
+                        <Star
+                          size={20}
+                          aria-hidden="true"
+                          className={
+                            i < form.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+                          }
+                        />
+                      </button>
+                    ))}
+                  </fieldset>
                 </div>
 
+                <label htmlFor={`review-${item.product_id}`} className="sr-only">
+                  Write your review for {item.product?.name || "this product"}
+                </label>
                 <textarea
+                  id={`review-${item.product_id}`}
                   value={form.review}
                   onChange={(e) =>
                     setReviewForm((prev) => ({
@@ -100,7 +111,7 @@ export default function ReviewsPage() {
                       [item.product_id]: { ...prev[item.product_id] || { rating: 0, review: "" }, review: e.target.value },
                     }))
                   }
-                  className="mt-3 h-20 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm"
+                  className="mt-3 h-20 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40"
                   placeholder="Write your review (optional)"
                 />
 

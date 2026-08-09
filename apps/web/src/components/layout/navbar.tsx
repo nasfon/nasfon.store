@@ -54,12 +54,13 @@ export function Navbar() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search products..."
+              aria-label="Search products"
               className="h-9 w-full rounded-full border border-gray-200 bg-gray-50 pl-10 pr-4 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </form>
         </div>
 
-        <nav className="hidden items-center gap-4 md:flex">
+        <nav aria-label="Primary" className="hidden items-center gap-4 md:flex">
           <Link
             href="/products"
             className="text-sm font-medium text-gray-600 hover:text-gray-900"
@@ -69,10 +70,11 @@ export function Navbar() {
           <Link
             href="/cart"
             className="relative rounded-full p-2 text-gray-600 hover:bg-gray-100"
+            aria-label={itemCount > 0 ? `Shopping cart, ${itemCount > 99 ? "99+" : itemCount} items` : "Shopping cart"}
           >
-            <ShoppingCart size={20} />
+            <ShoppingCart size={20} aria-hidden="true" />
             {itemCount > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-white">
+              <span aria-hidden="true" className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-white">
                 {itemCount > 99 ? "99+" : itemCount}
               </span>
             )}
@@ -83,32 +85,33 @@ export function Navbar() {
                 <Link
                   href="/admin"
                   className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
-                  title="Admin Dashboard"
+                  aria-label="Admin Dashboard"
                 >
-                  <LayoutDashboard size={20} />
+                  <LayoutDashboard size={20} aria-hidden="true" />
                 </Link>
               )}
               <Link
                 href="/dashboard"
                 className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
-                title="Dashboard"
+                aria-label="Dashboard"
               >
-                <User size={20} />
+                <User size={20} aria-hidden="true" />
               </Link>
               <button
                 onClick={handleLogout}
                 className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
-                title="Logout"
+                aria-label="Logout"
               >
-                <LogOut size={20} />
+                <LogOut size={20} aria-hidden="true" />
               </button>
             </div>
           ) : (
             <Link
               href="/login"
               className="rounded-full p-2 text-gray-600 hover:bg-gray-100"
+              aria-label="Log in"
             >
-              <User size={20} />
+              <User size={20} aria-hidden="true" />
             </Link>
           )}
         </nav>

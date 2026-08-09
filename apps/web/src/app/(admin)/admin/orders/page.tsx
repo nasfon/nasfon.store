@@ -98,8 +98,9 @@ export default function AdminOrdersPage() {
               <p><span className="text-gray-500">Payment:</span> {selectedOrder.payment_status}</p>
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-700">Order Status</label>
+              <label htmlFor="order-status" className="text-sm font-medium text-gray-700">Order Status</label>
               <select
+                id="order-status"
                 value={selectedOrder.order_status}
                 onChange={(e) => handleStatusChange(selectedOrder.id, e.target.value)}
                 className="mt-1.5 h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm"

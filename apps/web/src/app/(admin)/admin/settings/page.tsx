@@ -51,16 +51,16 @@ function SettingsForm({ settings }: { settings: NonNullable<ReturnType<typeof us
           <h2 className="font-semibold text-gray-900">Policies</h2>
           <div className="mt-4 space-y-4">
             <div>
-              <label className="text-sm font-medium text-gray-700">Return Policy</label>
-              <textarea value={form.return_policy} onChange={(e) => setForm({ ...form, return_policy: e.target.value })} className="mt-1.5 h-24 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm" />
+              <label htmlFor="return-policy" className="text-sm font-medium text-gray-700">Return Policy</label>
+              <textarea id="return-policy" value={form.return_policy} onChange={(e) => setForm({ ...form, return_policy: e.target.value })} className="mt-1.5 h-24 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-700">Privacy Policy</label>
-              <textarea value={form.privacy_policy} onChange={(e) => setForm({ ...form, privacy_policy: e.target.value })} className="mt-1.5 h-24 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm" />
+              <label htmlFor="privacy-policy" className="text-sm font-medium text-gray-700">Privacy Policy</label>
+              <textarea id="privacy-policy" value={form.privacy_policy} onChange={(e) => setForm({ ...form, privacy_policy: e.target.value })} className="mt-1.5 h-24 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm" />
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-700">Terms & Conditions</label>
-              <textarea value={form.terms_conditions} onChange={(e) => setForm({ ...form, terms_conditions: e.target.value })} className="mt-1.5 h-24 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm" />
+              <label htmlFor="terms-conditions" className="text-sm font-medium text-gray-700">Terms & Conditions</label>
+              <textarea id="terms-conditions" value={form.terms_conditions} onChange={(e) => setForm({ ...form, terms_conditions: e.target.value })} className="mt-1.5 h-24 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm" />
             </div>
           </div>
         </div>

@@ -42,23 +42,26 @@ export function ImageUpload({ images, onChange, maxImages = 10 }: ImageUploadPro
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadTotal, setUploadTotal] = useState(0);
+  const [error, setError] = useState<string | null>(null);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     const remaining = maxImages - images.length;
 
+    setError(null);
+
     if (files.length > remaining) {
-      alert(`You can only add ${remaining} more image(s)`);
+      setError(`You can only add ${remaining} more image(s)`);
       return;
     }
 
     for (const file of files) {
       if (!file.type.startsWith("image/")) {
-        alert(`${file.name} is not an image`);
+        setError(`${file.name} is not an image`);
         continue;
       }
       if (file.size > 5 * 1024 * 1024) {
-        alert(`${file.name} is too large (max 5MB)`);
+        setError(`${file.name} is too large (max 5MB)`);
         continue;
       }
     }
@@ -73,7 +76,7 @@ export function ImageUpload({ images, onChange, maxImages = 10 }: ImageUploadPro
         const url = await uploadToCloudinary(file);
         uploaded.push({ image_url: url, display_order: images.length + uploaded.length });
       } catch {
-        alert(`Failed to upload ${file.name}`);
+        setError(`Failed to upload ${file.name}`);
       }
       setUploadProgress((p) => p + 1);
     }
@@ -108,13 +111,18 @@ export function ImageUpload({ images, onChange, maxImages = 10 }: ImageUploadPro
 
   return (
     <div className="space-y-3">
+      {error && (
+        <p role="alert" className="rounded-lg bg-error/10 px-3 py-2 text-sm text-error">
+          {error}
+        </p>
+      )}
       {images.length > 0 && (
         <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
           {images.map((img, i) => (
             <div key={i} className="group relative aspect-square rounded-lg border border-gray-200 bg-gray-50">
               <img
                 src={img.image_url}
-                alt=""
+                alt={`Image ${i + 1}`}
                 className="h-full w-full rounded-lg object-cover"
               />
               <div className="absolute inset-0 flex items-center justify-center gap-1 rounded-lg bg-black/0 opacity-0 transition-all group-hover:bg-black/40 group-hover:opacity-100">
@@ -122,16 +130,18 @@ export function ImageUpload({ images, onChange, maxImages = 10 }: ImageUploadPro
                   type="button"
                   onClick={() => moveImage(i, i - 1)}
                   disabled={i === 0}
+                  aria-label={`Move image ${i + 1} up`}
                   className="rounded-full bg-white/90 p-1 text-gray-700 disabled:opacity-30"
                 >
-                  <GripVertical size={14} />
+                  <GripVertical size={14} aria-hidden="true" />
                 </button>
                 <button
                   type="button"
                   onClick={() => removeImage(i)}
+                  aria-label={`Remove image ${i + 1}`}
                   className="rounded-full bg-white/90 p-1 text-error"
                 >
-                  <X size={14} />
+                  <X size={14} aria-hidden="true" />
                 </button>
               </div>
               <span className="absolute left-1 top-1 rounded bg-black/60 px-1.5 py-0.5 text-xs text-white">
@@ -152,16 +162,17 @@ export function ImageUpload({ images, onChange, maxImages = 10 }: ImageUploadPro
             onChange={handleFileSelect}
             className="hidden"
             disabled={uploading}
+            aria-label="Upload product images"
           />
           <Button type="button" variant="outline" className="w-full" onClick={() => inputRef.current?.click()} disabled={uploading}>
             {uploading ? (
-              <>
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+              <span role="status" className="flex items-center justify-center gap-2">
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" aria-hidden="true" />
                 Uploading {uploadProgress}/{uploadTotal}...
-              </>
+              </span>
             ) : (
               <>
-                <Upload size={16} />
+                <Upload size={16} aria-hidden="true" />
                 {images.length === 0 ? "Upload Images" : "Add More Images"}
               </>
             )}

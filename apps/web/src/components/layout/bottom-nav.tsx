@@ -20,7 +20,7 @@ export function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 md:hidden" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
+    <nav aria-label="Primary" className="fixed bottom-0 left-0 right-0 z-40 md:hidden" style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}>
       <div className="mx-4 mb-3 rounded-2xl border border-gray-100 bg-white/90 px-2 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] backdrop-blur-lg">
         <div className="flex items-center justify-around py-1">
           {items.map((item) => {
@@ -30,17 +30,18 @@ export function BottomNav() {
               <Link
                 key={item.href}
                 href={item.href}
+                aria-current={isActive ? "page" : undefined}
                 className={`relative flex flex-col items-center gap-0.5 px-3 py-2 text-xs font-medium transition-colors ${
-                  isActive ? "text-primary" : "text-gray-400"
+                  isActive ? "text-primary" : "text-gray-500"
                 }`}
               >
                 <div className={`rounded-xl p-1.5 transition-colors ${isActive ? "bg-primary/10" : ""}`}>
-                  <item.icon size={22} />
+                  <item.icon size={22} aria-hidden="true" />
                 </div>
                 <span className={`${isActive ? "font-semibold" : ""}`}>{item.label}</span>
-                {isActive && <span className="absolute -top-0.5 left-1/2 h-1 w-5 -translate-x-1/2 rounded-full bg-primary" />}
+                {isActive && <span aria-hidden="true" className="absolute -top-0.5 left-1/2 h-1 w-5 -translate-x-1/2 rounded-full bg-primary" />}
                 {isCart && itemCount > 0 && (
-                  <span className="absolute -right-0.5 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-white">
+                  <span aria-hidden="true" className="absolute -right-0.5 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-white">
                     {itemCount > 99 ? "99+" : itemCount}
                   </span>
                 )}

@@ -142,9 +142,9 @@ export default function AdminProductsPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
-                      <button onClick={() => setShowImagesModal(product.id)} className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600" title="Manage Images"><Images size={16} /></button>
-                      <button onClick={() => openEdit(product)} className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"><Pencil size={16} /></button>
-                      <button onClick={() => { if (confirm("Delete this product?")) deleteProduct.mutate(product.id, { onSuccess: () => toast.success("Deleted") }); }} className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-error"><Trash2 size={16} /></button>
+                      <button onClick={() => setShowImagesModal(product.id)} aria-label={`Manage images for ${product.name}`} className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"><Images size={16} aria-hidden="true" /></button>
+                      <button onClick={() => openEdit(product)} aria-label={`Edit ${product.name}`} className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"><Pencil size={16} aria-hidden="true" /></button>
+                      <button onClick={() => { if (confirm("Delete this product?")) deleteProduct.mutate(product.id, { onSuccess: () => toast.success("Deleted") }); }} aria-label={`Delete ${product.name}`} className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-error"><Trash2 size={16} aria-hidden="true" /></button>
                     </div>
                   </td>
                 </tr>
@@ -312,6 +312,7 @@ export default function AdminProductsPage() {
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               placeholder="Describe the product, its features, and what's included..."
+              aria-label="Product description"
               className="mt-3 h-24 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </section>

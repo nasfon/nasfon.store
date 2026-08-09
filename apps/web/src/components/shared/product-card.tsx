@@ -71,7 +71,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </Link>
 
         {product.brand && (
-          <p className="mt-0.5 hidden text-xs text-gray-400 md:block">{product.brand}</p>
+          <p className="mt-0.5 hidden text-xs text-gray-500 md:block">{product.brand}</p>
         )}
 
         <div className="mt-1.5 flex items-center gap-1.5">
@@ -79,11 +79,11 @@ export function ProductCard({ product }: ProductCardProps) {
             ₦{product.selling_price.toLocaleString()}
           </span>
           {product.compare_price && product.compare_price > product.selling_price && (
-            <span className="text-xs text-gray-400 line-through">
+            <span className="text-xs text-gray-500 line-through">
               ₦{product.compare_price.toLocaleString()}
             </span>
           )}
-          <span className={`text-xs font-medium md:hidden ${inStock ? "text-green-600" : "text-red-600"}`}>
+          <span className={`text-xs font-medium md:hidden ${inStock ? "text-green-700" : "text-red-700"}`}>
             {availableStock}
           </span>
         </div>

@@ -96,8 +96,8 @@ export default function AdminCategoriesPage() {
                   <td className="px-4 py-3"><Badge variant={cat.is_active ? "success" : "error"}>{cat.is_active ? "Active" : "Inactive"}</Badge></td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2">
-                      <button onClick={() => openEdit(cat)} className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"><Pencil size={16} /></button>
-                      <button onClick={() => { if (confirm("Delete?")) deleteCategory.mutate(cat.id, { onSuccess: () => toast.success("Deleted") }); }} className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-error"><Trash2 size={16} /></button>
+                      <button onClick={() => openEdit(cat)} aria-label={`Edit ${cat.name}`} className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"><Pencil size={16} aria-hidden="true" /></button>
+                      <button onClick={() => { if (confirm("Delete?")) deleteCategory.mutate(cat.id, { onSuccess: () => toast.success("Deleted") }); }} aria-label={`Delete ${cat.name}`} className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-error"><Trash2 size={16} aria-hidden="true" /></button>
                     </div>
                   </td>
                 </tr>
