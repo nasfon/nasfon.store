@@ -9,6 +9,7 @@ import {
   User,
   LogOut,
   LayoutDashboard,
+  Package,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useCart } from "@/hooks/use-cart";
@@ -59,6 +60,14 @@ export function Navbar() {
             />
           </form>
         </div>
+
+        <Link
+          href="/track"
+          className="ml-auto flex items-center gap-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 md:hidden"
+        >
+          <Package size={18} aria-hidden="true" />
+          Track Order
+        </Link>
 
         <nav aria-label="Primary" className="hidden items-center gap-4 md:flex">
           <Link
