@@ -10,28 +10,35 @@ import { useEffect } from "react";
  * `notFound()` guard). This throws in the browser and shows a misleading dev
  * overlay even though the page works fine. It never happens in production.
  */
+type MeasureFunction = typeof performance.measure;
+
+type PatchedPerformance = Performance & {
+  __patched?: boolean;
+  __originalMeasure?: MeasureFunction;
+};
+
 export function PerformancePatch() {
   useEffect(() => {
     if (process.env.NODE_ENV !== "development") return;
     if (typeof window === "undefined") return;
 
-    const perf = window.performance;
-    if (!perf || typeof perf.measure !== "function" || (perf as any).__patched) return;
+    const perf = window.performance as PatchedPerformance;
+    if (!perf || typeof perf.measure !== "function" || perf.__patched) return;
 
     const original = perf.measure.bind(perf);
-    (perf as any).__originalMeasure = original;
-    (perf as any).measure = function (...args: Parameters<typeof perf.measure>) {
+    perf.__originalMeasure = original;
+    perf.measure = ((...args: Parameters<MeasureFunction>): PerformanceMeasure => {
       try {
         return original.apply(perf, args);
-      } catch (err: any) {
-        const message: string = (err?.message as string) || "";
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "";
         if (message.includes("negative time stamp") || message.includes("cannot be negative")) {
-          return;
+          return undefined as unknown as PerformanceMeasure;
         }
         throw err;
       }
-    };
-    (perf as any).__patched = true;
+    }) as typeof perf.measure;
+    perf.__patched = true;
   }, []);
 
   return null;

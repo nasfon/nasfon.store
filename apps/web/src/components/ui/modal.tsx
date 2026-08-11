@@ -33,12 +33,13 @@ export function Modal({
   const lastFocusedRef = useRef<HTMLElement | null>(null);
   const titleId = useId();
   const descriptionId = useId();
-  const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
 
-  const handleEscape = useCallback((e: KeyboardEvent) => {
-    if (e.key === "Escape") onCloseRef.current();
-  }, []);
+  const handleEscape = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    },
+    [onClose]
+  );
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -69,22 +70,25 @@ export function Modal({
   );
 
   useEffect(() => {
-    if (open) {
-      lastFocusedRef.current = document.activeElement as HTMLElement | null;
-      document.addEventListener("keydown", handleEscape);
-      document.body.style.overflow = "hidden";
-      const frame = requestAnimationFrame(() => {
-        dialogRef.current?.focus();
-      });
-      return () => {
-        cancelAnimationFrame(frame);
-        document.removeEventListener("keydown", handleEscape);
-        document.body.style.overflow = "";
-        lastFocusedRef.current?.focus?.();
-        lastFocusedRef.current = null;
-      };
-    }
+    if (!open) return;
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
   }, [open, handleEscape]);
+
+  useEffect(() => {
+    if (!open) return;
+    lastFocusedRef.current = document.activeElement as HTMLElement | null;
+    document.body.style.overflow = "hidden";
+    const frame = requestAnimationFrame(() => {
+      dialogRef.current?.focus();
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      document.body.style.overflow = "";
+      lastFocusedRef.current?.focus?.();
+      lastFocusedRef.current = null;
+    };
+  }, [open]);
 
   if (!open) return null;
 
