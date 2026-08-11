@@ -6,8 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Check, X, Eye, Store, MapPin, Phone, Mail, FileText, Ban, RotateCcw, Trash2 } from "lucide-react";
-import { useAdminSellers, useAdminVerifySeller, useAdminSetSellerActive, useAdminDeleteSeller } from "@/hooks/use-seller";
+import { Check, X, Eye, Store, MapPin, Phone, Mail, FileText, Ban, RotateCcw, Trash2, Plus } from "lucide-react";
+import { useAdminSellers, useAdminCreateSeller, useAdminVerifySeller, useAdminSetSellerActive, useAdminDeleteSeller } from "@/hooks/use-seller";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import type { Seller } from "@/types";
 
@@ -20,10 +21,37 @@ const statusStyles: Record<string, { label: string; className: string }> = {
 export default function AdminSellersPage() {
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
   const { data: sellers, isLoading } = useAdminSellers(statusFilter);
+  const createSeller = useAdminCreateSeller();
   const verifySeller = useAdminVerifySeller();
   const setSellerActive = useAdminSetSellerActive();
   const deleteSeller = useAdminDeleteSeller();
   const [viewing, setViewing] = useState<Seller | null>(null);
+  const [showCreate, setShowCreate] = useState(false);
+  const [form, setForm] = useState({
+    full_name: "", email: "", password: "", phone_number: "",
+    shop_name: "", shop_slug: "", shop_address: "",
+    contact_phone: "", contact_email: "", support_contact: "", business_description: "",
+  });
+
+  const openCreate = () => {
+    setForm({
+      full_name: "", email: "", password: "", phone_number: "",
+      shop_name: "", shop_slug: "", shop_address: "",
+      contact_phone: "", contact_email: "", support_contact: "", business_description: "",
+    });
+    setShowCreate(true);
+  };
+
+  const handleCreate = (e: React.FormEvent) => {
+    e.preventDefault();
+    createSeller.mutate(form, {
+      onSuccess: () => {
+        toast.success("Seller created");
+        setShowCreate(false);
+      },
+      onError: (err) => toast.error(err.message),
+    });
+  };
 
   const handleVerify = (seller: Seller, status: "approved" | "rejected") => {
     verifySeller.mutate(
@@ -67,6 +95,7 @@ export default function AdminSellersPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">Sellers</h1>
         <div className="flex gap-2">
+          <Button onClick={openCreate}><Plus size={18} />Add Seller</Button>
           {[
             { value: undefined, label: "All" },
             { value: "pending", label: "Pending" },
@@ -317,6 +346,152 @@ export default function AdminSellersPage() {
             </div>
           </div>
         )}
+      </Modal>
+
+      <Modal
+        open={showCreate}
+        onClose={() => setShowCreate(false)}
+        title="Add Seller"
+        description="Create a seller account. The seller will be approved and active immediately."
+        size="xl"
+        footer={
+          <>
+            <Button type="button" variant="outline" onClick={() => setShowCreate(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" form="create-seller-form" disabled={createSeller.isPending}>
+              {createSeller.isPending ? "Creating..." : "Create Seller"}
+            </Button>
+          </>
+        }
+      >
+        <form id="create-seller-form" onSubmit={handleCreate} className="space-y-6">
+          <section>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+              Account Details
+            </h3>
+            <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Input
+                id="seller-full-name"
+                label="Full Name"
+                placeholder="e.g. Jane Doe"
+                value={form.full_name}
+                onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+                required
+              />
+              <Input
+                id="seller-email"
+                label="Email"
+                type="email"
+                placeholder="seller@example.com"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                required
+              />
+              <Input
+                id="seller-password"
+                label="Password"
+                type="password"
+                placeholder="At least 8 characters"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                minLength={8}
+                required
+              />
+              <Input
+                id="seller-phone"
+                label="Phone Number (Optional)"
+                type="tel"
+                placeholder="e.g. 08012345678"
+                value={form.phone_number}
+                onChange={(e) => setForm({ ...form, phone_number: e.target.value })}
+              />
+            </div>
+          </section>
+
+          <section className="border-t border-gray-100 pt-5">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-400">
+              Shop Details
+            </h3>
+            <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Input
+                id="seller-shop-name"
+                label="Shop Name"
+                placeholder="e.g. Jane's Boutique"
+                value={form.shop_name}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setForm({
+                    ...form,
+                    shop_name: val,
+                    shop_slug: val.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+                  });
+                }}
+                required
+              />
+              <Input
+                id="seller-shop-slug"
+                label="Shop Slug (URL-friendly)"
+                placeholder="auto-generated"
+                value={form.shop_slug}
+                onChange={(e) => setForm({ ...form, shop_slug: e.target.value })}
+                required
+              />
+              <div className="sm:col-span-2">
+                <Input
+                  id="seller-shop-address"
+                  label="Shop Address"
+                  placeholder="e.g. 12 Lagos Road, Ikeja, Lagos"
+                  value={form.shop_address}
+                  onChange={(e) => setForm({ ...form, shop_address: e.target.value })}
+                  required
+                />
+              </div>
+              <Input
+                id="seller-contact-phone"
+                label="Contact Phone"
+                type="tel"
+                placeholder="e.g. 08012345678"
+                value={form.contact_phone}
+                onChange={(e) => setForm({ ...form, contact_phone: e.target.value })}
+                required
+              />
+              <Input
+                id="seller-contact-email"
+                label="Contact Email"
+                type="email"
+                placeholder="shop@example.com"
+                value={form.contact_email}
+                onChange={(e) => setForm({ ...form, contact_email: e.target.value })}
+                required
+              />
+              <div className="sm:col-span-2">
+                <Input
+                  id="seller-support-contact"
+                  label="Support Contact (Optional)"
+                  placeholder="WhatsApp or phone for customer support"
+                  value={form.support_contact}
+                  onChange={(e) => setForm({ ...form, support_contact: e.target.value })}
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label
+                  htmlFor="seller-business-description"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Business Description (Optional)
+                </label>
+                <textarea
+                  id="seller-business-description"
+                  value={form.business_description}
+                  onChange={(e) => setForm({ ...form, business_description: e.target.value })}
+                  placeholder="Describe the business, what it sells, and its mission..."
+                  className="mt-1.5 h-24 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+            </div>
+          </section>
+        </form>
       </Modal>
     </div>
   );

@@ -116,6 +116,27 @@ export function useAdminSellers(status?: string) {
   });
 }
 
+export function useAdminCreateSeller() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: {
+      full_name: string;
+      email: string;
+      password: string;
+      phone_number?: string;
+      shop_name: string;
+      shop_slug: string;
+      shop_address: string;
+      shop_logo_url?: string;
+      contact_phone: string;
+      contact_email: string;
+      support_contact?: string;
+      business_description?: string;
+    }) => api.post<Seller>("/admin/sellers", data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "sellers"] }),
+  });
+}
+
 export function useAdminVerifySeller() {
   const qc = useQueryClient();
   return useMutation({
