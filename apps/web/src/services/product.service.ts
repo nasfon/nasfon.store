@@ -1,5 +1,4 @@
-import { cookies } from "next/headers";
-import { createClient } from "@/utils/supabase/server";
+import { createPublicClient } from "@/utils/supabase/server";
 import { cache } from "react";
 
 const listingColumns = "id, name, slug, featured_image, selling_price, compare_price, stock_quantity, brand, is_featured, category_id, created_at";
@@ -12,8 +11,7 @@ export const getProducts = cache(async (params: {
   featured?: boolean;
   sort?: string;
 }) => {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createPublicClient();
 
   const page = params.page || 1;
   const limit = params.limit || 20;
@@ -62,8 +60,7 @@ export const getProducts = cache(async (params: {
 });
 
 export async function getProductBySlug(slug: string) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createPublicClient();
 
   const { data, error } = await supabase
     .from("products")
@@ -87,8 +84,7 @@ export async function getProductBySlug(slug: string) {
 }
 
 export async function getFeaturedProducts() {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createPublicClient();
 
   const { data, error } = await supabase
     .from("products")
@@ -102,8 +98,7 @@ export async function getFeaturedProducts() {
 }
 
 export async function searchProducts(searchQuery: string, page = 1, limit = 20) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createPublicClient();
 
   const offset = (page - 1) * limit;
 

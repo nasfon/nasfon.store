@@ -1,9 +1,7 @@
-import { cookies } from "next/headers";
-import { createClient } from "@/utils/supabase/server";
+import { createPublicClient } from "@/utils/supabase/server";
 
 export async function getActiveDeliveryLocations() {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createPublicClient();
 
   const { data, error } = await supabase
     .from("delivery_locations")

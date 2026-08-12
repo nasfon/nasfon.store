@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { createClient } from "@/utils/supabase/server";
+import { createClient, createPublicClient } from "@/utils/supabase/server";
 
 export async function createReview(data: {
   user_id: string;
@@ -49,8 +49,7 @@ export async function createReview(data: {
 }
 
 export async function getProductReviews(productId: string) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createPublicClient();
 
   const { data, error } = await supabase
     .from("reviews")

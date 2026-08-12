@@ -4,8 +4,7 @@ import type { Metadata } from "next";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Phone, Mail, CheckCircle2, Store } from "lucide-react";
 import * as sellerService from "@/services/seller.service";
-import { createClient } from "@/utils/supabase/server";
-import { cookies } from "next/headers";
+import { createPublicClient } from "@/utils/supabase/server";
 import Link from "next/link";
 
 interface SellerPageProps {
@@ -49,8 +48,7 @@ export default async function SellerProfilePage({ params }: SellerPageProps) {
     notFound();
   }
 
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createPublicClient();
   const { data: products } = await supabase
     .from("products")
     .select("id, name, slug, featured_image, selling_price, compare_price")

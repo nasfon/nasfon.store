@@ -1,9 +1,7 @@
-import { cookies } from "next/headers";
-import { createClient } from "@/utils/supabase/server";
+import { createPublicClient } from "@/utils/supabase/server";
 
 export async function getCategories() {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createPublicClient();
 
   const { data, error } = await supabase
     .from("categories")
@@ -16,8 +14,7 @@ export async function getCategories() {
 }
 
 export async function getCategoryBySlug(slug: string) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createPublicClient();
 
   const { data: category, error: catError } = await supabase
     .from("categories")

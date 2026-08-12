@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { createClient } from "@/utils/supabase/server";
+import { createClient, createPublicClient } from "@/utils/supabase/server";
 
 export async function getSellerProfile(userId: string) {
   const cookieStore = await cookies();
@@ -19,8 +19,7 @@ export async function getSellerProfile(userId: string) {
 }
 
 export async function getSellerBySlug(slug: string) {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+  const supabase = createPublicClient();
 
   const { data, error } = await supabase
     .from("sellers")
