@@ -19,29 +19,54 @@ export function RouteProgress() {
   const [visible, setVisible] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     const nav = (window as unknown as { navigation?: NavigationLike }).navigation;
     if (!nav) return;
 
+    // The Navigation API dispatches the `navigate` event synchronously while
+    // React is committing the previous render, so scheduling state updates
+    // directly in the handler triggers "useInsertionEffect must not schedule
+    // updates". Defer the updates to the next frame instead.
+    const defer = (fn: () => void) => {
+      requestAnimationFrame(() => {
+        if (mountedRef.current) fn();
+      });
+    };
+
     const start = () => {
-      if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-      if (timerRef.current) clearInterval(timerRef.current);
-      setVisible(true);
-      setProgress(14);
-      timerRef.current = setInterval(() => {
-        setProgress((current) => (current < 90 ? current + (90 - current) * 0.14 : 90));
-      }, 180);
+      defer(() => {
+        if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+        if (timerRef.current) clearInterval(timerRef.current);
+        setVisible(true);
+        setProgress(14);
+        timerRef.current = setInterval(() => {
+          setProgress((current) => (current < 90 ? current + (90 - current) * 0.14 : 90));
+        }, 180);
+      });
     };
 
     const done = () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-      setProgress(100);
-      hideTimerRef.current = setTimeout(() => {
-        setVisible(false);
-        setProgress(0);
-      }, 280);
+      defer(() => {
+        if (timerRef.current) clearInterval(timerRef.current);
+        setProgress(100);
+        hideTimerRef.current = setTimeout(() => {
+          if (!mountedRef.current) return;
+          setVisible(false);
+          setProgress(0);
+        }, 280);
+      });
     };
 
     nav.addEventListener("navigate", start);
