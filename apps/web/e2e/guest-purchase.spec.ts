@@ -14,7 +14,7 @@ test.describe('Guest Purchase Flow', () => {
     if (await productsLink.isVisible()) {
       await productsLink.click();
     } else {
-      await page.goto('/products');
+      await page.goto('/');
     }
 
     // Wait for products to load

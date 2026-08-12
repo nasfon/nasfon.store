@@ -54,7 +54,7 @@ function PaymentContent({
           <Link href="/checkout">
             <Button size="lg" className="w-full">Checkout Again</Button>
           </Link>
-          <Link href="/products">
+          <Link href="/">
             <Button variant="outline" size="lg" className="w-full">Continue Shopping</Button>
           </Link>
         </div>
@@ -95,7 +95,7 @@ function PaymentContent({
           <Link href="/checkout">
             <Button size="lg" className="w-full">Checkout Again</Button>
           </Link>
-          <Link href="/products">
+          <Link href="/">
             <Button variant="outline" size="lg" className="w-full">Continue Shopping</Button>
           </Link>
         </div>

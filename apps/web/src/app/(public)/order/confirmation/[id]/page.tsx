@@ -71,7 +71,7 @@ export default function OrderConfirmationPage({
         <Link href={`/track?order_number=${order.order_number}&phone=${order.customer_phone}`}>
           <Button variant="outline" size="lg" className="w-full">Track Order</Button>
         </Link>
-        <Link href="/products">
+        <Link href="/">
           <Button variant="outline" size="lg" className="w-full">Continue Shopping</Button>
         </Link>
       </div>

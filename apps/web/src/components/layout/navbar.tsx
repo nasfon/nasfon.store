@@ -27,7 +27,7 @@ export function Navbar() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`/?search=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 
@@ -71,7 +71,7 @@ export function Navbar() {
 
         <nav aria-label="Primary" className="hidden items-center gap-4 md:flex">
           <Link
-            href="/products"
+            href="/"
             className="text-sm font-medium text-gray-600 hover:text-gray-900"
           >
             Products

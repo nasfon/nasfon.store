@@ -34,7 +34,7 @@ export default function CartPage() {
           title="Your cart is empty"
           description="Looks like you haven't added anything yet."
           action={
-            <Link href="/products">
+            <Link href="/">
               <Button>Browse Products</Button>
             </Link>
           }
@@ -173,7 +173,7 @@ export default function CartPage() {
         </Link>
 
         <Link
-          href="/products"
+          href="/"
           className="mt-3 flex items-center justify-center gap-1 text-sm text-gray-500 hover:text-gray-900"
         >
           <ArrowLeft size={16} />

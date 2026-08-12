@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Buy Now Flow', () => {
   test('should go directly to checkout from product page', async ({ page }) => {
-    await page.goto('/products');
+    await page.goto('/');
     
     // Check if products exist
     const firstProduct = page.locator('a[href^="/products/"]').first();

@@ -37,7 +37,7 @@ export default function CategoryPage({
     return (
       <div className="mx-auto max-w-7xl px-4 py-16 text-center">
         <p className="text-gray-500">Category not found.</p>
-        <Link href="/products"><Button className="mt-4">Browse Products</Button></Link>
+        <Link href="/"><Button className="mt-4">Browse Products</Button></Link>
       </div>
     );
   }
@@ -46,7 +46,7 @@ export default function CategoryPage({
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
-      <Link href="/products" className="mb-6 flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900">
+      <Link href="/" className="mb-6 flex items-center gap-1 text-sm text-gray-500 hover:text-gray-900">
         <ArrowLeft size={16} />
         All Products
       </Link>

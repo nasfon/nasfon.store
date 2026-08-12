@@ -40,7 +40,7 @@ export default function OrdersPage() {
         icon={<Package size={48} />}
         title="No orders yet"
         description="When you place an order, it will appear here."
-        action={<Link href="/products"><Button>Browse Products</Button></Link>}
+        action={<Link href="/"><Button>Browse Products</Button></Link>}
       />
     );
   }

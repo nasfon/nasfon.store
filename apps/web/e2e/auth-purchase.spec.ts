@@ -30,7 +30,7 @@ test.describe('Auth Purchase Flow', () => {
     // await page.getByRole('button', { name: /login/i }).click();
 
     // 3. Browse and Purchase
-    await page.goto('/products');
+    await page.goto('/');
     
     const firstProduct = page.locator('a[href^="/products/"]').first();
     if (await firstProduct.count() > 0) {
