@@ -61,7 +61,7 @@ export default function TrackPage() {
           onChange={(e) => setPhoneNumber(e.target.value)}
           required
         />
-        <Button type="submit" size="lg" className="w-full" disabled={trackOrder.isPending}>
+        <Button type="submit" size="lg" className="w-full" loading={trackOrder.isPending}>
           {trackOrder.isPending ? "Searching..." : "Track Order"}
         </Button>
       </form>

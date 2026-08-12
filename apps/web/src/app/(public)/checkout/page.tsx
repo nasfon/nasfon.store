@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { LoaderOverlay } from "@/components/ui/loader";
 import { useCart } from "@/hooks/use-cart";
 import { useDeliveryLocations } from "@/hooks/use-delivery";
 import { useCheckout, useBuyNow } from "@/hooks/use-orders";
@@ -109,6 +110,10 @@ function CheckoutForm({ cart, locations, isBuyNow, buyNowProductId, buyNowQty, b
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
+      {(checkout.isPending || buyNow.isPending) && (
+        <LoaderOverlay label="Placing your order..." />
+      )}
+
       <h1 className="text-2xl font-bold text-gray-900">Checkout</h1>
 
       <form onSubmit={handleSubmit} className="mt-6 grid gap-8 lg:grid-cols-5">
@@ -227,7 +232,7 @@ function CheckoutForm({ cart, locations, isBuyNow, buyNowProductId, buyNowQty, b
               type="submit"
               size="lg"
               className="mt-4 w-full"
-              disabled={checkout.isPending || buyNow.isPending}
+              loading={checkout.isPending || buyNow.isPending}
             >
               {checkout.isPending || buyNow.isPending ? "Placing Order..." : "Place Order"}
             </Button>

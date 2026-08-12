@@ -127,7 +127,7 @@ export default function AdminCategoriesPage() {
             <Button
               type="submit"
               form="category-form"
-              disabled={createCategory.isPending || updateCategory.isPending}
+              loading={createCategory.isPending || updateCategory.isPending}
             >
               {editing ? "Save Changes" : "Create Category"}
             </Button>

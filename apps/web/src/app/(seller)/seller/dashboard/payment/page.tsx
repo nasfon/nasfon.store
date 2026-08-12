@@ -101,7 +101,7 @@ export default function SellerPaymentPage() {
           <div className="rounded-lg bg-yellow-50 p-4 text-xs text-yellow-800">
             Keep your secret key safe. It is encrypted at rest and never exposed to customers.
           </div>
-          <Button type="submit" disabled={updateConfig.isPending}>
+          <Button type="submit" loading={updateConfig.isPending}>
             {updateConfig.isPending ? "Saving..." : hasConfig ? "Update Keys" : "Save Configuration"}
           </Button>
         </form>

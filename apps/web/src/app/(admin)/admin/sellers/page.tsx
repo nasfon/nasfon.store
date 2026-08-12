@@ -359,7 +359,7 @@ export default function AdminSellersPage() {
             <Button type="button" variant="outline" onClick={() => setShowCreate(false)}>
               Cancel
             </Button>
-            <Button type="submit" form="create-seller-form" disabled={createSeller.isPending}>
+            <Button type="submit" form="create-seller-form" loading={createSeller.isPending}>
               {createSeller.isPending ? "Creating..." : "Create Seller"}
             </Button>
           </>

@@ -2,6 +2,7 @@
 
 import { use } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, ShoppingCart, Star, Minus, Plus, ChevronLeft, ChevronRight, Store, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +12,7 @@ import { useProductReviews } from "@/hooks/use-reviews";
 import { useAddCartItem } from "@/hooks/use-cart";
 import { toast } from "sonner";
 import { useState } from "react";
+import { cloudinaryUrl } from "@/utils/cloudinary";
 
 export default function ProductDetailPage({
   params,
@@ -110,11 +112,14 @@ export default function ProductDetailPage({
           <div className="relative aspect-square overflow-hidden rounded-lg bg-gray-100">
             {selectedImage ? (
               <>
-                <img
+                <Image
                   key={selectedImage.id}
-                  src={selectedImage.image_url}
+                  src={cloudinaryUrl(selectedImage.image_url, { width: 1200, format: "auto" })}
                   alt={product.name}
-                  className="h-full w-full object-cover transition-opacity duration-300"
+                  fill
+                  sizes="(min-width: 1024px) 50vw, 100vw"
+                  className="object-cover transition-opacity duration-300"
+                  priority
                 />
                 {allImages.length > 1 && (
                   <>
@@ -160,12 +165,14 @@ export default function ProductDetailPage({
                   onClick={() => setSelectedIdx(i)}
                   aria-label={`Show image ${i + 1} of ${allImages.length}`}
                   aria-current={i === selectedIdx}
-                  className={`h-20 w-20 shrink-0 overflow-hidden rounded-md border-2 object-cover ${i === selectedIdx ? "border-primary" : "border-transparent"}`}
+                  className={`relative h-20 w-20 shrink-0 overflow-hidden rounded-md border-2 ${i === selectedIdx ? "border-primary" : "border-transparent"}`}
                 >
-                  <img
-                    src={img.image_url}
+                  <Image
+                    src={cloudinaryUrl(img.image_url, { width: 160, format: "auto" })}
                     alt=""
-                    className="h-full w-full object-cover"
+                    fill
+                    sizes="80px"
+                    className="object-cover"
                   />
                 </button>
               ))}
@@ -211,7 +218,13 @@ export default function ProductDetailPage({
             >
               <div className="relative h-12 w-12 overflow-hidden rounded-full border bg-gray-100">
                 {product.seller.shop_logo_url ? (
-                  <img src={product.seller.shop_logo_url} alt={product.seller.shop_name} className="h-full w-full object-cover" />
+                  <Image
+                    src={cloudinaryUrl(product.seller.shop_logo_url, { width: 96, format: "auto" })}
+                    alt={product.seller.shop_name}
+                    fill
+                    sizes="48px"
+                    className="object-cover"
+                  />
                 ) : (
                   <Store size={22} className="absolute inset-0 m-auto text-gray-400" />
                 )}
@@ -263,7 +276,7 @@ export default function ProductDetailPage({
                 variant="outline"
                 size="lg"
                 className="flex-1"
-                disabled={addToCart.isPending}
+                loading={addToCart.isPending}
                 onClick={handleAddToCart}
               >
                 <ShoppingCart size={18} />

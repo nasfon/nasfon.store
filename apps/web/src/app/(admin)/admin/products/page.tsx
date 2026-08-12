@@ -174,7 +174,7 @@ export default function AdminProductsPage() {
             <Button
               type="submit"
               form="product-form"
-              disabled={createProduct.isPending || updateProduct.isPending}
+              loading={createProduct.isPending || updateProduct.isPending}
             >
               {editing ? "Save Changes" : "Create Product"}
             </Button>

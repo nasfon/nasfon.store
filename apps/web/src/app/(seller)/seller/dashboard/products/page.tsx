@@ -248,7 +248,7 @@ export default function SellerProductsPage() {
             <label className="block text-sm font-medium text-gray-700 mb-1">Product Images</label>
             <ImageUpload images={images} onChange={setImages} maxImages={5} />
           </div>
-          <Button type="submit" className="w-full" disabled={createProduct.isPending || updateProduct.isPending}>
+          <Button type="submit" className="w-full" loading={createProduct.isPending || updateProduct.isPending}>
             {createProduct.isPending || updateProduct.isPending ? "Saving..." : editing?.id ? "Update Product" : "Create Product"}
           </Button>
         </form>

@@ -149,6 +149,7 @@ export default function SellerOrdersPage() {
                       size="sm"
                       variant="outline"
                       disabled={updateStatus.isPending}
+                      loading={updateStatus.isPending && updateStatus.variables?.order_status === status}
                       onClick={() => handleStatusChange(viewing, status)}
                     >
                       {status.replace(/_/g, " ")}

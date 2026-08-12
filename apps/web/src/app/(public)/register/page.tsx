@@ -128,7 +128,7 @@ export default function RegisterPage() {
           Password must be at least 8 characters and include a capital letter, lowercase
           letter, number, and symbol.
         </p>
-        <Button type="submit" size="lg" className="w-full" disabled={loading}>
+        <Button type="submit" size="lg" className="w-full" loading={loading}>
           {loading ? "Creating account..." : "Create Account"}
         </Button>
       </form>

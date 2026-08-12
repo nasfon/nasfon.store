@@ -37,4 +37,12 @@ describe('Button component', () => {
     const button = screen.getByRole('button', { name: /click me/i });
     expect(button).toHaveClass('custom-class');
   });
+
+  it('should be disabled and show a spinner when loading is true', () => {
+    render(<Button loading>Click me</Button>);
+    const button = screen.getByRole('button', { name: /click me/i });
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute('aria-busy', 'true');
+    expect(button.querySelector('[aria-hidden="true"]')).toBeInTheDocument();
+  });
 });

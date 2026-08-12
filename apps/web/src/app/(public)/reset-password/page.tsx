@@ -174,7 +174,7 @@ function ResetPasswordContent() {
               onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
               required
             />
-            <Button type="submit" size="lg" className="w-full" disabled={loading || code.length !== 6}>
+            <Button type="submit" size="lg" className="w-full" loading={loading} disabled={code.length !== 6}>
               {loading ? "Verifying..." : "Verify Code"}
             </Button>
           </form>
@@ -219,7 +219,7 @@ function ResetPasswordContent() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
             />
-            <Button type="submit" size="lg" className="w-full" disabled={loading}>
+            <Button type="submit" size="lg" className="w-full" loading={loading}>
               {loading ? "Resetting..." : "Reset Password"}
             </Button>
           </form>

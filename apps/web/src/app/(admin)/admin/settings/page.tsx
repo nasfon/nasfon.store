@@ -65,7 +65,7 @@ function SettingsForm({ settings }: { settings: NonNullable<ReturnType<typeof us
           </div>
         </div>
 
-        <Button type="submit" disabled={updateSettings.isPending}>
+        <Button type="submit" loading={updateSettings.isPending}>
           {updateSettings.isPending ? "Saving..." : "Save Settings"}
         </Button>
       </form>

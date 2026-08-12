@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Search, X, Loader2 } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { ProductCard } from "@/components/shared/product-card";
+import { DotsLoader } from "@/components/ui/loader";
 import { useInfiniteSearchProducts } from "@/hooks/use-products";
 
 export default function SearchPage() {
@@ -72,8 +73,8 @@ export default function SearchPage() {
         {!debouncedQuery ? (
           <p className="text-center text-gray-400">Type a product name to search.</p>
         ) : isLoading ? (
-          <div role="status" className="flex items-center justify-center gap-2 py-12 text-sm text-gray-400">
-            <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+          <div role="status" className="flex flex-col items-center gap-3 py-12 text-sm text-gray-400">
+            <DotsLoader className="justify-center" />
             Searching...
           </div>
         ) : products.length > 0 ? (
@@ -88,10 +89,7 @@ export default function SearchPage() {
             </div>
             <div ref={sentinelRef} className="flex flex-col items-center gap-3 py-8">
               {isFetchingNextPage && (
-                <div role="status" className="flex items-center gap-2 text-sm text-gray-400">
-                  <Loader2 size={16} className="animate-spin" aria-hidden="true" />
-                  Loading more results...
-                </div>
+                <DotsLoader className="justify-center" />
               )}
               {hasNextPage && !isFetchingNextPage && (
                 <button

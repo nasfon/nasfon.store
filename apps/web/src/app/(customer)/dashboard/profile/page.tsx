@@ -50,7 +50,7 @@ function ProfileForm({ profile }: { profile: NonNullable<ReturnType<typeof usePr
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
         />
-        <Button type="submit" disabled={updateProfile.isPending}>
+        <Button type="submit" loading={updateProfile.isPending}>
           {updateProfile.isPending ? "Saving..." : "Save Changes"}
         </Button>
       </form>

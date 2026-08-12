@@ -157,7 +157,7 @@ export default function SellerDeliveryLocationsPage() {
             onChange={(e) => setForm({ ...form, estimated_delivery_days: e.target.value })}
             required
           />
-          <Button type="submit" className="w-full" disabled={createLocation.isPending || updateLocation.isPending}>
+          <Button type="submit" className="w-full" loading={createLocation.isPending || updateLocation.isPending}>
             {createLocation.isPending || updateLocation.isPending ? "Saving..." : editing ? "Update Location" : "Create Location"}
           </Button>
         </form>

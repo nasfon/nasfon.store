@@ -120,7 +120,7 @@ export default function AdminDeliveryLocationsPage() {
             <Button
               type="submit"
               form="location-form"
-              disabled={createLocation.isPending || updateLocation.isPending}
+              loading={createLocation.isPending || updateLocation.isPending}
             >
               {editing ? "Save Changes" : "Add Location"}
             </Button>

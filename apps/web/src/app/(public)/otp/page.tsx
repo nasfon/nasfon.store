@@ -116,7 +116,7 @@ function OtpContent() {
               onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
               required
             />
-            <Button type="submit" size="lg" className="w-full" disabled={loading || code.length !== 6}>
+            <Button type="submit" size="lg" className="w-full" loading={loading} disabled={code.length !== 6}>
               {loading ? "Verifying..." : "Verify Code"}
             </Button>
           </form>

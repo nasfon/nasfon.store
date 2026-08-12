@@ -1,18 +1,21 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useCart, useAddCartItem } from "@/hooks/use-cart";
 import { toast } from "sonner";
+import { cloudinaryUrl } from "@/utils/cloudinary";
 import type { Product } from "@/types";
 
 interface ProductCardProps {
   product: Product;
+  priority?: boolean;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, priority = false }: ProductCardProps) {
   const addToCart = useAddCartItem();
   const { data: cart } = useCart();
   const cartQty = cart?.items?.find((i) => i.product_id === product.id)?.quantity ?? 0;
@@ -47,16 +50,18 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <div className="group rounded-lg border border-gray-200 bg-white shadow-card transition-shadow hover:shadow-dropdown" style={{ contentVisibility: "auto" }}>
       <Link href={`/products/${product.slug}`} className="block">
-        <div className="aspect-square overflow-hidden rounded-t-lg bg-gray-100">
+        <div className="relative aspect-square overflow-hidden rounded-t-lg bg-gray-100">
           {product.featured_image ? (
-            <img
-              src={product.featured_image}
+            <Image
+              src={cloudinaryUrl(product.featured_image, { width: 800, format: "auto" })}
               alt={product.name}
-              loading="lazy"
-              className="h-full w-full object-cover transition-transform group-hover:scale-105"
+              fill
+              sizes="(min-width: 1280px) 25vw, (min-width: 768px) 33vw, 50vw"
+              className="object-cover transition-transform group-hover:scale-105"
+              priority={priority}
             />
           ) : (
-            <div className="flex h-full items-center justify-center text-gray-300">
+            <div className="flex h-full w-full items-center justify-center text-gray-300">
               No image
             </div>
           )}
@@ -101,7 +106,7 @@ export function ProductCard({ product }: ProductCardProps) {
           variant="secondary"
           size="sm"
           className="mt-2 w-full"
-          disabled={addToCart.isPending}
+          loading={addToCart.isPending}
           onClick={handleAddToCart}
         >
           <ShoppingCart size={16} />

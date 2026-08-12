@@ -108,7 +108,7 @@ function LoginContent() {
             Forgot password?
           </Link>
         </div>
-        <Button type="submit" size="lg" className="w-full" disabled={loading}>
+        <Button type="submit" size="lg" className="w-full" loading={loading}>
           {loading ? "Signing in..." : "Sign In"}
         </Button>
       </form>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { api } from "@/lib/fetch";
 
 interface CartItemWithProduct {
@@ -137,6 +137,7 @@ export function useCartQuantity() {
   const updateItem = useUpdateCartItem();
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const originals = useRef<Record<string, CartResponse | undefined>>({});
+  const [pending, setPending] = useState<string[]>([]);
 
   const setQuantity = (productId: string, quantity: number) => {
     if (timers.current[productId]) {
@@ -172,9 +173,13 @@ export function useCartQuantity() {
     timers.current[productId] = setTimeout(() => {
       const original = originals.current[productId];
       delete originals.current[productId];
+      setPending((prev) => [...new Set([...prev, productId])]);
       updateItem.mutate(
         { product_id: productId, quantity },
         {
+          onSettled: () => {
+            setPending((prev) => prev.filter((id) => id !== productId));
+          },
           onError: () => {
             if (original) {
               queryClient.setQueryData(["cart"], original);
@@ -198,7 +203,7 @@ export function useCartQuantity() {
     }
   };
 
-  return { setQuantity, syncToServer, cancelPending };
+  return { setQuantity, syncToServer, cancelPending, pending };
 }
 
 export function useRemoveCartItem() {

@@ -4,10 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/fetch";
 import type { Category, Product } from "@/types";
 
-export function useCategories() {
+export function useCategories(initialData?: Category[]) {
   return useQuery({
     queryKey: ["categories"],
     queryFn: () => api.get<Category[]>("/categories"),
+    ...(initialData ? { initialData } : {}),
   });
 }
 

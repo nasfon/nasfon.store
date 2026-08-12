@@ -3,9 +3,11 @@
 import { use, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Loader2, ShieldCheck, TimerOff, AlertTriangle, HelpCircle } from "lucide-react";
+import { ShieldCheck, TimerOff, AlertTriangle, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Spinner } from "@/components/ui/spinner";
+import { DotsLoader } from "@/components/ui/loader";
 import { usePaymentByReference } from "@/hooks/use-payments";
 
 function PaymentContent({
@@ -117,10 +119,11 @@ function PaymentContent({
 
       {!order && (
         <>
-          <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-500">
-            <Loader2 size={18} className="animate-spin text-primary" />
+          <div className="mt-6 flex items-center justify-center gap-3 text-sm text-gray-500">
+            <Spinner size={18} className="text-primary" />
             Confirming payment
           </div>
+          <DotsLoader className="mt-4 justify-center" />
 
           {paymentUrl && (
             <div className="mt-8">

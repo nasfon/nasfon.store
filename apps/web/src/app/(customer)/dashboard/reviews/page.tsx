@@ -119,7 +119,7 @@ export default function ReviewsPage() {
                   size="sm"
                   className="mt-2"
                   onClick={() => handleSubmit(item.product_id, order.id)}
-                  disabled={createReview.isPending}
+                  loading={createReview.isPending}
                 >
                   {createReview.isPending ? "Submitting..." : "Submit Review"}
                 </Button>
