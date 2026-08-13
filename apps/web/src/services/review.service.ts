@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { createClient, createPublicClient } from "@/utils/supabase/server";
+import { sanitizePlainText } from "@/lib/sanitize";
 
 export async function createReview(data: {
   user_id: string;
@@ -38,7 +39,7 @@ export async function createReview(data: {
       product_id: data.product_id,
       order_id: data.order_id,
       rating: data.rating,
-      review: data.review || null,
+      review: data.review ? sanitizePlainText(data.review, 2000) : null,
       is_visible: true,
     })
     .select()
