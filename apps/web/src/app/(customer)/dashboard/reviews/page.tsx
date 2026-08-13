@@ -12,6 +12,7 @@ export default function ReviewsPage() {
   const { data: orders } = useOrders();
   const createReview = useCreateReview();
   const [reviewForm, setReviewForm] = useState<Record<string, { rating: number; review: string }>>({});
+  const [submittingId, setSubmittingId] = useState<string | null>(null);
 
   const deliveredOrders = orders?.filter((o) => o.order_status === "delivered") || [];
 
@@ -21,6 +22,8 @@ export default function ReviewsPage() {
       toast.error("Please select a rating");
       return;
     }
+
+    setSubmittingId(productId);
 
     createReview.mutate(
       {
@@ -37,8 +40,12 @@ export default function ReviewsPage() {
             delete next[productId];
             return next;
           });
+          setSubmittingId(null);
         },
-        onError: (err) => toast.error(err.message),
+        onError: (err) => {
+          toast.error(err.message);
+          setSubmittingId(null);
+        },
       }
     );
   };
@@ -119,9 +126,9 @@ export default function ReviewsPage() {
                   size="sm"
                   className="mt-2"
                   onClick={() => handleSubmit(item.product_id, order.id)}
-                  loading={createReview.isPending}
+                  loading={createReview.isPending && submittingId === item.product_id}
                 >
-                  {createReview.isPending ? "Submitting..." : "Submit Review"}
+                  {createReview.isPending && submittingId === item.product_id ? "Submitting..." : "Submit Review"}
                 </Button>
               </div>
             );
