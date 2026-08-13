@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Pencil, Trash2, Images } from "lucide-react";
+import { Plus, Pencil, Trash2, Images, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Modal } from "@/components/ui/modal";
+import { Pagination } from "@/components/ui/pagination";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { ImageUpload } from "@/components/shared/image-upload";
@@ -22,6 +23,8 @@ import {
 } from "@/hooks/use-admin";
 import { toast } from "sonner";
 
+const PAGE_SIZE = 10;
+
 export default function AdminProductsPage() {
   const { data: products, isLoading } = useAdminProducts();
   const createProduct = useCreateProduct();
@@ -30,6 +33,8 @@ export default function AdminProductsPage() {
 
   const [showModal, setShowModal] = useState(false);
   const { data: categories } = useAdminCategories(showModal);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [showImagesModal, setShowImagesModal] = useState<string | null>(null);
   const [editing, setEditing] = useState<{
     id: string; name: string; slug: string; sku: string;
@@ -92,6 +97,20 @@ export default function AdminProductsPage() {
     }
   };
 
+  const normalizedSearch = search.trim().toLowerCase();
+  const filteredProducts = products?.filter((product) => {
+    if (!normalizedSearch) return true;
+    const categoryName = product.category?.name?.toLowerCase() || "";
+    return (
+      product.name.toLowerCase().includes(normalizedSearch) ||
+      categoryName.includes(normalizedSearch)
+    );
+  });
+
+  const totalPages = Math.max(1, Math.ceil((filteredProducts?.length || 0) / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pagedProducts = filteredProducts?.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
   return (
     <div>
       <div className="flex items-center justify-between">
@@ -99,7 +118,19 @@ export default function AdminProductsPage() {
         <Button onClick={openCreate}><Plus size={18} />Add Product</Button>
       </div>
 
-      <div className="mt-6 overflow-x-auto rounded-lg border border-gray-200 bg-white">
+      <div className="relative mt-6 max-w-sm">
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true" />
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => { setPage(1); setSearch(e.target.value); }}
+          placeholder="Search by product name or category..."
+          aria-label="Search products by name or category"
+          className="h-10 w-full rounded-lg border border-gray-300 bg-white pl-9 pr-4 text-sm placeholder:text-gray-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+        />
+      </div>
+
+      <div className="mt-4 overflow-x-auto rounded-lg border border-gray-200 bg-white">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-gray-50 text-left text-gray-500">
@@ -117,7 +148,7 @@ export default function AdminProductsPage() {
                 <tr key={i}><td colSpan={6} className="px-4 py-3"><Skeleton className="h-6 w-full" /></td></tr>
               ))
             ) : products?.length ? (
-              products.map((product) => (
+              pagedProducts?.map((product) => (
                 <tr key={product.id} className="border-b last:border-b-0">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
@@ -150,11 +181,21 @@ export default function AdminProductsPage() {
                 </tr>
               ))
             ) : (
-              <tr><td colSpan={6} className="px-4 py-12 text-center text-gray-400">No products yet.</td></tr>
+              <tr><td colSpan={6} className="px-4 py-12 text-center text-gray-400">
+                {products?.length ? "No products match your search." : "No products yet."}
+              </td></tr>
             )}
           </tbody>
         </table>
       </div>
+
+      <Pagination
+        page={currentPage}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        totalItems={filteredProducts?.length || 0}
+        pageSize={PAGE_SIZE}
+      />
 
       <Modal
         open={showModal}

@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Check, X, Eye, Store, MapPin, Phone, Mail, FileText, Ban, RotateCcw, Trash2, Plus } from "lucide-react";
+import { Pagination } from "@/components/ui/pagination";
+import { Check, X, Eye, Store, MapPin, Phone, Mail, FileText, Ban, RotateCcw, Trash2, Plus, Search } from "lucide-react";
 import { useAdminSellers, useAdminCreateSeller, useAdminVerifySeller, useAdminSetSellerActive, useAdminDeleteSeller } from "@/hooks/use-seller";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -18,8 +19,12 @@ const statusStyles: Record<string, { label: string; className: string }> = {
   rejected: { label: "Rejected", className: "bg-red-100 text-red-800" },
 };
 
+const PAGE_SIZE = 10;
+
 export default function AdminSellersPage() {
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const { data: sellers, isLoading } = useAdminSellers(statusFilter);
   const createSeller = useAdminCreateSeller();
   const verifySeller = useAdminVerifySeller();
@@ -32,6 +37,18 @@ export default function AdminSellersPage() {
     shop_name: "", shop_slug: "", shop_address: "",
     contact_phone: "", contact_email: "", support_contact: "", business_description: "",
   });
+
+  const normalizedSearch = search.trim().toLowerCase();
+  const filteredSellers = sellers?.filter((seller) => {
+    if (!normalizedSearch) return true;
+    const userEmail = seller.user?.email?.toLowerCase() || "";
+    const contactEmail = seller.contact_email?.toLowerCase() || "";
+    return userEmail.includes(normalizedSearch) || contactEmail.includes(normalizedSearch);
+  });
+
+  const totalPages = Math.max(1, Math.ceil((filteredSellers?.length || 0) / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pagedSellers = filteredSellers?.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   const openCreate = () => {
     setForm({
@@ -106,12 +123,24 @@ export default function AdminSellersPage() {
               key={f.label}
               variant={statusFilter === f.value ? "primary" : "outline"}
               size="sm"
-              onClick={() => setStatusFilter(f.value)}
+              onClick={() => { setPage(1); setStatusFilter(f.value); }}
             >
               {f.label}
             </Button>
           ))}
         </div>
+      </div>
+
+      <div className="relative mt-6 max-w-sm">
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true" />
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => { setPage(1); setSearch(e.target.value); }}
+          placeholder="Search sellers by email..."
+          aria-label="Search sellers by email"
+          className="h-10 w-full rounded-lg border border-gray-300 bg-white pl-9 pr-4 text-sm placeholder:text-gray-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+        />
       </div>
 
       {isLoading ? (
@@ -133,7 +162,7 @@ export default function AdminSellersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {sellers?.map((seller) => (
+              {pagedSellers?.map((seller) => (
                 <tr key={seller.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
@@ -217,10 +246,10 @@ export default function AdminSellersPage() {
                   </td>
                 </tr>
               ))}
-              {(!sellers || sellers.length === 0) && (
+              {(!filteredSellers || filteredSellers.length === 0) && (
                 <tr>
                   <td colSpan={5} className="px-4 py-10 text-center text-gray-500">
-                    No sellers found.
+                    {sellers?.length ? "No sellers match your search." : "No sellers found."}
                   </td>
                 </tr>
               )}
@@ -228,6 +257,14 @@ export default function AdminSellersPage() {
           </table>
         </div>
       )}
+
+      <Pagination
+        page={currentPage}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        totalItems={filteredSellers?.length || 0}
+        pageSize={PAGE_SIZE}
+      />
 
       <Modal open={!!viewing} onClose={() => setViewing(null)} title={viewing?.shop_name || "Seller Details"}>
         {viewing && (

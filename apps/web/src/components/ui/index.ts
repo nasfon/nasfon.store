@@ -14,3 +14,4 @@ export { Skeleton } from "./skeleton";
 export { Spinner } from "./spinner";
 export { EmptyState } from "./empty-state";
 export { Alert } from "./alert";
+export { Pagination } from "./pagination";

@@ -1,15 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Modal } from "@/components/ui/modal";
+import { Pagination } from "@/components/ui/pagination";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { useAdminDeliveryLocations, useCreateDeliveryLocation, useUpdateDeliveryLocation, useDeleteDeliveryLocation } from "@/hooks/use-admin";
 import { toast } from "sonner";
+
+const PAGE_SIZE = 10;
 
 export default function AdminDeliveryLocationsPage() {
   const { data: locations, isLoading } = useAdminDeliveryLocations();
@@ -18,12 +21,24 @@ export default function AdminDeliveryLocationsPage() {
   const deleteLocation = useDeleteDeliveryLocation();
 
   const [showModal, setShowModal] = useState(false);
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const [editing, setEditing] = useState<{
     id: string; name: string; delivery_fee: number;
     estimated_delivery_days: number; is_active: boolean;
   } | null>(null);
 
   const [form, setForm] = useState({ name: "", delivery_fee: "", estimated_delivery_days: "", is_active: true });
+
+  const normalizedSearch = search.trim().toLowerCase();
+  const filteredLocations = locations?.filter((loc) => {
+    if (!normalizedSearch) return true;
+    return loc.name.toLowerCase().includes(normalizedSearch);
+  });
+
+  const totalPages = Math.max(1, Math.ceil((filteredLocations?.length || 0) / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pagedLocations = filteredLocations?.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   const openCreate = () => {
     setEditing(null);
@@ -64,7 +79,19 @@ export default function AdminDeliveryLocationsPage() {
         <Button onClick={openCreate}><Plus size={18} />Add Location</Button>
       </div>
 
-      <div className="mt-6 overflow-x-auto rounded-lg border border-gray-200 bg-white">
+      <div className="relative mt-6 max-w-sm">
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true" />
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => { setPage(1); setSearch(e.target.value); }}
+          placeholder="Search by city name..."
+          aria-label="Search delivery locations by city name"
+          className="h-10 w-full rounded-lg border border-gray-300 bg-white pl-9 pr-4 text-sm placeholder:text-gray-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+        />
+      </div>
+
+      <div className="mt-4 overflow-x-auto rounded-lg border border-gray-200 bg-white">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-gray-50 text-left text-gray-500">
@@ -81,7 +108,7 @@ export default function AdminDeliveryLocationsPage() {
                 <tr key={i}><td colSpan={5} className="px-4 py-3"><Skeleton className="h-6 w-full" /></td></tr>
               ))
             ) : locations?.length ? (
-              locations.map((loc) => (
+              pagedLocations?.map((loc) => (
                 <tr key={loc.id} className="border-b last:border-b-0">
                   <td className="px-4 py-3 font-medium text-gray-900">{loc.name}</td>
                   <td className="px-4 py-3">₦{loc.delivery_fee.toLocaleString()}</td>
@@ -96,11 +123,21 @@ export default function AdminDeliveryLocationsPage() {
                 </tr>
               ))
             ) : (
-              <tr><td colSpan={5} className="px-4 py-12 text-center text-gray-400">No locations yet.</td></tr>
+              <tr><td colSpan={5} className="px-4 py-12 text-center text-gray-400">
+                {locations?.length ? "No locations match your search." : "No locations yet."}
+              </td></tr>
             )}
           </tbody>
         </table>
       </div>
+
+      <Pagination
+        page={currentPage}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        totalItems={filteredLocations?.length || 0}
+        pageSize={PAGE_SIZE}
+      />
 
       <Modal
         open={showModal}
