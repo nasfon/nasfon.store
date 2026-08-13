@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/admin";
 import { CustomerSidebar } from "@/components/layout/customer-sidebar";
 import { MobileMenu } from "@/components/layout/mobile-menu";
+import { WhatsAppButton } from "@/components/layout/whatsapp-button";
 
 export default async function CustomerLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies();
@@ -36,16 +37,26 @@ export default async function CustomerLayout({ children }: { children: React.Rea
     await supabase.auth.signOut();
     redirect("/login?error=suspended");
   }
+
+  const { data: settings } = await adminClient
+    .from("settings")
+    .select("support_phone")
+    .maybeSingle();
+  const supportPhone = settings?.support_phone || "";
+
   return (
-    <div className="mx-auto flex max-w-7xl px-4 py-8 gap-8">
-      <aside className="hidden w-56 shrink-0 md:block">
-        <h2 className="mb-4 text-lg font-bold text-gray-900">My Account</h2>
-        <CustomerSidebar />
-      </aside>
-      <div className="flex-1 min-w-0">
-        <MobileMenu />
-        {children}
+    <>
+      <div className="mx-auto flex max-w-7xl px-4 py-8 gap-8">
+        <aside className="hidden w-56 shrink-0 md:block">
+          <h2 className="mb-4 text-lg font-bold text-gray-900">My Account</h2>
+          <CustomerSidebar />
+        </aside>
+        <div className="flex-1 min-w-0">
+          <MobileMenu />
+          {children}
+        </div>
       </div>
-    </div>
+      <WhatsAppButton phoneNumber={supportPhone} />
+    </>
   );
 }

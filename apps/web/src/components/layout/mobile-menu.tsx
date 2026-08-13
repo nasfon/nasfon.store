@@ -79,7 +79,7 @@ export function MobileMenu() {
         aria-label="Menu"
         aria-hidden={!open}
         inert={!open}
-        className={`fixed bottom-0 left-0 top-0 z-50 flex w-72 max-w-[85vw] flex-col bg-white shadow-xl transition-transform duration-300 ease-out md:hidden ${
+        className={`fixed bottom-0 left-0 top-14 z-50 flex w-72 max-w-[85vw] flex-col bg-white shadow-xl transition-transform duration-300 ease-out md:hidden ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
