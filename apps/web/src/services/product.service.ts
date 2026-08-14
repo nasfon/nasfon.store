@@ -64,23 +64,31 @@ export async function getProductBySlug(slug: string) {
 
   const { data, error } = await supabase
     .from("products")
-    .select("*, category:categories(*), images:product_images(*)")
+    .select(
+      "*, category:categories(id, name, slug), images:product_images(id, image_url, display_order), seller:sellers(id, shop_name, shop_slug, shop_logo_url, verification_status)"
+    )
     .eq("slug", slug)
     .eq("is_active", true)
     .single();
 
   if (error) throw new Error(error.message === "No rows" ? "Product not found" : error.message);
 
-  if (data && data.seller_id) {
-    const { data: seller } = await supabase
-      .from("sellers")
-      .select("id, shop_name, shop_slug, shop_logo_url, verification_status")
-      .eq("id", data.seller_id)
-      .maybeSingle();
-    if (seller) data.seller = seller;
-  }
-
   return data;
+}
+
+export async function getProductIdBySlug(slug: string) {
+  const supabase = createPublicClient();
+
+  const { data, error } = await supabase
+    .from("products")
+    .select("id")
+    .eq("slug", slug)
+    .eq("is_active", true)
+    .single();
+
+  if (error) throw new Error(error.message === "No rows" ? "Product not found" : error.message);
+
+  return data.id;
 }
 
 export async function getFeaturedProducts() {

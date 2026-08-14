@@ -11,7 +11,7 @@ import { toast } from "sonner";
 export default function CartPage() {
   const { data: cart, isLoading } = useCart(true);
   const removeItem = useRemoveCartItem();
-  const { setQuantity, syncToServer, cancelPending, pending } = useCartQuantity();
+  const { setQuantity, syncToServer, cancelPending } = useCartQuantity();
 
   if (isLoading) {
     return (
@@ -63,7 +63,6 @@ export default function CartPage() {
       <div className="mt-6 space-y-4">
         {cart.items.map((item) => {
           const isUpdating = removeItem.isPending && removeItem.variables === item.product_id;
-          const isSyncing = pending.includes(item.product_id);
 
           return (
             <div
@@ -113,12 +112,6 @@ export default function CartPage() {
                   >
                     <Plus size={16} aria-hidden="true" />
                   </button>
-                  {isSyncing && (
-                    <span role="status" aria-label="Saving changes" className="flex items-center gap-1 text-xs text-gray-400">
-                      <Loader2 size={12} className="animate-spin" aria-hidden="true" />
-                      Saving
-                    </span>
-                  )}
                 </div>
               </div>
 

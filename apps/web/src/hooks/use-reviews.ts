@@ -9,6 +9,7 @@ export function useProductReviews(productSlug: string) {
     queryKey: ["reviews", productSlug],
     queryFn: () => api.get<Review[]>(`/products/${productSlug}/reviews`),
     enabled: !!productSlug,
+    staleTime: 5 * 60 * 1000,
   });
 }
 

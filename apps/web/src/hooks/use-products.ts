@@ -34,6 +34,7 @@ export function useProduct(slug: string) {
     queryKey: ["product", slug],
     queryFn: () => api.get<Product>(`/products/${slug}`),
     enabled: !!slug,
+    staleTime: 5 * 60 * 1000,
   });
 }
 
