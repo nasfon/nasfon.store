@@ -31,23 +31,17 @@ export function AdminMobileMenu() {
 
   return (
     <>
-      <div className="sticky top-14 z-30 -mx-4 mb-4 flex items-center gap-3 border-b border-gray-200 bg-white/95 px-4 py-3 backdrop-blur md:hidden">
-        <button
-          ref={triggerRef}
-          onClick={() => setOpen((v) => !v)}
-          className="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700"
-          aria-label="Open admin menu"
-          aria-expanded={open}
-          aria-controls="admin-mobile-menu-panel"
-        >
-          <Menu size={18} aria-hidden="true" />
-          Menu
-        </button>
-        <div className="flex items-center gap-2">
-          <div className="h-2 w-2 rounded-full bg-error" />
-          <span className="text-sm font-bold text-gray-900">Admin Panel</span>
-        </div>
-      </div>
+      <button
+        ref={triggerRef}
+        onClick={() => setOpen((v) => !v)}
+        className="mb-4 flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 md:hidden"
+        aria-label="Open admin menu"
+        aria-expanded={open}
+        aria-controls="admin-mobile-menu-panel"
+      >
+        <Menu size={18} aria-hidden="true" />
+        Admin Menu
+      </button>
 
       {open && <div className="fixed inset-0 z-40 bg-black/40 md:hidden" onClick={close} />}
 

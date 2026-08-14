@@ -2,9 +2,10 @@
 
 import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Grid3X3, ShoppingCart, User, type LucideIcon } from "lucide-react";
+import { Home, Grid3X3, ShoppingCart, User, LayoutDashboard, Store, type LucideIcon } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { useAuth } from "@/hooks/use-auth";
+import { useSellerProfile } from "@/hooks/use-seller";
 
 interface NavItem {
   href: string;
@@ -41,15 +42,24 @@ function BottomNavItem({ item, isActive, itemCount }: { item: NavItem; isActive:
 
 export function BottomNav() {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
+  const { data: sellerProfile } = useSellerProfile();
   const { data: cart } = useCart();
   const itemCount = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
+
+  const isApprovedSeller = sellerProfile?.verification_status === "approved";
+  const profileLabel = isAdmin ? "Admin" : isApprovedSeller ? "Seller" : user ? "Profile" : "Login";
+  const ProfileIcon = isAdmin ? LayoutDashboard : isApprovedSeller ? Store : User;
 
   const items: NavItem[] = [
     { href: "/", label: "Home", icon: Home },
     { href: "/categories", label: "Categories", icon: Grid3X3 },
     { href: "/cart", label: "Cart", icon: ShoppingCart },
-    { href: user ? "/dashboard" : "/login", label: user ? "Profile" : "Login", icon: User },
+    {
+      href: user ? "/dashboard" : "/login",
+      label: profileLabel,
+      icon: ProfileIcon,
+    },
   ];
 
   return (
