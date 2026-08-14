@@ -2,17 +2,27 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Menu, X, LogOut } from "lucide-react";
+import { createClient } from "@/utils/supabase/client";
 import { adminNavLinks } from "./admin-nav";
 
 export function AdminMobileMenu() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
   const closeRef = useRef<HTMLButtonElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   const close = () => setOpen(false);
+
+  const handleLogout = async () => {
+    close();
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/");
+    router.refresh();
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -105,6 +115,13 @@ export function AdminMobileMenu() {
           >
             Back to Store
           </Link>
+          <button
+            onClick={handleLogout}
+            className="mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-red-50 hover:text-red-600"
+          >
+            <LogOut size={18} aria-hidden="true" />
+            Sign Out
+          </button>
         </div>
       </div>
     </>
