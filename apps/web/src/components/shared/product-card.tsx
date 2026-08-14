@@ -5,7 +5,7 @@ import Image from "next/image";
 import { ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useCart, useAddCartItem } from "@/hooks/use-cart";
+import { useAddCartItem } from "@/hooks/use-cart";
 import { toast } from "sonner";
 import { cloudinaryUrl } from "@/utils/cloudinary";
 import type { Product } from "@/types";
@@ -17,10 +17,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product, priority = false }: ProductCardProps) {
   const addToCart = useAddCartItem();
-  const { data: cart } = useCart();
-  const cartQty = cart?.items?.find((i) => i.product_id === product.id)?.quantity ?? 0;
-  const availableStock = product.stock_quantity - cartQty;
-  const inStock = availableStock > 0;
+  const inStock = product.stock_quantity > 0;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -89,7 +86,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             </span>
           )}
           <span className={`text-xs font-medium md:hidden ${inStock ? "text-green-700" : "text-red-700"}`}>
-            {availableStock}
+            {product.stock_quantity}
           </span>
         </div>
 

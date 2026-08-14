@@ -23,10 +23,11 @@ interface CartResponse {
   total: number;
 }
 
-export function useCart() {
+export function useCart(enabled = false) {
   return useQuery({
     queryKey: ["cart"],
     queryFn: () => api.get<CartResponse>("/cart"),
+    enabled,
   });
 }
 

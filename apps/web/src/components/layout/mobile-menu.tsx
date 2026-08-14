@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { X, Menu, LayoutDashboard, Package, User, Star, LogOut, Store } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import { useSellerProfile } from "@/hooks/use-seller";
 import { createClient } from "@/utils/supabase/client";
 
 const navGroups = [
@@ -24,14 +23,12 @@ export function MobileMenu() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-  const { profile, user } = useAuth();
-  const { data: sellerProfile } = useSellerProfile();
+  const { profile, user, isApprovedSeller } = useAuth();
   const panelRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
   const close = () => setOpen(false);
-  const isApprovedSeller = sellerProfile?.verification_status === "approved";
 
   const handleLogout = async () => {
     close();

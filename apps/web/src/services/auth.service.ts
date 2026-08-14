@@ -143,5 +143,11 @@ export async function getMe() {
 
   if (!profile.is_active) throw new Error("Account has been suspended");
 
-  return { ...user, profile };
+  const { data: seller } = await adminClient
+    .from("sellers")
+    .select("id, user_id, shop_name, shop_slug, verification_status, is_active")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  return { ...user, profile, seller };
 }

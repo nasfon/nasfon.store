@@ -9,7 +9,7 @@ import { useCart, useCartQuantity, useRemoveCartItem } from "@/hooks/use-cart";
 import { toast } from "sonner";
 
 export default function CartPage() {
-  const { data: cart, isLoading } = useCart();
+  const { data: cart, isLoading } = useCart(true);
   const removeItem = useRemoveCartItem();
   const { setQuantity, syncToServer, cancelPending, pending } = useCartQuantity();
 

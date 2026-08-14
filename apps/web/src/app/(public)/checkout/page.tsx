@@ -249,7 +249,7 @@ function CheckoutForm({ cart, locations, isBuyNow, buyNowProductId, buyNowQty, b
 function CheckoutContent() {
   const searchParams = useSearchParams();
   const { profile } = useAuth();
-  const { data: cart, isLoading: cartLoading } = useCart();
+  const { data: cart, isLoading: cartLoading } = useCart(true);
   const { data: locations } = useDeliveryLocations();
 
   const isBuyNow = searchParams.has("buy_now");
